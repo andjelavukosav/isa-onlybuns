@@ -3,22 +3,27 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-//import { LoginComponent } from './login/login.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { HomeComponent } from './home/home.component';
 import { MaterialModule } from './infrastructure/material/material.module';
+import { LoginComponent } from './infrastructure/auth/login/login.component';
+import { RoutingModule } from './infrastructure/routing/routing.module';
+import { RegistrationComponent
 
+ } from './infrastructure/auth/registration/registration.component';
 @NgModule({
   declarations: [
     AppComponent,
-    //LoginComponent,
+    LoginComponent,
     NavbarComponent,
-    HomeComponent
+    HomeComponent,
+    RegistrationComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    MaterialModule
+    MaterialModule,
+    RoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]
