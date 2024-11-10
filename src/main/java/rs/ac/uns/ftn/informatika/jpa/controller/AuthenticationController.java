@@ -40,25 +40,31 @@ public class AuthenticationController {
     public ResponseEntity<UserTokenStateDTO> createAuthenticationToken(
             @RequestBody JwtAuthenticationRequestDTO authenticationRequest, HttpServletResponse response) {
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authenticationRequest.getUsername(), authenticationRequest.getPassword()));
-
+        // Authenticate using email and password
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(), authenticationRequest.getPassword())
+        );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        // Obtain the user object from the authentication
         User user = (User) authentication.getPrincipal();
-        String jwt = tokenUtils.generateToken(user.getUsername());
+
+        // Generate the JWT using the user's email
+        String jwt = tokenUtils.generateToken(user.getEmail());
         int expiresIn = tokenUtils.getExpiredIn();
 
         return ResponseEntity.ok(new UserTokenStateDTO(jwt, expiresIn));
     }
 
+
+
     @PostMapping("/signup")
     public ResponseEntity<User> addUser(@RequestBody UserDTO userRequest, UriComponentsBuilder ucBuilder) {
-        User existUser = this.userService.findByUsername(userRequest.getUsername());
+        User existUser = this.userService.findByEmail(userRequest.getEmail());
 
         if (existUser != null) {
-            throw new ResourceConflictException(userRequest.getId(), "Username already exists");
+            throw new ResourceConflictException(userRequest.getId(), "Email already exists");
         }
 
         User user = this.userService.save(userRequest);
