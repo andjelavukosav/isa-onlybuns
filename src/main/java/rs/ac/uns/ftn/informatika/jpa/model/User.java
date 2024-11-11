@@ -49,6 +49,18 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Role> roles;
 
+    @ManyToOne(fetch = FetchType.LAZY)  // One-to-many from Address to User
+    @JoinColumn(name = "address_id")
+    private Address address;  // A user can have one address
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
     public int getId() {
         return id;
     }

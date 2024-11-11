@@ -22,17 +22,8 @@ export class RegistrationComponent implements OnInit {
   title = 'Sign up';
   form!: FormGroup;
 
-  /**
-   * Boolean used in telling the UI
-   * that the form has been submitted
-   * and is awaiting a response
-   */
   submitted = false;
 
-  /**
-   * Notification message from received
-   * form request or router
-   */
   notification!: DisplayMessage;
 
   returnUrl!: string;
@@ -44,9 +35,7 @@ export class RegistrationComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private formBuilder: FormBuilder
-  ) {
-
-  }
+  ) {}
 
   ngOnInit() {
     this.route.params
@@ -54,14 +43,23 @@ export class RegistrationComponent implements OnInit {
       .subscribe((params: any) => {
         this.notification = params as DisplayMessage;
       });
+
     // get return url from route parameters or default to '/'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+
+    // Initialize the form group
     this.form = this.formBuilder.group({
-      username: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(64)])],
-      password: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(32)])],
-      firstname: [''],
-      lastname: [''],
-      email: ['']
+      username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(64)]],
+      password: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(32)]],
+      firstname: ['', [Validators.required]],
+      lastname: ['', [Validators.required]],
+      email: ['', [Validators.required]],
+      address: this.formBuilder.group({
+        country: ['', [Validators.required]],
+        city: ['', [Validators.required]],
+        street: ['', [Validators.required]],
+        streetNumber: ['', [Validators.required]]
+      })
     });
   }
 
@@ -70,28 +68,58 @@ export class RegistrationComponent implements OnInit {
     this.ngUnsubscribe.complete();
   }
 
+  // Method to handle form submission
   onSubmit() {
-    /**
-     * Innocent until proven guilty
-     */
-    this.notification;
     this.submitted = true;
 
-    this.authService.signup(this.form.value)
-      .subscribe(data => {
-        console.log(data);
-        this.authService.login(this.form.value).subscribe(() => {
-          this.userService.getMyInfo().subscribe();
-        });
-        this.router.navigate([this.returnUrl]);
-      },
-        error => {
-          this.submitted = false;
-          console.log('Sign up error');
-          this.notification = { msgType: 'error', msgBody: error['error'].message };
-        });
-
+  
+    try {
+      const formData = {
+        username: this.form.value.username,
+        password: this.form.value.password,
+        firstname: this.form.value.firstname,
+        lastname: this.form.value.lastname,
+        email: this.form.value.email,
+        address: {
+          country: this.form.value.address.country,
+          city: this.form.value.address.city,
+          street: this.form.value.address.street,
+          streetNumber: this.form.value.address.streetNumber
+        }
+      };
+  
+      console.log('Submitting form data:', formData);
+  
+      this.authService.signup(formData)
+        .subscribe(
+          data => {
+            console.log('Signup successful:', data);
+            this.notification = {
+              msgType: 'success',
+              msgBody: 'You have been successfully registered! Please log in.'
+            };
+  
+            this.authService.login(formData).subscribe(() => {
+              this.userService.getMyInfo().subscribe();
+            });
+  
+            this.router.navigate([this.returnUrl]);
+          },
+          error => {
+            this.submitted = false;
+            console.log('Sign up error', error);
+  
+            if (error.status === 409) {
+              this.notification = {
+                msgType: 'error',
+                msgBody: 'This email is already taken. Please use a different one.'
+              };
+            }
+          }
+        );
+    } catch (error) {
+      console.error('Error in onSubmit:', error);
+    }
   }
-
-
+  
 }

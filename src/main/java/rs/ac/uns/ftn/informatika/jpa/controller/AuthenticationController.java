@@ -60,15 +60,18 @@ public class AuthenticationController {
 
 
     @PostMapping("/signup")
-    public ResponseEntity<User> addUser(@RequestBody UserDTO userRequest, UriComponentsBuilder ucBuilder) {
+    public ResponseEntity<String> addUser(@RequestBody UserDTO userRequest) {
         User existUser = this.userService.findByEmail(userRequest.getEmail());
 
         if (existUser != null) {
-            throw new ResourceConflictException(userRequest.getId(), "Email already exists");
+            // Return a response with a conflict message if the email already exists
+            return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
         }
 
+        // Continue with saving the new user if email doesn't exist
         User user = this.userService.save(userRequest);
 
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return new ResponseEntity<>("User created successfully", HttpStatus.CREATED);
     }
+
 }

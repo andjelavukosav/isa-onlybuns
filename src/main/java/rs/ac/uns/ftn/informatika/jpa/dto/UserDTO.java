@@ -13,6 +13,9 @@ public class UserDTO {
 
     private String email;
 
+    private AddressDTO address;  // Add this field to represent the address
+
+
     public String getUsername() {
         return username;
     }
@@ -61,4 +64,11 @@ public class UserDTO {
         this.email = email;
     }
 
+    public AddressDTO getAddress() {
+        return address;
+    }
+
+    public void setAddress(AddressDTO address) {
+        this.address = address;
+    }
 }
