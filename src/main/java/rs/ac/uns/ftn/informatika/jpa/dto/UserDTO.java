@@ -13,8 +13,17 @@ public class UserDTO {
 
     private String email;
 
+    private boolean enabled;
+
     private AddressDTO address;  // Add this field to represent the address
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
 
     public String getUsername() {
         return username;

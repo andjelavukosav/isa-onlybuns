@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
         // Set user details
         u.setFirstName(userRequest.getFirstname());
         u.setLastName(userRequest.getLastname());
-        u.setEnabled(true);
+        u.setEnabled(userRequest.isEnabled());
         u.setEmail(userRequest.getEmail());
 
         // Get the roles and assign to user
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
                 address.setCountry(addressDTO.getCountry());
                 address.setCity(addressDTO.getCity());
                 address.setStreet(addressDTO.getStreet());
-                address.setNumber(addressDTO.getStreetNumber());
+                address.setStreetNumber(addressDTO.getStreetNumber());
                 addressRepository.save(address); // Save new address
             }
 
@@ -101,6 +101,56 @@ public class UserServiceImpl implements UserService {
         // Save the user and return the saved entity
         return this.userRepository.save(u);
     }
+
+    public User updateUser(int id, UserDTO userRequest) throws AccessDeniedException {
+        // Find the user by ID
+        User existingUser = userRepository.findById(id).orElseThrow(() -> new AccessDeniedException("User not found"));
+
+        // Update the user fields
+        existingUser.setUsername(userRequest.getUsername());
+
+
+
+        // Update user details
+        existingUser.setPassword(userRequest.getPassword());
+        existingUser.setFirstName(userRequest.getFirstname());
+        existingUser.setLastName(userRequest.getLastname());
+        existingUser.setEnabled(userRequest.isEnabled());
+        existingUser.setEmail(userRequest.getEmail());
+
+        // Update roles if necessary
+        // If roles need to be updated, we can add logic to handle that. For simplicity, we retain the same role.
+        // List<Role> roles = roleService.findByName("ROLE_USER");
+        // existingUser.setRoles(roles);
+
+        // Handle address
+        if (userRequest.getAddress() != null) {
+            AddressDTO addressDTO = userRequest.getAddress();
+            Address address = addressRepository.findByCountryAndCityAndStreetAndStreetNumber(
+                    addressDTO.getCountry(),
+                    addressDTO.getCity(),
+                    addressDTO.getStreet(),
+                    addressDTO.getStreetNumber()
+            );
+
+            // If address doesn't exist, create a new one
+            if (address == null) {
+                address = new Address();
+                address.setCountry(addressDTO.getCountry());
+                address.setCity(addressDTO.getCity());
+                address.setStreet(addressDTO.getStreet());
+                address.setStreetNumber(addressDTO.getStreetNumber());
+                addressRepository.save(address); // Save new address
+            }
+
+            // Update the user's address
+            existingUser.setAddress(address);
+        }
+
+        // Save the updated user and return the saved entity
+        return userRepository.save(existingUser);
+    }
+
 
 
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -55,7 +54,7 @@ public class Address {
         this.street = street;
     }
 
-    public void setNumber(String number) {
+    public void setStreetNumber(String number) {
         this.streetNumber = number;
     }
 
@@ -75,7 +74,7 @@ public class Address {
         return street;
     }
 
-    public String getNumber() {
+    public String getStreetNumber() {
         return streetNumber;
     }
 }
