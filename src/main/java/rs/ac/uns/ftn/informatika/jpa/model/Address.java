@@ -1,7 +1,11 @@
 package rs.ac.uns.ftn.informatika.jpa.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name="Address")
@@ -23,14 +27,15 @@ public class Address {
     @Column(name = "streetNumber")
     private String streetNumber;
 
-    @OneToMany(mappedBy = "address")  // One-to-many from Address to User
-    private List<User> users;  // An address can have many users
+    @OneToMany(mappedBy = "address",fetch = FetchType.EAGER)  // One-to-many from Address to User
+    @JsonIgnore
+    private Set<User> users = new HashSet<User>();
 
-    public List<User> getUsers() {
+    public Set<User> getUsers() {
         return users;
     }
 
-    public void setUsers(List<User> users) {
+    public void setUsers(Set<User> users) {
         this.users = users;
     }
 
