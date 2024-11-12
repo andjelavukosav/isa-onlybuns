@@ -14,5 +14,5 @@ public interface UserService {
     User findByEmail(String email);
     User updateUser(int id, UserDTO user);
     List<UserDTO> findUsersByRoleExcludingAdmin(int adminId);
-    List<User> searchUsers(String firstName, String lastName, String email);
+    List<UserDTO> searchUsers(String firstName, String lastName, String email, int adminId);
 }

@@ -17,6 +17,7 @@ import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 import javax.transaction.Transactional;
 import java.security.Principal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +53,6 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
 
-        Hibernate.initialize(user.getFollowers());
         return  this.userService.findByEmail(user.getEmail());
     }
 
@@ -79,6 +79,27 @@ public class UserController {
         int adminId = adminUser.getId();
         return this.userService.findUsersByRoleExcludingAdmin(adminId);
     }
+
+    @GetMapping("/users/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserDTO> searchUsers(
+            @RequestParam(required = false)String firstName,
+            @RequestParam(required = false)String lastName,
+            @RequestParam(required = false)String email,
+            Principal principal) {
+
+         if(principal == null) {
+             throw new RuntimeException("Principal is null, user not authenticated.");
+         }
+         User adminUser = this.userService.findByUsername(principal.getName());
+         if (adminUser == null) {
+             throw new RuntimeException("User not found or does not have the required role.");
+         }
+         int adminId = adminUser.getId();
+
+         return this.userService.searchUsers(firstName, lastName, email, adminId);
+    }
+
 
 
 

@@ -156,17 +156,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> findUsersByRoleExcludingAdmin(int adminId) {
-        List<User> users =  userRepository.findAllByRoleName("ROLE_USER")
-                .stream()
-                .filter(user -> user.getId() != adminId) // isključuje administratora
-                .collect(Collectors.toList());
+        List<User> users =  userRepository.findAllByRoleNameExcludingId("ROLE_USER", adminId);
 
         return users.stream().map(user -> new UserDTO(user)).collect(Collectors.toList());
     }
 
     @Override
-    public List<User> searchUsers(String firstName, String lastName, String email) {
-        return this.userRepository.filterUsers(firstName, lastName, email);
+    public List<UserDTO> searchUsers(String firstName, String lastName, String email, int adminId) {
+        List<User> users = userRepository.searchUserBy(firstName, lastName, email, adminId);
+        return users.stream().map(UserDTO::new).collect(Collectors.toList());
     }
-
 }

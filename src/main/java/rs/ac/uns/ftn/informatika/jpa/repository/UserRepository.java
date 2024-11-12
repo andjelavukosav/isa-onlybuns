@@ -11,17 +11,18 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     User findByUsername(String username);
     User findByEmail(String email);
 
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName")
-    List<User> findAllByRoleName(@Param("roleName") String roleName);
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName AND u.id <> :excludedId")
+    List<User> findAllByRoleNameExcludingId(@Param("roleName") String roleName, @Param("excludedId") int excludedId);
 
 
-    @Query("SELECT u FROM User u WHERE" +
-            "(:firstName IS NULL OR u.firstName LIKE %:firstName%) AND " +
-            "(:lastName IS NULL OR u.lastName LIKE %:lastName%) AND " +
-            "(:email IS NULL OR u.email LIKE %:email%)")
-    List<User> filterUsers(@Param("firstName") String firstName,
+    @Query("SELECT u FROM User u WHERE u.id <> :adminId AND (:firstName IS NULL OR u.firstName LIKE %:firstName%) " +
+            "AND (:lastName IS NULL OR u.lastName LIKE %:lastName%) AND (:email IS NULL OR u.email LIKE %:email%)")
+    List<User> searchUserBy(@Param("firstName") String firstName,
                            @Param("lastName") String lastName,
-                           @Param("email")String email);
+                           @Param("email") String email,
+                           @Param("adminId") int adminId);
+
+
 
 }
 

@@ -4,7 +4,7 @@ import {ConfigService} from './config.service';
 import {map} from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { UserDTO } from '../model/registered-user';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../env/enviroment';
 
 @Injectable({
@@ -37,4 +37,12 @@ export class UserService {
     return this.http.get<UserDTO[]>(environment.apiHost + '/users');
   }
 
+  searchUsers(firstName: string, lastName: string, email: string): Observable<UserDTO[]> {
+    let params = new HttpParams();
+    if(firstName) params = params.set('firstName', firstName);
+    if(lastName) params = params.set('lastName', lastName);
+    if(email) params = params.set('email', email);
+
+    return this.http.get<UserDTO[]>(environment.apiHost + '/users/search', { params});
+  }
 }

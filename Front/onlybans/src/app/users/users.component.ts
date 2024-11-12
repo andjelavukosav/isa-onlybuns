@@ -10,6 +10,11 @@ import { UserService } from '../service';
 export class UsersComponent {
 
   registeredUsers: UserDTO[] = [];
+  searchCriteria = {
+    firstName: '',
+    lastName: '',
+    email: ''
+  };
 
   constructor(private userService: UserService){}
 
@@ -23,6 +28,20 @@ export class UsersComponent {
 
       }
     )
-
   }
+
+  searchUsers(): void{
+    const {firstName, lastName, email} = this.searchCriteria;
+
+    this.userService.searchUsers(firstName, lastName, email).subscribe(
+      (data: UserDTO[]) => {
+        this.registeredUsers = data;  // Ažuriranje liste sa rezultatima pretrage
+      },
+      (error) => {
+        console.error('Greška prilikom pretrage korisnika:', error);
+      }
+    );
+  }
+
+
 }
