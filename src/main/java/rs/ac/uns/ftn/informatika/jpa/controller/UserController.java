@@ -47,9 +47,12 @@ public class UserController {
 
     @GetMapping("/whoami")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @Transactional
     public User user() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
+
+        Hibernate.initialize(user.getFollowers());
         return  this.userService.findByEmail(user.getEmail());
     }
 
