@@ -20,21 +20,12 @@ export class LoginComponent implements OnInit {
   title = 'Login';
   form!: FormGroup;
 
-  /**
-   * Boolean used in telling the UI
-   * that the form has been submitted
-   * and is awaiting a response
-   */
   submitted = false;
 
-   /**
-   * Notification message from received
-   * form request or router
-   */
-    notification!: DisplayMessage;
+  notification!: DisplayMessage;
 
-    returnUrl!: string;
-    private ngUnsubscribe: Subject<void> = new Subject<void>();
+  returnUrl!: string;
+  private ngUnsubscribe: Subject<void> = new Subject<void>();
 
 
   constructor(
@@ -54,7 +45,7 @@ export class LoginComponent implements OnInit {
     // get return url from route parameters or default to '/'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
     this.form = this.formBuilder.group({
-      username: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(64)])],
+      email: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(64)])],
       password: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(32)])]
     });
   }
@@ -65,9 +56,6 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit() {
-    /**
-     * Innocent until proven guilty
-     */
     
     this.notification;
     this.submitted = true;
@@ -81,7 +69,7 @@ export class LoginComponent implements OnInit {
         error => {
           console.log(error);
           this.submitted = false;
-          this.notification = {msgType: 'error', msgBody: 'Incorrect username or password.'};
+          this.notification = {msgType: 'error', msgBody: 'Incorrect email or password.'};
         });
   }
 

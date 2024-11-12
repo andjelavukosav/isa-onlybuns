@@ -49,10 +49,10 @@ public class TokenUtils {
      * @param username Korisničko ime korisnika kojem se token izdaje
      * @return JWT token
      */
-    public String generateToken(String username) {
+    public String generateToken(String email) {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
-                .setSubject(username)
+                .setSubject(email)
                 .setAudience(generateAudience())
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDate())
@@ -121,18 +121,18 @@ public class TokenUtils {
      * @return Korisničko ime iz tokena ili null ukoliko ne postoji.
      */
     public String getUsernameFromToken(String token) {
-        String username;
+        String email;
 
         try {
             final Claims claims = this.getAllClaimsFromToken(token);
-            username = claims.getSubject();
+            email = claims.getSubject();
         } catch (ExpiredJwtException ex) {
             throw ex;
         } catch (Exception e) {
-            username = null;
+            email = null;
         }
 
-        return username;
+        return email;
     }
 
     /**
@@ -229,12 +229,12 @@ public class TokenUtils {
      */
     public Boolean validateToken(String token, UserDetails userDetails) {
         User user = (User) userDetails;
-        final String username = getUsernameFromToken(token);
+        final String email = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
 
         // Token je validan kada:
-        return (username != null // korisnicko ime nije null
-                && username.equals(userDetails.getUsername()) // korisnicko ime iz tokena se podudara sa korisnickom imenom koje pise u bazi
+        return (email != null // korisnicko ime nije null
+                && email.equals(((User) userDetails).getEmail()) // korisnicko ime iz tokena se podudara sa korisnickom imenom koje pise u bazi
                 && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())); // nakon kreiranja tokena korisnik nije menjao svoju lozinku
     }
 
