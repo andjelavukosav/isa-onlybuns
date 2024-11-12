@@ -4,6 +4,7 @@ import { LoginComponent } from '../auth/login/login.component';
 import { RouterModule, Routes } from '@angular/router';
 import { RegistrationComponent } from '../auth/registration/registration.component';
 import { NavbarComponent } from 'src/app/navbar/navbar.component';
+import { CreatePostComponent } from 'src/app/create-post/create-post.component';
 
 const routes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -13,7 +14,8 @@ const routes: Routes = [
     pathMatch: 'full'
   },
   {path: 'login', component: LoginComponent},
-  {path: 'signup', component: RegistrationComponent}
+  {path: 'signup', component: RegistrationComponent},
+  {path: 'create-post', component: CreatePostComponent}
 ];
 
 @NgModule({

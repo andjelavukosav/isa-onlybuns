@@ -1,0 +1,31 @@
+<div id="post-management">
+    <hr>
+    <div id="post-details">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Description</th>
+            <th>Image</th>
+            <th>Creation Date</th>
+            <th>Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of post">
+            <td>{{ p.id }}</td>
+            <td>{{ p.username }}</td>
+            <td>{{ p.description }}</td>
+            <td>
+              <img [src]="p.imagePath" alt="Post Image" style="max-width: 100px; max-height: 100px;">
+            </td>
+            <td>{{ p.creationDateTime }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <hr>
+    
+  </div>
+  
