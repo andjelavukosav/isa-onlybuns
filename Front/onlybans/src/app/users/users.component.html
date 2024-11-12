@@ -12,7 +12,8 @@
       </thead>
       <tbody>
         <tr *ngFor="let user of registeredUsers">
-          <td>{{ user.firstName }} {{ user.lastName }}</td>
+          <td>{{ user.firstname }}</td>
+          <td> {{ user.lastname }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.followersCount }}</td>
         </tr>

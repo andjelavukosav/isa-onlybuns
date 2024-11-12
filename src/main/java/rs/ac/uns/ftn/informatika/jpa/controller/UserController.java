@@ -62,15 +62,20 @@ public class UserController {
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-
     public List<UserDTO> findRegisteredUsers(Principal principal) {
-        // Trazimo trenutno prijavljenog administratora na osnovu korisničkog imena
-        User adminUser = this.userService.findByUsername(principal.getName());
-        int adminId = adminUser.getId();
+        if (principal == null) {
+            throw new RuntimeException("Principal is null, user not authenticated.");
+        }
 
-        // Dobijanje svih korisnika sa ulogom `ROLE_USER` osim administratora
+        User adminUser = this.userService.findByUsername(principal.getName());
+        if (adminUser == null) {
+            throw new RuntimeException("User not found or does not have the required role.");
+        }
+
+        int adminId = adminUser.getId();
         return this.userService.findUsersByRoleExcludingAdmin(adminId);
     }
+
 
 
 }

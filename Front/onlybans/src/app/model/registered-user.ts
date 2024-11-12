@@ -1,7 +1,7 @@
 export interface UserDTO {
     id: number;
-    firstName: string;
-    lastName: string;
+    firstname: string;
+    lastname: string;
     email: string;
     followersCount: number;
   }  

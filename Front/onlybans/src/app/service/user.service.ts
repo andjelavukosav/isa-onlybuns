@@ -34,7 +34,7 @@ export class UserService {
   }
 
   getAllUsersForAdmin(): Observable<UserDTO[]> {
-    return this.http.get<UserDTO[]>(environment.apiHost + 'get/users');
+    return this.http.get<UserDTO[]>(environment.apiHost + '/users');
   }
 
 }

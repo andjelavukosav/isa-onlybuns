@@ -47,6 +47,7 @@ public class User implements UserDetails {
     private Set<User> following = new HashSet<>(); //skup korisnika koje trenutni korisnik prati
 
     @ManyToMany(mappedBy = "following")
+    @JsonIgnore
     private Set<User> followers = new HashSet<>(); //korisnici koji prate ovog korisnika
 
     @Column(name = "enabled")

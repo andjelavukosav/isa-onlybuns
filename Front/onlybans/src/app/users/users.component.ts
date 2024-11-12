@@ -15,7 +15,7 @@ export class UsersComponent {
 
   ngOnInit(): void{
     this.userService.getAllUsersForAdmin().subscribe(
-      (data) => {
+      (data: UserDTO[]) => {
         this.registeredUsers = data;
       },
       (error) => {
