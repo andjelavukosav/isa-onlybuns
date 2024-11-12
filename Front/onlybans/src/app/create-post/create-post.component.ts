@@ -15,6 +15,7 @@ import { AuthService, UserService } from '../service';
 export class CreatePostComponent {
   @Input() post: Post | null = null;
   selectedImage: File | null = null;
+  previewUrl: string | null = null;
   
   // Mapa koordinata
   map: Map | undefined;
@@ -55,7 +56,7 @@ export class CreatePostComponent {
   }
 
 
-  onMapReady(map: Map): void { // Use `Map` here instead of `LeafletMap`
+  onMapReady(map: Map): void { // Use Map here instead of LeafletMap
     this.map = map;
     this.map.on('click', (event: L.LeafletMouseEvent) => {
       const latLng = event.latlng;
@@ -81,33 +82,50 @@ export class CreatePostComponent {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
       this.selectedImage = file;
-      
+  
+      // Kreiranje preview slike
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
     } else {
       alert('Molimo odaberite validnu sliku.');
     }
   }
 
   createPost(): void {
+    console.log('Metoda createPost() je pozvana');
+
     if (this.postForm.valid && this.selectedImage) {
       const formValues = this.postForm.value;
-
-      const currentUser = this.authService.getCurrentUser();
+  
   
       const newPost: Post = {
         id: 0, // Backend će generisati ID
-        userId: currentUser.userId, 
         description: formValues.description!,
         imagePath: '', // Backend će popuniti putanju slike
         creationDateTime: formValues.createdAt!,
-        location: this.location,
-        username: currentUser.username
+        location: this.location
       };
-  
-      // Pozovi servis i proslijedi `newPost` i `selectedImage`
+
+      // Pozovi servis i proslijedi newPost i selectedImage
       this.postService.addPost(newPost, this.selectedImage).subscribe({
         next: (createdPost) => {
           console.log('Post successfully created:', createdPost);
-          // Ovde možeš dodati logiku za osvežavanje stranice ili navigaciju
+
+          // Resetovanje forme i čišćenje slike
+          this.postForm.reset(); // Resetuje formu
+          this.selectedImage = null; // Briše selektovanu sliku
+          this.previewUrl = null; // Uklanja preview slike
+          this.marker = null; // Uklanja marker sa mape
+          if (this.map) {
+            this.map.eachLayer((layer) => {
+              if ((layer as any).options.icon) {
+                this.map!.removeLayer(layer); // Uklanja marker sa mape
+              }
+            });
+          }
         },
         error: (err) => {
           console.error('Error creating post:', err);
@@ -118,5 +136,6 @@ export class CreatePostComponent {
       alert('Molimo popunite sve obavezne podatke i dodajte sliku.');
     }
   }
+  
   
 }

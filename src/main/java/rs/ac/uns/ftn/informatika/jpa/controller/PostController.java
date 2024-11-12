@@ -2,6 +2,7 @@ package rs.ac.uns.ftn.informatika.jpa.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +21,11 @@ import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,24 +82,26 @@ public class PostController {
 
     @Operation(description = "Create a new post", method = "POST")
     @PostMapping(value = "/create", consumes = "multipart/form-data", produces = "application/json")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<PostDTO> createPost(
-            @RequestParam("userId") int userId,
             @RequestParam("description") String description,
             @RequestParam(value = "location.latitude", required = false) Double latitude,
             @RequestParam(value = "location.longitude", required = false) Double longitude,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+            Principal principal
     ) throws IOException {
 
+        User user = this.userService.findByUsername(principal.getName());
+        System.out.println(user.getEmail());
+        if (user == null) {
+            System.out.println("Korisnik nije pronađen.");
+        }
+
         // Validacija inputa
-        if (userId <= 0 || description == null || description.isEmpty()) {
+        if (user.getId() <= 0 || description == null || description.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        // Dohvat korisnika iz baze
-        User user = userService.findById(userId);
-        if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
 
         // Kreiranje Post objekta
         Post post = new Post();
@@ -113,6 +119,9 @@ public class PostController {
             post.setImagePath(imagePath);
         }
 
+        post.setCreationDateTime(LocalDateTime.now());
+
+
         // Čuvanje posta u bazi
         PostDTO postDTO = new PostDTO(post);
         post = postService.save(postDTO);
@@ -121,11 +130,32 @@ public class PostController {
         return new ResponseEntity<>(postDTO, HttpStatus.CREATED);
     }
 
+    @Value("${upload.folder}")
+    private String uploadFolder;
+
     private String saveImage(MultipartFile imageFile) throws IOException {
-        // Logika za čuvanje slike
-        String imagePath = "uploads/images/" + System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-        // Sačuvaj sliku na odgovarajućem mestu na serveru
-        Files.copy(imageFile.getInputStream(), Paths.get("path/to/save", imagePath), StandardCopyOption.REPLACE_EXISTING);
-        return imagePath;
+        if (imageFile.isEmpty()) {
+            throw new IllegalArgumentException("Fajl je prazan.");
+        }
+
+        // Provera tipa fajla
+        String contentType = imageFile.getContentType();
+        if (!contentType.startsWith("image")) {
+            throw new IllegalArgumentException("Fajl nije validna slika.");
+        }
+
+        // Generisanje jedinstvenog imena fajla
+        String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+        fileName = fileName.replace(":", "-"); // Zameni ':' zbog problema na Windows-u
+
+        // Putanja gde se fajl čuva
+        Path imagePath = Paths.get(uploadFolder, fileName);
+
+        // Čuvanje fajla
+        Files.createDirectories(imagePath.getParent()); // Osiguraj da folder postoji
+        Files.copy(imageFile.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return fileName; // Vraća ime fajla koje se može koristiti za prikazivanje slike
     }
+
 }

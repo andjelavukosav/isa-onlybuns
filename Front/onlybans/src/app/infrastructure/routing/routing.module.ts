@@ -5,6 +5,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { RegistrationComponent } from '../auth/registration/registration.component';
 import { NavbarComponent } from 'src/app/navbar/navbar.component';
 import { CreatePostComponent } from 'src/app/create-post/create-post.component';
+import { UserProfileComponent } from 'src/app/user-profile/user-profile.component';
 
 const routes: Routes = [
   {path: 'home', component: HomeComponent},
@@ -15,7 +16,8 @@ const routes: Routes = [
   },
   {path: 'login', component: LoginComponent},
   {path: 'signup', component: RegistrationComponent},
-  {path: 'create-post', component: CreatePostComponent}
+  {path: 'create-post', component: CreatePostComponent},
+  {path: 'profile/:userId', component: UserProfileComponent}
 ];
 
 @NgModule({

@@ -74,6 +74,8 @@ public class WebSecurityConfig {
                 // samo korisnik koji ima rolu 'ADMIN', navodimo na sledeci nacin:
                 // .antMatchers("/admin").hasRole("ADMIN") ili .antMatchers("/admin").hasAuthority("ROLE_ADMIN")
                 .antMatchers("/api/posts/all").permitAll()  // Allow public access to posts
+                .antMatchers("/api/users/{userId}").permitAll()
+
                 .anyRequest().authenticated().and()
                 .cors().and()
 

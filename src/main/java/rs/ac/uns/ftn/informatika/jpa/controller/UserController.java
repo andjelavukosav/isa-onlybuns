@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
+import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
@@ -31,8 +32,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
-    private UserRepository userRepository;
+    private UserDTOMapper userDTOMapper;
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
@@ -119,6 +121,15 @@ public class UserController {
     }
 
 
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable int userId) {
+         User user = userService.findById(userId);
+        if (user != null) {
+            return ResponseEntity.ok(UserDTOMapper.fromUsertoDTO(user));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 
 
