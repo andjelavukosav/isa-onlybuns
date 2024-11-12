@@ -28,6 +28,7 @@ import { CreatePostComponent } from './create-post/create-post.component';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 import { UsersComponent } from './users/users.component';
+import { UserProfileComponent } from './user-profile/user-profile.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { UsersComponent } from './users/users.component';
     PostComponent,
     CreatePostComponent,
     RegistrationComponent,
-    UsersComponent
+    UsersComponent,
+    UserProfileComponent
   ],
   imports: [
     BrowserModule,

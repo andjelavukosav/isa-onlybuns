@@ -45,4 +45,9 @@ export class UserService {
 
     return this.http.get<UserDTO[]>(environment.apiHost + '/users/search', { params});
   }
+
+  getUserById(userId: number): Observable<UserDTO> {
+    return this.http.get<UserDTO>(environment.apiHost + `/users/${userId}`);
+  }
+
 }
