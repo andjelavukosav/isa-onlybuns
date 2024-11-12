@@ -29,6 +29,11 @@ import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 import { UsersComponent } from './users/users.component';
 import { UserProfileComponent } from './user-profile/user-profile.component';
+import { UserHomeComponent } from './user-home/user-home.component';
+import { FollowedUserPostComponent } from './followed-user-post/followed-user-post.component';
+import { ActivityTrendsComponent } from './activity-trends/activity-trends.component';
+import { NearbyPostsMapComponent } from './nearby-posts-map/nearby-posts-map.component';
+import { ChatComponent } from './chat/chat.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +47,12 @@ import { UserProfileComponent } from './user-profile/user-profile.component';
     CreatePostComponent,
     RegistrationComponent,
     UsersComponent,
-    UserProfileComponent
+    UserProfileComponent,
+    UserHomeComponent,
+    FollowedUserPostComponent,
+    ActivityTrendsComponent,
+    NearbyPostsMapComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule,
