@@ -40,4 +40,12 @@ public class PostServiceImpl implements PostService {
         post.setUser(UserDTOMapper.fromDTOtoUser(postRequest.getUser()));
         return this.postRepository.save(post);
     }
+
+    @Override
+    public PostDTO getPostById(Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+
+        return new PostDTO(post);
+    }
 }

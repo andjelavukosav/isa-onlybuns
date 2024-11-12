@@ -158,4 +158,10 @@ public class PostController {
         return fileName; // Vraća ime fajla koje se može koristiti za prikazivanje slike
     }
 
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostDTO> getPostById(@PathVariable Integer postId) {
+        PostDTO postDTO = postService.getPostById(postId);
+        return ResponseEntity.ok(postDTO);
+    }
+
 }
