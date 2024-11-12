@@ -8,4 +8,6 @@ import java.util.List;
 public interface PostService {
     List<Post> findAll();
     Post save(PostDTO postDTO);
+    Post findById(int id);
+   // Post update(PostDTO postDTO);
 }

@@ -9,6 +9,7 @@ export interface Post {
     location: Location; // Lokacija objave
     usernameDisplay?: string;
     user?: UserDTO;
+    //likeCount?: number;
   }
 
 

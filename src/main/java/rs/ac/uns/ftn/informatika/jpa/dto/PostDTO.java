@@ -14,6 +14,7 @@ public class PostDTO {
     public LocationDTO location;
     public MultipartFile image;
     public UserDTO user;
+   // public int likeCount;
 
     public PostDTO() {}
 
@@ -32,6 +33,7 @@ public class PostDTO {
         this.imagePath = post.getImagePath();
         this.user = new UserDTO(post.getUser());
         this.creationDateTime = post.getCreationDateTime();
+        //this.likeCount = post.getLikeCount();
     }
 
     public UserDTO getUser() { return user; }

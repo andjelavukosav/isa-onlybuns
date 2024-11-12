@@ -55,7 +55,20 @@ export class PostComponent implements OnInit {
   }
 
 
-
+  /*likePost(post: Post): void {
+    // Increment the like count locally
+    post.likeCount = (post.likeCount || 0) + 1;
+    
+    // Optionally: Call the service to save the like on the backend
+    this.postService.likePost(post.id).subscribe({
+      next: () => {
+        console.log(`Post ${post.id} liked successfully.`);
+      },
+      error: () => {
+        console.error(`Failed to like post ${post.id}.`);
+      }
+    });
+  }*/
 
 
   getCurrentUser(path:any): void {

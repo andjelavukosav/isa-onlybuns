@@ -22,6 +22,9 @@ public class Post {
     @Column(name = "CreationDateTime")
     private LocalDateTime creationDateTime;
 
+    //@Column(name= "LikeCount" )
+    //private int likeCount;
+
     @Embedded
     private Location location;
 
@@ -89,4 +92,12 @@ public class Post {
     public void setUser(User user) {
         this.user = user;
     }
+
+   // public int getLikeCount() {
+     //   return likeCount;
+    //}
+
+//    public void setLikeCount(int likeCount) {
+//        this.likeCount = likeCount;
+//    }
 }
