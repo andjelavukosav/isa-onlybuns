@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import rs.ac.uns.ftn.informatika.jpa.dto.AddressDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Address;
+import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.Role;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.repository.AddressRepository;
@@ -152,5 +153,8 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    public List<Post> getAllPostsByUser(int userId) {
+        return userRepository.findPostsByUserId(userId);
+    }
 
 }

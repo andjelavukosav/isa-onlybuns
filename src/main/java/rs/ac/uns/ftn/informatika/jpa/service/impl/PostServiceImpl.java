@@ -8,6 +8,7 @@ import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
+import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 
 import java.util.List;
@@ -16,6 +17,9 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<Post> findAll() throws AccessDeniedException {
@@ -26,7 +30,6 @@ public class PostServiceImpl implements PostService {
     public Post save(PostDTO postRequest) {
         Post post = new Post();
         post.setId(postRequest.id);
-        post.setUsername(postRequest.username);
         post.setDescription(postRequest.description);
         post.setCreationDateTime(postRequest.creationDateTime);
         post.setLocation(new Location(postRequest.location));

@@ -4,6 +4,7 @@ import { PostService } from '../service/post.service';
 import { Post } from '../model/post.model';
 import { Location } from '../model/location.model';
 import { icon, latLng, marker, tileLayer, Map } from 'leaflet';
+import { AuthService, UserService } from '../service';
 
 
 @Component({
@@ -31,7 +32,7 @@ export class CreatePostComponent {
     center: latLng(51.505, -0.09) // Početni centar mape
   };
 
-  constructor(private postService: PostService) {}
+  constructor(private postService: PostService, private authService: AuthService) {}
 
   postForm = new FormGroup({
     description: new FormControl('', [Validators.required, Validators.maxLength(255)]),
@@ -80,6 +81,7 @@ export class CreatePostComponent {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
       this.selectedImage = file;
+      
     } else {
       alert('Molimo odaberite validnu sliku.');
     }
@@ -88,15 +90,17 @@ export class CreatePostComponent {
   createPost(): void {
     if (this.postForm.valid && this.selectedImage) {
       const formValues = this.postForm.value;
+
+      const currentUser = this.authService.getCurrentUser();
   
       const newPost: Post = {
         id: 0, // Backend će generisati ID
-        userId: 123, // Primer ID korisnika
+        userId: currentUser.userId, 
         description: formValues.description!,
         imagePath: '', // Backend će popuniti putanju slike
         creationDateTime: formValues.createdAt!,
         location: this.location,
-        username: 'Korisnik',
+        username: currentUser.username
       };
   
       // Pozovi servis i proslijedi `newPost` i `selectedImage`

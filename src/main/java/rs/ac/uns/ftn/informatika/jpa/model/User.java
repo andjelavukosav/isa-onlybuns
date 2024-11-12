@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,6 +50,10 @@ public class User implements UserDetails {
     @ManyToOne(fetch = FetchType.EAGER)  // One-to-many from Address to User
     @JoinColumn(name = "address_id")
     private Address address;  // A user can have one address
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Set<Post> posts = new HashSet<Post>();
 
     public Address getAddress() {
         return address;
@@ -141,6 +143,25 @@ public class User implements UserDetails {
     public void setLastPasswordResetDate(Timestamp lastPasswordResetDate) {
         this.lastPasswordResetDate = lastPasswordResetDate;
     }
+
+    public Set<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(Set<Post> posts) {
+        this.posts = posts;
+    }
+
+    public void addPost(Post post) {
+        this.posts.add(post);
+        post.setUser(this);
+    }
+
+    public  void removePost(Post post) {
+        this.posts.remove(post);
+        post.setUser(null);
+    }
+
 
     @JsonIgnore
     @Override

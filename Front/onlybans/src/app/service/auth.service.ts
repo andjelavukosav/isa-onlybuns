@@ -7,6 +7,7 @@ import { catchError, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { of } from 'rxjs/internal/observable/of';
 import { Observable } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable()
 export class AuthService {
@@ -65,4 +66,12 @@ export class AuthService {
     return this.access_token;
   }
 
+  getCurrentUser(): any {
+    const token = this.getToken();
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      return decodedToken; 
+    }
+    return null;
+  }
 }

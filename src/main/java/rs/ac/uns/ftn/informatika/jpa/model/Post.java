@@ -1,5 +1,7 @@
 package rs.ac.uns.ftn.informatika.jpa.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -10,9 +12,6 @@ public class Post {
     @Column(name = "Id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    @Column(name = "UserId")
-    private int userId;
 
     @Column(name = "Description")
     private String description;
@@ -26,21 +25,21 @@ public class Post {
     @Embedded
     private Location location;
 
-    @Column (name = "Username")
-    private String username;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "Id")
+    private User user;
+
 
     public Post() {
         super();
     }
 
-    public Post(int userId, String description, String imagePath, LocalDateTime creationDateTime, Location location, String username) {
-        super();
-        this.userId = userId;
+    public Post(User user, String description, String imagePath, LocalDateTime creationDateTime, Location location) {
+        this.user = user;
         this.description = description;
         this.imagePath = imagePath;
         this.creationDateTime = creationDateTime;
         this.location = location;
-        this.username = username;
     }
 
     public int getId() {
@@ -49,14 +48,6 @@ public class Post {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public String getDescription() {
@@ -91,11 +82,11 @@ public class Post {
         this.location = location;
     }
 
-    public String getUsername() {
-        return username;
+    public User getUser() {
+        return user;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -12,8 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
+import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResult.PagedResults;
+import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
+import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,9 +35,30 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private UserService userService;
 
-    @Operation(description = "Get all posts",method="GET")
-    @GetMapping(value = "/all", produces= MediaType.APPLICATION_JSON_VALUE)
+    @Autowired
+    private UserRepository userRepository;
+
+    @GetMapping("/users/{userId}/posts")
+    public ResponseEntity<List<Post>> getPostsByUser(@PathVariable int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        List<Post> posts = new ArrayList<>(user.getPosts());
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
+
+    /*@GetMapping
+    public ResponseEntity<List<Post>> getAllPosts() {
+        List<Post> posts = postService.findAll();
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }*/
+
+    @Operation(description = "Get all posts", method = "GET")
+    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PagedResults<PostDTO>> getAllPosts() {
         List<Post> posts = postService.findAll();
 
@@ -53,7 +77,6 @@ public class PostController {
     public ResponseEntity<PostDTO> createPost(
             @RequestParam("userId") int userId,
             @RequestParam("description") String description,
-            @RequestParam("username") String username,
             @RequestParam(value = "location.latitude", required = false) Double latitude,
             @RequestParam(value = "location.longitude", required = false) Double longitude,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile
@@ -64,11 +87,16 @@ public class PostController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        // Dohvat korisnika iz baze
+        User user = userService.findById(userId);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         // Kreiranje Post objekta
         Post post = new Post();
-        post.setUserId(userId);
+        post.setUser(user); // Postavljanje korisnika
         post.setDescription(description);
-        post.setUsername(username);
 
         // Postavljanje lokacije ako je prisutna
         if (latitude != null && longitude != null) {
@@ -85,15 +113,15 @@ public class PostController {
         PostDTO postDTO = new PostDTO(post);
         post = postService.save(postDTO);
 
+
         return new ResponseEntity<>(postDTO, HttpStatus.CREATED);
     }
 
     private String saveImage(MultipartFile imageFile) throws IOException {
-        // Logika za čuvanje slike (možete dodati direktorijum, validaciju imena fajla itd.)
+        // Logika za čuvanje slike
         String imagePath = "uploads/images/" + System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
         // Sačuvaj sliku na odgovarajućem mestu na serveru
         Files.copy(imageFile.getInputStream(), Paths.get("path/to/save", imagePath), StandardCopyOption.REPLACE_EXISTING);
         return imagePath;
     }
-
 }
