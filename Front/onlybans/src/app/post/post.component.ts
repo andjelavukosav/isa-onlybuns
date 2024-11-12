@@ -43,8 +43,6 @@ export class PostComponent implements OnInit {
     });
   }
   
-  
-  
 
   getCurrentUser(path:any): void {
     this.userService.getMyInfo()

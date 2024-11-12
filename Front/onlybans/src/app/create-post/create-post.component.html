@@ -34,7 +34,8 @@
         <!-- Slika -->
         <div class="form-group">
             <label for="image">Slika:</label>
-            <input id="image" type="file" (change)="onImageSelected($event)" accept="image/*" />
+            <input type="file" (change)="onImageSelected($event)" />
+            <img *ngIf="previewUrl" [src]="previewUrl" alt="Preview" />
             <div *ngIf="!selectedImage" class="error-message">
                 Morate odabrati sliku.
             </div>
