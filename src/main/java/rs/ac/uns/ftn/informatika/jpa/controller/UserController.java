@@ -1,13 +1,16 @@
 package rs.ac.uns.ftn.informatika.jpa.controller;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
+import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
+import javax.transaction.Transactional;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +43,14 @@ public class UserController {
 
     @GetMapping("/whoami")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @Transactional
     public User user(Principal user) {
-        return this.userService.findByUsername(user.getName());
+        User currentUser = this.userService.findByUsername(user.getName());
+
+        // Inicijalizujte lazy kolekcije (ako postoji potreba)
+        Hibernate.initialize(currentUser.getFollowers());  // Inicijalizuje followers kolekciju
+
+        return currentUser;
     }
 
     @GetMapping("/foo")
@@ -50,4 +59,18 @@ public class UserController {
         fooObj.put("foo", "bar");
         return fooObj;
     }
+
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+
+    public List<UserDTO> findRegisteredUsers(Principal principal) {
+        // Trazimo trenutno prijavljenog administratora na osnovu korisničkog imena
+        User adminUser = this.userService.findByUsername(principal.getName());
+        int adminId = adminUser.getId();
+
+        // Dobijanje svih korisnika sa ulogom `ROLE_USER` osim administratora
+        return this.userService.findUsersByRoleExcludingAdmin(adminId);
+    }
+
+
 }

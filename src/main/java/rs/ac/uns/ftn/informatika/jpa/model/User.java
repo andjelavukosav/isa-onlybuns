@@ -4,16 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 
 @Entity
-@Table(name="Users")
+@Table(name = "Users")
 public class User implements UserDetails {
 
     @Id
@@ -37,6 +35,20 @@ public class User implements UserDetails {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "followersCount")
+    private long followersCount;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_following",
+            joinColumns = @JoinColumn(name = "follower_id"),
+            inverseJoinColumns = @JoinColumn(name = "following_id")
+    )
+    private Set<User> following = new HashSet<>(); //skup korisnika koje trenutni korisnik prati
+
+    @ManyToMany(mappedBy = "following")
+    private Set<User> followers = new HashSet<>(); //korisnici koji prate ovog korisnika
+
     @Column(name = "enabled")
     private boolean enabled;
 
@@ -48,6 +60,18 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Role> roles;
+
+    public User() {super();}
+    public User(int id, String username, String password, String firstName, String lastName, String email, long followersCount) {
+        super();
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.followersCount = followersCount;
+    }
 
     public int getId() {
         return id;
@@ -98,6 +122,28 @@ public class User implements UserDetails {
     public List<Role> getRoles() {
         return roles;
     }
+
+    public void setFollowersCount(long followersCount) { this.followersCount = followersCount; }
+    public long getFollowersCount() { return followersCount; }
+
+    public void setFollowing(Set<User> following) { this.following = following; }
+    public Set<User> getFollowing() { return following; }
+    public void setFollowers(Set<User> followers) { this.followers = followers; }
+    public Set<User> getFollowers() { return followers; }
+
+    //Dodavanje korisnika u listu following - oni koje prati, a njega u njegovu listu
+    public void follow(User user) {
+        following.add(user);
+        user.getFollowers().add(this);
+        user.setFollowersCount(user.getFollowers().size()); // Ažurira broj pratilaca
+    }
+
+    public void unfollow(User user) {
+        following.remove(user);
+        user.getFollowers().remove(this);
+        user.setFollowersCount(user.getFollowers().size());
+    }
+
 
     @JsonIgnore
     @Override

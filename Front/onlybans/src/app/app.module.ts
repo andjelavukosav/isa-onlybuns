@@ -23,6 +23,7 @@ import { ConfigService } from './service';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { TokenInterceptor } from './interceptor/TokenInterceptor';
+import { UsersComponent } from './users/users.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { TokenInterceptor } from './interceptor/TokenInterceptor';
     NavbarComponent,
     HomeComponent,
     CardComponent,
-    RegistrationComponent
+    RegistrationComponent,
+    UsersComponent
   ],
   imports: [
     BrowserModule,
