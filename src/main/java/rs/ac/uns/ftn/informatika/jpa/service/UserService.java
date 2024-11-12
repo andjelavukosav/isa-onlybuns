@@ -10,4 +10,6 @@ public interface UserService {
     User findByUsername(String username);
     List<User> findAll ();
     User save(UserDTO userDTO);
+    User findByEmail(String email);
+    User updateUser(int id, UserDTO user);
 }
