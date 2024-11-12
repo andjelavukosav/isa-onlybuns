@@ -1,0 +1,38 @@
+<div>
+    <h2>All registered users</h2>
+
+    <!-- Polja za unos kriterijuma pretrage -->
+  <div>
+    <label for="firstName">Firstname:</label>
+    <input id="firstName" [(ngModel)]="searchCriteria.firstName" placeholder="Firstname" />
+    
+    <label for="lastName">Lastname:</label>
+    <input id="lastName" [(ngModel)]="searchCriteria.lastName" placeholder="Lastname" />
+    
+    <label for="email">Email:</label>
+    <input id="email" [(ngModel)]="searchCriteria.email" placeholder="Email" />
+
+    <button (click)="searchUsers()">Search</button>
+  
+    <table>
+      <thead>
+        <tr>
+          <th>Firstname</th>
+          <th>Lastname</th>
+          <th>Email</th>
+          <th>Posts count</th>
+          <th>Followers count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of registeredUsers">
+          <td>{{ user.firstname }}</td>
+          <td> {{ user.lastname }}</td>
+          <td>{{ user.email }}</td>
+          <td></td>
+          <td>{{ user.followersCount }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
