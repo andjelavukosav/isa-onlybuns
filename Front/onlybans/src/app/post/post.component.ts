@@ -27,13 +27,24 @@ export class PostComponent implements OnInit {
   getPosts(): void {
     this.postService.getPosts().subscribe({
       next: (result: PagedResults<Post>) => {
-        this.post = result.results;
+        // Sortiranje postova pre nego što ih dodelimo listi
+        const sortedPosts = result.results.sort((a, b) => {
+          const dateA = new Date(a.creationDateTime); // Parsiranje datuma iz stringa
+          const dateB = new Date(b.creationDateTime);
+          return dateB.getTime() - dateA.getTime(); // Sortira u opadajućem redosledu
+        });
+  
+        // Dodeljujemo sortirane postove listi
+        this.post = sortedPosts;
       },
       error: () => {
         console.error('Failed to load posts.');
       }
     });
   }
+  
+  
+  
 
   getCurrentUser(path:any): void {
     this.userService.getMyInfo()

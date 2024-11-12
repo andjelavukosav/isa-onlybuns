@@ -62,6 +62,9 @@ public class PostController {
     public ResponseEntity<PagedResults<PostDTO>> getAllPosts() {
         List<Post> posts = postService.findAll();
 
+        // Sort the posts by creationDateTime in descending order (newest first)
+        posts.sort((p1, p2) -> p2.getCreationDateTime().compareTo(p1.getCreationDateTime()));
+
         List<PostDTO> postsDTO = new ArrayList<>();
         for (Post post : posts) {
             postsDTO.add(new PostDTO(post));
@@ -71,6 +74,7 @@ public class PostController {
         pagedResults.setTotalCount(posts.size());
         return new ResponseEntity<>(pagedResults, HttpStatus.OK);
     }
+
 
     @Operation(description = "Create a new post", method = "POST")
     @PostMapping(value = "/create", consumes = "multipart/form-data", produces = "application/json")

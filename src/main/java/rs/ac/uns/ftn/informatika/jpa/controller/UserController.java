@@ -35,10 +35,10 @@ public class UserController {
 
      @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-
     public User loadById(@PathVariable int userId) {
         return this.userService.findById(userId);
     }
+
 
     @GetMapping("/user/all")
     @PreAuthorize("hasRole('ADMIN')")

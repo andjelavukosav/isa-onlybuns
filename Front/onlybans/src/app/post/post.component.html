@@ -1,31 +1,17 @@
-<div id="post-management">
-    <hr>
-    <div id="post-details">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>User</th>
-            <th>Description</th>
-            <th>Image</th>
-            <th>Creation Date</th>
-            <th>Location</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of post">
-            <td>{{ p.id }}</td>
-            <td>{{ p.username }}</td>
-            <td>{{ p.description }}</td>
-            <td>
-              <img [src]="p.imagePath" alt="Post Image" style="max-width: 100px; max-height: 100px;">
-            </td>
-            <td>{{ p.creationDateTime }}</td>
-          </tr>
-        </tbody>
-      </table>
+<div id="post-management" style="display: flex; flex-wrap: wrap; gap: 20px;">
+  <div *ngFor="let p of post" class="post-card" style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 300px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+    <div class="post-header">
+      <strong>{{ p.username }}</strong>
+      <span style="float: right; color: #888;">{{ p.creationDateTime | date:'short' }}</span>
     </div>
-    <hr>
-    
+    <div class="post-image" style="text-align: center; margin: 16px 0;">
+      <img [src]="p.imagePath" alt="Post Image" style="max-width: 100%; border-radius: 8px;">
+    </div>
+    <div class="post-content">
+      <p>{{ p.description }}</p>
+    </div>
+    <div class="post-footer" style="color: #888; font-size: 0.9em;">
+      <span>Location: {{ p.location }}</span>
+    </div>
   </div>
-  
+</div>
