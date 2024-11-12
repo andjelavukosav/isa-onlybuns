@@ -11,30 +11,41 @@ import { PagedResults } from '../model/paged-result.model';
 })
 export class PostComponent implements OnInit {
   post: Post[] = [];
-  currentUser: any; 
+  currentUser: any;
   whoamIResponse = {};
 
   constructor(
     private postService: PostService,
-    private userService: UserService 
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
     this.getPosts();
-    this.getCurrentUser('http://localhost:8080/api'); 
+    this.getCurrentUser('http://localhost:8080/api');
   }
 
   getPosts(): void {
     this.postService.getPosts().subscribe({
       next: (result: PagedResults<Post>) => {
-        // Sortiranje postova pre nego što ih dodelimo listi
         const sortedPosts = result.results.sort((a, b) => {
-          const dateA = new Date(a.creationDateTime); // Parsiranje datuma iz stringa
+          const dateA = new Date(a.creationDateTime);
           const dateB = new Date(b.creationDateTime);
-          return dateB.getTime() - dateA.getTime(); // Sortira u opadajućem redosledu
+          return dateB.getTime() - dateA.getTime();
         });
-  
-        // Dodeljujemo sortirane postove listi
+
+        // For each post, get the userName based on userId
+        sortedPosts.forEach(post => {
+
+          this.userService.getUserById(post.user?.id || 0).subscribe({
+            next: (user) => {
+              post.usernameDisplay = user.username;
+            },
+            error: () => {
+              console.error(`Failed to load user for post ID ${post.id}`);
+            }
+          });
+        });
+
         this.post = sortedPosts;
       },
       error: () => {
@@ -42,7 +53,10 @@ export class PostComponent implements OnInit {
       }
     });
   }
-  
+
+
+
+
 
   getCurrentUser(path:any): void {
     this.userService.getMyInfo()

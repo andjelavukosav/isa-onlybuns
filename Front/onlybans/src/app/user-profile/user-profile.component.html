@@ -1,0 +1,11 @@
+<div *ngIf="user">
+    <h1>{{ user.username }}'s Profile</h1>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <!-- Add any other user information you want to display -->
+  </div>
+  
+  <div *ngIf="!user">
+    <p>Loading user data...</p>
+  </div>
+  
