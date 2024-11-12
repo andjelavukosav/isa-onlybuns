@@ -51,6 +51,7 @@ export class RegistrationComponent implements OnInit {
     this.form = this.formBuilder.group({
       username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(64)]],
       password: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(32)]],
+      confirmPassword: ['', [Validators.required]],
       firstname: ['', [Validators.required]],
       lastname: ['', [Validators.required]],
       email: ['', [Validators.required]],
@@ -60,7 +61,13 @@ export class RegistrationComponent implements OnInit {
         street: ['', [Validators.required]],
         streetNumber: ['', [Validators.required]]
       })
-    });
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  passwordMatchValidator(group: FormGroup) {
+    const password = group.get('password')?.value;
+    const confirmPassword = group.get('confirmPassword')?.value;
+    return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
   ngOnDestroy() {
@@ -72,54 +79,51 @@ export class RegistrationComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
 
-  
-    try {
-      const formData = {
+    if (this.form.invalid) {
+        this.submitted = false;
+        alert('Passwords do not match. Please correct the passwords.');
+        return;
+    }
+
+    const formData = {
         username: this.form.value.username,
         password: this.form.value.password,
         firstname: this.form.value.firstname,
         lastname: this.form.value.lastname,
         email: this.form.value.email,
         address: {
-          country: this.form.value.address.country,
-          city: this.form.value.address.city,
-          street: this.form.value.address.street,
-          streetNumber: this.form.value.address.streetNumber
+            country: this.form.value.address.country,
+            city: this.form.value.address.city,
+            street: this.form.value.address.street,
+            streetNumber: this.form.value.address.streetNumber
         }
-      };
-  
-      console.log('Submitting form data:', formData);
-  
-      this.authService.signup(formData)
-        .subscribe(
-          data => {
-            console.log('Signup successful:', data);
-            this.notification = {
-              msgType: 'success',
-              msgBody: 'You have been successfully registered! Please log in.'
-            };
-  
-            this.authService.login(formData).subscribe(() => {
-              this.userService.getMyInfo().subscribe();
-            });
-  
-            this.router.navigate([this.returnUrl]);
-          },
-          error => {
-            this.submitted = false;
-            console.log('Sign up error', error);
-  
+    };
+
+    this.authService.signup(formData).subscribe(
+        data => {
+            alert('Signup successful: You have been successfully registered! Please verify your account via email.');
+            this.router.navigate(['/login']);
+        },
+        error => {
+            let errorMessage = 'An error occurred';
+
             if (error.status === 409) {
-              this.notification = {
-                msgType: 'error',
-                msgBody: 'This email is already taken. Please use a different one.'
-              };
+                errorMessage = 'This email or username is already taken. Please use a different one.';
+            } else if (error.status === 400) {
+                errorMessage = 'Invalid password format. Please ensure your password meets the requirements.';
+            } else if (error.status === 500) {
+                errorMessage = 'Server error. Please try again later.';
+            } else {
+              errorMessage = 'Signup successful: You have been successfully registered! Please verify your account via email.';
+              this.router.navigate(['/login']);
             }
-          }
-        );
-    } catch (error) {
-      console.error('Error in onSubmit:', error);
-    }
-  }
+            
+
+            alert(errorMessage);
+            this.submitted = false;
+        }
+    );
+}
+
   
 }
