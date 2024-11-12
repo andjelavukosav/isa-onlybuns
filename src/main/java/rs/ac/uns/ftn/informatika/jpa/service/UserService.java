@@ -1,5 +1,6 @@
 package rs.ac.uns.ftn.informatika.jpa.service;
 
+import org.springframework.data.domain.Sort;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.Role;
@@ -16,5 +17,5 @@ public interface UserService {
     User updateUser(int id, UserDTO user);
     List<Post> getAllPostsByUser(int userId);
     List<UserDTO> findUsersByRoleExcludingAdmin(int adminId);
-    List<UserDTO> searchUsers(String firstName, String lastName, String email, int adminId);
+    List<UserDTO> searchUsers(String firstName, String lastName, String email, Long minPosts, Long maxPosts, int adminId, Sort sort);
 }

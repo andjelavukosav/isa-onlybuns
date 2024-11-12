@@ -37,11 +37,27 @@ export class UserService {
     return this.http.get<UserDTO[]>(environment.apiHost + '/users');
   }
 
-  searchUsers(firstName: string, lastName: string, email: string): Observable<UserDTO[]> {
+  searchUsers(firstName: string, lastName: string, email: string, sortBy: string, sortDirection: string ,minPosts?: number | null, maxPosts?: number | null): Observable<UserDTO[]> {
     let params = new HttpParams();
     if(firstName) params = params.set('firstName', firstName);
     if(lastName) params = params.set('lastName', lastName);
     if(email) params = params.set('email', email);
+
+
+    if (minPosts !== null && minPosts !== undefined) {
+      params = params.set('minPosts', minPosts.toString()); // Pretvaramo broj u string
+    }
+
+    if (maxPosts !== null && maxPosts !== undefined) {
+      params = params.set('maxPosts', maxPosts.toString()); // Pretvaramo broj u string
+    }
+
+    if (sortBy) {
+      params = params.set('sortBy', sortBy);
+    }
+    if (sortDirection) {
+      params = params.set('sortDirection', sortDirection);
+    }
 
     return this.http.get<UserDTO[]>(environment.apiHost + '/users/search', { params});
   }
