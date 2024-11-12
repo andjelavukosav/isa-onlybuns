@@ -34,4 +34,8 @@ export class PostService {
     return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/all');
   }
 
+  likePost(postId: number): Observable<any> {
+    return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/like', {});
+  }
+  
 }

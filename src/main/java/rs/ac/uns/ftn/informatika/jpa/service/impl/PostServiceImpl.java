@@ -7,7 +7,6 @@ import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
-import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
@@ -38,6 +37,39 @@ public class PostServiceImpl implements PostService {
         post.setLocation(new Location(postRequest.location));
         post.setImagePath(postRequest.imagePath);
         post.setUser(UserDTOMapper.fromDTOtoUser(postRequest.getUser()));
+        post.setLikeCount(postRequest.likeCount);
         return this.postRepository.save(post);
     }
+
+    @Override
+    public Post findById(int id) {
+        return this.postRepository.findById(id);
+    }
+
+    public Post update(PostDTO postRequest) {
+        // Retrieve the post from the database
+
+
+        Post post = this.postRepository.findById(postRequest.id);
+
+        // Update fields as per the request
+        post.setDescription(postRequest.description);
+        post.setLocation(new Location(postRequest.location));  // Ensure location is mapped properly
+        post.setImagePath(postRequest.imagePath);
+        post.setCreationDateTime(postRequest.creationDateTime);
+        // Only update the like count if explicitly specified (you may wish to exclude this for update consistency)
+
+        post.setLikeCount(postRequest.likeCount);
+
+
+        // Update the user if needed (optional, based on requirements)
+        if (postRequest.getUser() != null) {
+            post.setUser(UserDTOMapper.fromDTOtoUser(postRequest.getUser()));
+        }
+
+        // Save the updated post to the repository
+        return postRepository.save(post);
+    }
+
+
 }
