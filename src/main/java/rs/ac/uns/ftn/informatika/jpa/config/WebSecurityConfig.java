@@ -73,7 +73,7 @@ public class WebSecurityConfig {
                 // koji tip korisnika moze da pristupi odgovarajucoj ruti. Npr. ukoliko zelimo da definisemo da ruti 'admin' moze da pristupi
                 // samo korisnik koji ima rolu 'ADMIN', navodimo na sledeci nacin:
                 // .antMatchers("/admin").hasRole("ADMIN") ili .antMatchers("/admin").hasAuthority("ROLE_ADMIN")
-
+                .antMatchers("/api/posts/all").permitAll()  // Allow public access to posts
                 .anyRequest().authenticated().and()
                 .cors().and()
 

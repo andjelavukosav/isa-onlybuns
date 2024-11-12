@@ -34,10 +34,10 @@ public class UserController {
 
      @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-
     public User loadById(@PathVariable int userId) {
         return this.userService.findById(userId);
     }
+
 
     @GetMapping("/user/all")
     @PreAuthorize("hasRole('ADMIN')")
@@ -52,7 +52,6 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
 
-        Hibernate.initialize(user.getFollowers());
         return  this.userService.findByEmail(user.getEmail());
     }
 

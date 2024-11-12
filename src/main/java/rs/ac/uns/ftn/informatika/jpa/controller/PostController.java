@@ -33,10 +33,13 @@ public class PostController {
     private PostService postService;
 
 
-    @Operation(description = "Get all posts",method="GET")
-    @GetMapping(value = "/all", produces= MediaType.APPLICATION_JSON_VALUE)
+    @Operation(description = "Get all posts", method = "GET")
+    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PagedResults<PostDTO>> getAllPosts() {
         List<Post> posts = postService.findAll();
+
+        // Sort the posts by creationDateTime in descending order (newest first)
+        posts.sort((p1, p2) -> p2.getCreationDateTime().compareTo(p1.getCreationDateTime()));
 
         List<PostDTO> postsDTO = new ArrayList<>();
         for (Post post : posts) {
@@ -47,6 +50,7 @@ public class PostController {
         pagedResults.setTotalCount(posts.size());
         return new ResponseEntity<>(pagedResults, HttpStatus.OK);
     }
+
 
     @Operation(description = "Create a new post", method = "POST")
     @PostMapping(value = "/create", consumes = "multipart/form-data", produces = "application/json")

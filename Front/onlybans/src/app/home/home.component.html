@@ -1,4 +1,9 @@
 <div class="content" fxLayout="row" fxLayoutAlign="center none">
+
+    <app-post></app-post>
+
+    <app-create-post></app-create-post>
+
     <app-card (apiClick)="makeRequest($event)" [responseObj]="fooResponse" apiText="/api/foo"
       content='This is an demo public endpoint which requires no authentication.' fxFlex subTitle="Public" title='"Foo"'>
     </app-card>
@@ -13,6 +18,4 @@
       fxFlex subTitle="Authorized role: ADMIN" title='"All users"'>
     </app-card>
 
-    <app-post></app-post>
-    <app-create-post></app-create-post>
   </div>
