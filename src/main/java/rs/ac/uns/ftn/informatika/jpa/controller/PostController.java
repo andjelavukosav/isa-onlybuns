@@ -108,7 +108,7 @@ public class PostController {
         Post post = new Post();
         post.setUser(user); // Postavljanje korisnika
         post.setDescription(description);
-       // post.setLikeCount(0);
+        post.setLikeCount(0);
         // Postavljanje lokacije ako je prisutna
         if (latitude != null && longitude != null) {
             post.setLocation(new Location(latitude, longitude));
@@ -159,21 +159,22 @@ public class PostController {
         return fileName; // Vraća ime fajla koje se može koristiti za prikazivanje slike
     }
 
-   /* @PostMapping("/{postId}/like")
+    @PostMapping("/{postId}/like")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> likePost(@PathVariable int postId) {
-      /*  try {
+       try {
             Post post = postService.findById(postId);
             post.setLikeCount(post.getLikeCount() + 1);
             PostDTO postDTO = new PostDTO(post);
-           // postService.update(postDTO);
+            postDTO.id = postId;
+            postService.update(postDTO);
             return ResponseEntity.ok("Post liked successfully");
         } catch (ConfigDataResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while liking the post.");
         }
-        return null;
-    }*/
+
+    }
 
 }

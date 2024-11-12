@@ -37,7 +37,7 @@ public class PostServiceImpl implements PostService {
         post.setLocation(new Location(postRequest.location));
         post.setImagePath(postRequest.imagePath);
         post.setUser(UserDTOMapper.fromDTOtoUser(postRequest.getUser()));
-     //   post.setLikeCount(postRequest.likeCount);
+        post.setLikeCount(postRequest.likeCount);
         return this.postRepository.save(post);
     }
 
@@ -46,17 +46,17 @@ public class PostServiceImpl implements PostService {
         return this.postRepository.findById(id);
     }
 
-    /*public Post update(PostDTO postRequest) {
+    public Post update(PostDTO postRequest) {
         // Retrieve the post from the database
 
 
-        Post post = new Post();
+        Post post = this.postRepository.findById(postRequest.id);
 
         // Update fields as per the request
         post.setDescription(postRequest.description);
         post.setLocation(new Location(postRequest.location));  // Ensure location is mapped properly
         post.setImagePath(postRequest.imagePath);
-
+        post.setCreationDateTime(postRequest.creationDateTime);
         // Only update the like count if explicitly specified (you may wish to exclude this for update consistency)
 
         post.setLikeCount(postRequest.likeCount);
@@ -69,7 +69,7 @@ public class PostServiceImpl implements PostService {
 
         // Save the updated post to the repository
         return postRepository.save(post);
-    }*/
+    }
 
 
 }

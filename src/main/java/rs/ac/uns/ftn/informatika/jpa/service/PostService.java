@@ -9,5 +9,5 @@ public interface PostService {
     List<Post> findAll();
     Post save(PostDTO postDTO);
     Post findById(int id);
-   // Post update(PostDTO postDTO);
+    Post update(PostDTO postDTO);
 }
