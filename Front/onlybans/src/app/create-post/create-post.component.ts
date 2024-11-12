@@ -56,7 +56,7 @@ export class CreatePostComponent {
   }
 
 
-  onMapReady(map: Map): void { // Use `Map` here instead of `LeafletMap`
+  onMapReady(map: Map): void { // Use Map here instead of LeafletMap
     this.map = map;
     this.map.on('click', (event: L.LeafletMouseEvent) => {
       const latLng = event.latlng;
@@ -109,7 +109,7 @@ export class CreatePostComponent {
         location: this.location
       };
 
-      // Pozovi servis i proslijedi `newPost` i `selectedImage`
+      // Pozovi servis i proslijedi newPost i selectedImage
       this.postService.addPost(newPost, this.selectedImage).subscribe({
         next: (createdPost) => {
           console.log('Post successfully created:', createdPost);
