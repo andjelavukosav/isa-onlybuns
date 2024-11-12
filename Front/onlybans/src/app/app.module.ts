@@ -20,9 +20,14 @@ import { FooService } from './service';
 import { AuthService } from './service';
 import { UserService } from './service';
 import { ConfigService } from './service';
-
+import { PostService } from './service/post.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { TokenInterceptor } from './interceptor/TokenInterceptor';
+import { PostComponent } from './post/post.component';
+import { CreatePostComponent } from './create-post/create-post.component';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+
+import { UsersComponent } from './users/users.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +36,11 @@ import { TokenInterceptor } from './interceptor/TokenInterceptor';
     NavbarComponent,
     HomeComponent,
     CardComponent,
-    RegistrationComponent
+    RegistrationComponent,
+    PostComponent,
+    CreatePostComponent,
+    RegistrationComponent,
+    UsersComponent
   ],
   imports: [
     BrowserModule,
@@ -42,9 +51,9 @@ import { TokenInterceptor } from './interceptor/TokenInterceptor';
     ReactiveFormsModule,
     HttpClientModule,
     NoopAnimationsModule,
-
+    LeafletModule
   ],
-  providers: [ 
+  providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptor,
@@ -55,6 +64,7 @@ import { TokenInterceptor } from './interceptor/TokenInterceptor';
     ApiService,
     UserService,
     ConfigService,
+    PostService
   ],
   bootstrap: [AppComponent],
   schemas: [NO_ERRORS_SCHEMA]

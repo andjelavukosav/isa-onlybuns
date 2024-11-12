@@ -27,8 +27,8 @@
 .greeting-hamburger {
   display: none;
 }
-mat-button{
- margin-left: 30px; 
+button[mat-icon-button] {
+  color: gray; /* Boja ikone za kontrast sa pozadinom */
 }
 
 

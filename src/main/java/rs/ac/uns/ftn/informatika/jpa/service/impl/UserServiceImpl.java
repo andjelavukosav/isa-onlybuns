@@ -17,6 +17,7 @@ import rs.ac.uns.ftn.informatika.jpa.service.RoleService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -153,4 +154,16 @@ public class UserServiceImpl implements UserService {
 
 
 
+    @Override
+    public List<UserDTO> findUsersByRoleExcludingAdmin(int adminId) {
+        List<User> users =  userRepository.findAllByRoleNameExcludingId("ROLE_USER", adminId);
+
+        return users.stream().map(user -> new UserDTO(user)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserDTO> searchUsers(String firstName, String lastName, String email, int adminId) {
+        List<User> users = userRepository.searchUserBy(firstName, lastName, email, adminId);
+        return users.stream().map(UserDTO::new).collect(Collectors.toList());
+    }
 }

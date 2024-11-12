@@ -1,0 +1,46 @@
+<!-- create-post.component.html -->
+<div class="create-post-container">
+    <h2>Dodaj Novi Post</h2>
+
+    <form [formGroup]="postForm" (ngSubmit)="createPost()">
+        <!-- Opis posta -->
+        <div class="form-group">
+            <label for="description">Opis:</label>
+            <textarea id="description" formControlName="description" rows="4" placeholder="Unesite opis posta" required></textarea>
+            <div *ngIf="postForm.get('description')?.invalid && postForm.get('description')?.touched" class="error-message">
+                Opis je obavezan i ne sme biti duži od 255 karaktera.
+            </div>
+        </div>
+
+        <!-- Mapa -->
+        <div class="form-group">
+            <label for="map">Odaberite lokaciju na mapi:</label>
+            <div style="height: 300px; width: 100%;">
+                <div leaflet [leafletOptions]="options" (leafletMapReady)="onMapReady($event)"></div>
+            </div>
+        </div>
+
+        <!-- Unos za koordinate -->
+        <div class="form-group">
+            <label for="locationLatitude">Širina (Latitude):</label>
+            <input id="locationLatitude" type="text" formControlName="locationLatitude" placeholder="Unesite širinu" readonly />
+        </div>
+
+        <div class="form-group">
+            <label for="locationLongitude">Dužina (Longitude):</label>
+            <input id="locationLongitude" type="text" formControlName="locationLongitude" placeholder="Unesite dužinu" readonly />
+        </div>
+
+        <!-- Slika -->
+        <div class="form-group">
+            <label for="image">Slika:</label>
+            <input id="image" type="file" (change)="onImageSelected($event)" accept="image/*" />
+            <div *ngIf="!selectedImage" class="error-message">
+                Morate odabrati sliku.
+            </div>
+        </div>
+
+        <!-- Dugme za submit -->
+        <button type="submit" [disabled]="postForm.invalid || !selectedImage" class="btn-submit">Kreiraj Post</button>
+    </form>
+</div>
