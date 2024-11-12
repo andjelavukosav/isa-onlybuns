@@ -13,6 +13,7 @@ public class PostDTO {
     public String imagePath;
     public LocationDTO location;
     public MultipartFile image;
+    public UserDTO user;
 
     public PostDTO() {}
 
@@ -29,5 +30,9 @@ public class PostDTO {
         this.description = post.getDescription();
         this.location = new LocationDTO(post.getLocation());
         this.imagePath = post.getImagePath();
+        this.user = new UserDTO(post.getUser());
+        this.creationDateTime = post.getCreationDateTime();
     }
+
+    public UserDTO getUser() { return user; }
 }

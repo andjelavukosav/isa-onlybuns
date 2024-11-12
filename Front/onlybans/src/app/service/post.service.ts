@@ -16,9 +16,7 @@ export class PostService {
 
   addPost(createPost: Post, imageFile: File | null): Observable<Post> {
     const formData = new FormData();
-    formData.append('creatorId', createPost.userId.toString());
     formData.append('description', createPost.description);
-    formData.append('username', createPost.username);
   
     if (createPost.location) {
       formData.append('location.latitude', createPost.location.latitude.toString());
