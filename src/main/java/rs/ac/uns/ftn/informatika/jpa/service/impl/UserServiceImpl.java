@@ -2,12 +2,14 @@ package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rs.ac.uns.ftn.informatika.jpa.dto.AddressDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
+import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.Address;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.Role;
@@ -33,6 +35,8 @@ public class UserServiceImpl implements UserService {
     private RoleService roleService;
     @Autowired
     private AddressRepository addressRepository;
+    @Autowired
+    private UserDTOMapper userDTOMapper;
 
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
@@ -166,8 +170,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> searchUsers(String firstName, String lastName, String email, int adminId) {
-        List<User> users = userRepository.searchUserBy(firstName, lastName, email, adminId);
-        return users.stream().map(UserDTO::new).collect(Collectors.toList());
+    public List<UserDTO> searchUsers(String firstName, String lastName, String email, Long minPosts, Long maxPosts, int adminId, Sort sort) {
+        return UserDTOMapper.toUserDTOList(userRepository.searchUserBy(firstName, lastName, email, minPosts, maxPosts, adminId, sort));
     }
+
 }
