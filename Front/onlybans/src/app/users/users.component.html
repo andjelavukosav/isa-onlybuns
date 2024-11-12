@@ -1,0 +1,23 @@
+<div>
+    <h2>Lista svih korisnika</h2>
+  
+    <table>
+      <thead>
+        <tr>
+          <th>Ime</th>
+          <th>Email</th>
+          <th>Broj objava</th>
+          <th>Broj pratilaca</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of registeredUsers">
+          <td>{{ user.firstname }}</td>
+          <td> {{ user.lastname }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.followersCount }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

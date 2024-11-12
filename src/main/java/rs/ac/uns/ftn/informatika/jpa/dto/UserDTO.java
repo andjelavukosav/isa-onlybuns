@@ -1,5 +1,7 @@
 package rs.ac.uns.ftn.informatika.jpa.dto;
 
+import rs.ac.uns.ftn.informatika.jpa.model.User;
+
 public class UserDTO {
     private int id;
 
@@ -12,6 +14,26 @@ public class UserDTO {
     private String lastname;
 
     private String email;
+    private long followersCount;
+
+    public UserDTO() {
+
+    }
+
+    public UserDTO(User user) {
+        this(user.getId(), user.getUsername(), user.getPassword(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getFollowersCount());
+    }
+
+    public UserDTO(int id, String username, String password, String firstname, String lastname, String email, long followersCount) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.email = email;
+        this.followersCount = followersCount;
+    }
+
 
     private boolean enabled;
 
@@ -80,4 +102,8 @@ public class UserDTO {
     public void setAddress(AddressDTO address) {
         this.address = address;
     }
+    public long getFollowersCount() {return followersCount;}
+
+    public void setFollowersCount(long followersCount) { this.followersCount = followersCount; }
+
 }

@@ -27,6 +27,7 @@ import { PostComponent } from './post/post.component';
 import { CreatePostComponent } from './create-post/create-post.component';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
+import { UsersComponent } from './users/users.component';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,8 @@ import { LeafletModule } from '@asymmetrik/ngx-leaflet';
     RegistrationComponent,
     PostComponent,
     CreatePostComponent,
+    RegistrationComponent,
+    UsersComponent
   ],
   imports: [
     BrowserModule,
@@ -50,7 +53,7 @@ import { LeafletModule } from '@asymmetrik/ngx-leaflet';
     NoopAnimationsModule,
     LeafletModule
   ],
-  providers: [ 
+  providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptor,

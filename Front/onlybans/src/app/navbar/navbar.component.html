@@ -7,15 +7,14 @@
             <button *ngIf="!hasSignedIn()" mat-raised-button routerLink="/login">
                 <span>Login</span>
             </button>
-            <button *ngIf="hasSignedIn()" [matMenuTriggerFor]="userMenu" class="greeting-button" 
-            mat-button>
+            <button *ngIf="hasSignedIn()" [matMenuTriggerFor]="userMenu" mat-icon-button>
                 <span>Hello, {{userName()}}</span>
+                <mat-icon>menu</mat-icon>
             </button>
-            <button *ngIf="hasSignedIn()" [matMenuTriggerFor]="userMenu" class="greeting-hamburger" 
-            mat-icon-button>
-            </button>
+            
             <mat-menu #userMenu ="matMenu">
-                <mat-button (click)="logout()">sign out</mat-button>
+                <button mat-menu-item routerLink="/users">Registered Users</button>
+                <button mat-menu-item (click)="logout()">sign out</button>
             </mat-menu>
         </div>
     </div>
