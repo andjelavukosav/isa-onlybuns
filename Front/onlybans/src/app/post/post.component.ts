@@ -24,6 +24,7 @@ export class PostComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.getCurrentUser('http://localhost:8080');
     this.getPosts();
   }
 
@@ -63,11 +64,14 @@ export class PostComponent implements OnInit {
   likePost(post: Post): void {
     // Check if the user is logged in
     if (!this.currentUser) {
-      alert("You need to log in to access this feature.");
+      alert("You need to log in to access this feature." );
+      console.log('Useeeeeeeeeer', this.currentUser)
       return;
     }
+   
 
     // Increment the like count locally
+    console.log(this.currentUser)
     post.likeCount = (post.likeCount || 0) + 1;
 
     // Call the service to save the like on the backend
