@@ -23,7 +23,6 @@ export class PostComponent implements OnInit {
 
   ngOnInit(): void {
     this.getPosts();
-    this.getCurrentUser('http://localhost:8080/api');
   }
 
   getPosts(): void {
@@ -39,6 +38,11 @@ export class PostComponent implements OnInit {
           this.userService.getUserById(post.user?.id || 0).subscribe({
             next: (user) => {
               post.usernameDisplay = user.username;
+              
+              if (post.imagePath) {
+                console.log('Image path: ', post.imagePath)
+              }
+            
             },
             error: () => {
               console.error(`Failed to load user for post ID ${post.id}`);
