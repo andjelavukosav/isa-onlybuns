@@ -133,8 +133,6 @@ public class PostController {
         return new ResponseEntity<>(postDTO, HttpStatus.CREATED);
     }
 
-    @Value("${upload.folder}")
-    private String uploadFolder;
 
     private String saveImage(MultipartFile imageFile) throws IOException {
         // Definišite folder za čuvanje slika unutar statičkog direktorijuma
