@@ -2,20 +2,28 @@
   <div *ngFor="let p of post" class="post-card" style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 300px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
     <div class="post-header">
       <strong>
-        <a [routerLink]="['/profile',p.user?.id]" style="text-decoration: none; color: #007bff;">
+        <a [routerLink]="['/profile', p.user?.id]" style="text-decoration: none; color: #007bff;">
           {{ p.usernameDisplay }}
         </a>
       </strong>
       <span style="float: right; color: #888;">{{ p.creationDateTime | date:'short' }}</span>
     </div>
     <div class="post-image" style="text-align: center; margin: 16px 0;">
-      <img [src]="p.imagePath" alt="Post Image" style="max-width: 100%; border-radius: 8px;">
+      <img *ngIf="p.imagePath" [src]="p.imagePath" alt="Post Image" style="max-width: 100%; border-radius: 8px;">
     </div>
+    
     <div class="post-content">
       <p>{{ p.description }}</p>
     </div>
     <div class="post-footer" style="color: #888; font-size: 0.9em;">
       <span>Location: {{ p.location }}</span>
+      <div style="margin-top: 10px;">
+        <!-- Like button with click event -->
+        <button (click)="likePost(p)" style="background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+          Like
+        </button>
+        <span style="margin-left: 8px;">{{ p.likeCount || 0 }} Likes</span>
+      </div>
     </div>
   </div>
 </div>

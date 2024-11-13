@@ -8,4 +8,5 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Integer> {
     List<Post> findAll();
     Post save(Post post);
+    Post findById(int id);
 }

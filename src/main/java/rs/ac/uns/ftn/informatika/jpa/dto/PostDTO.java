@@ -14,6 +14,7 @@ public class PostDTO {
     public LocationDTO location;
     public MultipartFile image;
     public UserDTO user;
+    public int likeCount;
 
     public PostDTO() {}
 
@@ -30,9 +31,16 @@ public class PostDTO {
         this.description = post.getDescription();
         this.location = new LocationDTO(post.getLocation());
         this.imagePath = post.getImagePath();
+        if (this.imagePath != null && !this.imagePath.startsWith("http")) {
+            this.imagePath = "http://localhost:8080" + this.imagePath;
+        }
         this.user = new UserDTO(post.getUser());
         this.creationDateTime = post.getCreationDateTime();
+        this.likeCount = post.getLikeCount();
     }
 
     public UserDTO getUser() { return user; }
+
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 }
