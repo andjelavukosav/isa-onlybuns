@@ -42,6 +42,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public PostDTO getPostById(Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+
+        return new PostDTO(post);
+    }
+
+    @Override
+    public long getPostCountForUser(int userId) {
+        return postRepository.countPostByUser(userId);
+    }
+
+    @Override
     public Post findById(int id) {
         return this.postRepository.findById(id);
     }

@@ -15,6 +15,8 @@ export class PostComponent implements OnInit {
   currentUser: any;
   whoamIResponse = {};
 
+  commentText: {[key: number]: string} = {};
+
   constructor(
     private postService: PostService,
     private userService: UserService,
@@ -38,6 +40,11 @@ export class PostComponent implements OnInit {
           this.userService.getUserById(post.user?.id || 0).subscribe({
             next: (user) => {
               post.usernameDisplay = user.username;
+              
+              if (post.imagePath) {
+                console.log('Image path: ', post.imagePath)
+              }
+            
             },
             error: () => {
               console.error(`Failed to load user for post ID ${post.id}`);
@@ -53,8 +60,6 @@ export class PostComponent implements OnInit {
     });
   }
 
-<<<<<<< HEAD
-=======
   likePost(post: Post): void {
     // Check if the user is logged in
     if (!this.currentUser) {
@@ -102,5 +107,12 @@ export class PostComponent implements OnInit {
       obj['body'] = JSON.stringify(res, null, 2);
     }
   }
->>>>>>> 892faf72437cf9f053d010c2c62479211827ba0a
+
+  addComment(post: any): void{
+    if(!this.currentUser){
+      alert('Please, login first.')
+      this.commentText[post.id] = '';
+      return;
+    } 
+  }
 }

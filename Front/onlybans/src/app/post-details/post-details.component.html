@@ -1,0 +1,15 @@
+<div *ngIf="post" class="post-details">
+    <h2>Post Details</h2>
+    <div class="post-header">
+      <strong>{{ post.usernameDisplay }}</strong>
+      <span>{{ post.creationDateTime | date: 'short' }}</span>
+    </div>
+    <div class="post-image" style="text-align: center; margin: 16px 0;">
+      <img [src]="post.imagePath" alt="Post Image" style="max-width: 100%; border-radius: 8px;">
+    </div>
+    <div class="post-content">
+      <p>{{ post.description }}</p>
+    </div>
+    
+  </div>
+  

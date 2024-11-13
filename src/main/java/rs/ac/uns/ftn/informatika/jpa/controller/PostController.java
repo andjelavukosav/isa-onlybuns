@@ -29,6 +29,8 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -70,10 +72,10 @@ public class PostController {
         // Sort the posts by creationDateTime in descending order (newest first)
         posts.sort((p1, p2) -> p2.getCreationDateTime().compareTo(p1.getCreationDateTime()));
 
-        List<PostDTO> postsDTO = new ArrayList<>();
-        for (Post post : posts) {
-            postsDTO.add(new PostDTO(post));
-        }
+        List<PostDTO> postsDTO = posts.stream()
+                .map(PostDTO::new)
+                .collect(Collectors.toList());
+
         PagedResults<PostDTO> pagedResults = new PagedResults<>();
         pagedResults.setResults(postsDTO);
         pagedResults.setTotalCount(posts.size());
@@ -131,34 +133,41 @@ public class PostController {
         return new ResponseEntity<>(postDTO, HttpStatus.CREATED);
     }
 
-    @Value("${upload.folder}")
-    private String uploadFolder;
 
     private String saveImage(MultipartFile imageFile) throws IOException {
-        if (imageFile.isEmpty()) {
-            throw new IllegalArgumentException("Fajl je prazan.");
+        // Definišite folder za čuvanje slika unutar statičkog direktorijuma
+        String uploadDir = "uploads/images";
+        Path uploadPath = Paths.get(uploadDir);
+
+        // Kreirajte folder ako ne postoji
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
         }
 
-        // Provera tipa fajla
-        String contentType = imageFile.getContentType();
-        if (!contentType.startsWith("image")) {
-            throw new IllegalArgumentException("Fajl nije validna slika.");
-        }
+        // Generišite jedinstveno ime za fajl
+        String fileName = UUID.randomUUID().toString() + "-" + imageFile.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
 
-        // Generisanje jedinstvenog imena fajla
-        String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-        fileName = fileName.replace(":", "-"); // Zameni ':' zbog problema na Windows-u
+        // Sačuvajte fajl u folder
+        Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // Putanja gde se fajl čuva
-        Path imagePath = Paths.get(uploadFolder, fileName);
-
-        // Čuvanje fajla
-        Files.createDirectories(imagePath.getParent()); // Osiguraj da folder postoji
-        Files.copy(imageFile.getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
-
-        return fileName; // Vraća ime fajla koje se može koristiti za prikazivanje slike
+        // Vratite ime fajla koje će se koristiti za pristup slici
+        return "/images/" + fileName;
     }
 
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostDTO> getPostById(@PathVariable Integer postId) {
+        PostDTO postDTO = postService.getPostById(postId);
+        return ResponseEntity.ok(postDTO);
+    }
+
+    @GetMapping("/user/{userId}/count")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<Long> getPostCountForUser(@PathVariable int userId) {
+        Long count = postService.getPostCountForUser(userId);
+        return ResponseEntity.ok(count);
+    }
     @PostMapping("/{postId}/like")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> likePost(@PathVariable int postId) {

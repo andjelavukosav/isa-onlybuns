@@ -1,57 +1,61 @@
-<div>
-    <h2>All registered users</h2>
+<div class="user-page">
+  <h2>All Registered Users</h2>
 
-    <!-- Polja za unos kriterijuma pretrage -->
-  <div>
-    <label for="firstName">Firstname:</label>
-    <input id="firstName" [(ngModel)]="searchCriteria.firstName" placeholder="Firstname" />
+  <!-- Kontejner za pretragu -->
+  <div class="search-container">
+    <div class="search-field">
+      <label for="firstName">Firstname:</label>
+      <input id="firstName" [(ngModel)]="searchCriteria.firstName" placeholder="Firstname" />
+    </div>
     
-    <label for="lastName">Lastname:</label>
-    <input id="lastName" [(ngModel)]="searchCriteria.lastName" placeholder="Lastname" />
-    
-    <label for="email">Email:</label>
-    <input id="email" [(ngModel)]="searchCriteria.email" placeholder="Email" />
+    <div class="search-field">
+      <label for="lastName">Lastname:</label>
+      <input id="lastName" [(ngModel)]="searchCriteria.lastName" placeholder="Lastname" />
+    </div>
 
-     
-    <label for="minPosts">Min Posts:</label>
-    <input id="minPosts" type="number" [(ngModel)]="searchCriteria.minPosts" min="0" placeholder="Minimum Posts" />
-    
-    <label for="maxPosts">Max Posts:</label>
-    <input id="maxPosts" type="number" [(ngModel)]="searchCriteria.maxPosts" min="0" placeholder="Maximum Posts" />
+    <div class="search-field">
+      <label for="email">Email:</label>
+      <input id="email" [(ngModel)]="searchCriteria.email" placeholder="Email" />
+    </div>
 
-    <label for="sortBy">Sort by:</label>
-    <select id="sortBy" [(ngModel)]="searchCriteria.sortBy">
-      <option value="email">Email</option>
-      <option value="followersCount">Followers Count</option>
-    </select>
+    <div class="search-field">
+      <label for="minPosts">Min Posts:</label>
+      <input id="minPosts" type="number" [(ngModel)]="searchCriteria.minPosts" min="0" placeholder="Minimum Posts" />
+    </div>
 
-    <label for="sortDirection">Sort Direction:</label>
-    <select id="sortDirection" [(ngModel)]="searchCriteria.sortDirection">
-      <option value="ASC">Ascending (ASC)</option>
-      <option value="DESC">Descending (DESC)</option>
-    </select>
+    <div class="search-field">
+      <label for="maxPosts">Max Posts:</label>
+      <input id="maxPosts" type="number" [(ngModel)]="searchCriteria.maxPosts" min="0" placeholder="Maximum Posts" />
+    </div>
 
-    <button (click)="searchUsers()">Search</button>
-  
-    <table>
-      <thead>
-        <tr>
-          <th>Firstname</th>
-          <th>Lastname</th>
-          <th>Email</th>
-          <th>Posts count</th>
-          <th>Followers count</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of registeredUsers">
-          <td>{{ user.firstname }}</td>
-          <td> {{ user.lastname }}</td>
-          <td>{{ user.email }}</td>
-          <td></td>
-          <td>{{ user.followersCount }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="search-field">
+      <label for="sortBy">Sort by:</label>
+      <select id="sortBy" [(ngModel)]="searchCriteria.sortBy">
+        <option value="email">Email</option>
+        <option value="followersCount">Followers Count</option>
+      </select>
+    </div>
+
+    <div class="search-field">
+      <label for="sortDirection">Sort Direction:</label>
+      <select id="sortDirection" [(ngModel)]="searchCriteria.sortDirection">
+        <option value="ASC">Ascending (ASC)</option>
+        <option value="DESC">Descending (DESC)</option>
+      </select>
+    </div>
+
+    <button class="search-button" (click)="searchUsers()">Search</button>
   </div>
-  
+
+  <!-- Mreža korisnika -->
+  <div class="users-grid">
+    <div class="user-card" *ngFor="let user of registeredUsers">
+      <div class="user-info">
+        <h3>{{ user.firstname }} {{ user.lastname }}</h3>
+        <p>Email: {{ user.email }}</p>
+        <p>Posts Count: {{ user.postsCount }}</p>
+        <p>Followers Count: {{ user.followersCount }}</p>
+      </div>
+    </div>
+  </div>
+</div>

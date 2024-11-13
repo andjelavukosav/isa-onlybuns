@@ -33,7 +33,7 @@ export class UserService {
     return this.apiService.get(this.config.users_url);
   }
 
-  getAllUsersForAdmin(): Observable<UserDTO[]> {
+  getAllRegisteredUsers(): Observable<UserDTO[]> {
     return this.http.get<UserDTO[]>(environment.apiHost + '/users');
   }
 
@@ -64,6 +64,10 @@ export class UserService {
 
   getUserById(userId: number): Observable<UserDTO> {
     return this.http.get<UserDTO>(environment.apiHost + `/users/${userId}`);
+  }
+
+  getUserPostCount(userId: number): Observable<number> {
+    return this.http.get<number>(environment.apiHost + `/posts/user/${userId}/count`);
   }
 
 }
