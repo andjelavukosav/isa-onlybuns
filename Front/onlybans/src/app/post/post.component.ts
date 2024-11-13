@@ -15,6 +15,8 @@ export class PostComponent implements OnInit {
   currentUser: any;
   whoamIResponse = {};
 
+  commentText: {[key: number]: string} = {};
+
   constructor(
     private postService: PostService,
     private userService: UserService,
@@ -100,5 +102,16 @@ export class PostComponent implements OnInit {
       obj['status'] = 200;
       obj['body'] = JSON.stringify(res, null, 2);
     }
+  }
+
+  addComment(post: any): void{
+    if(!this.currentUser){
+      alert('Please, login first.')
+      this.commentText[post.id] = '';
+      return;
+    } 
+
+    
+    
   }
 }

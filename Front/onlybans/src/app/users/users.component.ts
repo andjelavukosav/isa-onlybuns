@@ -69,7 +69,9 @@ export class UsersComponent {
     this.userService.searchUsers(firstName, lastName, email, sortBy, sortDirection, minPosts, maxPosts).subscribe(
       (data: UserDTO[]) => {
         this.registeredUsers = data; 
-
+        this.registeredUsers.forEach(user => {
+          this.getPostCountForUser(user.id);
+        })
       },
       (error) => {
         console.error('Error during searching registered users:', error);
