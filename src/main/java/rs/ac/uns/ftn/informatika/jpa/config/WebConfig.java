@@ -22,6 +22,6 @@ public class WebConfig implements WebMvcConfigurer{
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Mapiranje URL putanje "/images/**" na fajlove u folderu src/main/resources/images
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("classpath:/images/");
+                .addResourceLocations("file:uploads/images/");
     }
 }

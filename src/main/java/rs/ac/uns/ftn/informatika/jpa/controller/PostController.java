@@ -135,7 +135,7 @@ public class PostController {
 
     private String saveImage(MultipartFile imageFile) throws IOException {
         // Definišite folder za čuvanje slika unutar statičkog direktorijuma
-        String uploadDir = "src/main/resources/images";
+        String uploadDir = "uploads/images";
         Path uploadPath = Paths.get(uploadDir);
 
         // Kreirajte folder ako ne postoji
