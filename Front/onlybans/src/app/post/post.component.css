@@ -1,0 +1,64 @@
+#post-management {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center; /* Centers the posts horizontally */
+  }
+  
+  .post-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    width: calc(30% - 20px); /* Adjust width to fit about 3 posts per row */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 450px; /* Set a slightly taller height for each post card */
+    box-sizing: border-box;
+  }
+  
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .post-image {
+    text-align: center;
+    margin: 16px 0;
+    flex-grow: 1; /* Ensures image section grows if there's extra space */
+  }
+  
+  .post-image img {
+    max-width: 100%;
+    max-height: 200px; /* Sets a taller maximum height for images */
+    border-radius: 8px;
+    object-fit: cover; /* Ensures images retain their aspect ratio */
+  }
+  
+  .post-content {
+    font-size: 0.95em;
+    color: #555;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 100px; /* Provides more space for content display */
+  }
+  
+  .post-footer {
+    color: #888;
+    font-size: 0.9em;
+    text-align: left;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+    margin-top: 8px;
+  }
+
+  img {
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  

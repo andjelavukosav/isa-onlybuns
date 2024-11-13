@@ -1,27 +1,73 @@
-<form (ngSubmit)="register()">
-    <div>
-        <mat-form-field>
-            <mat-label>Name</mat-label>
-            <input matInput formControlName="name" type="text"/>
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>Surname</mat-label>
-            <input matInput formControlName="surname" type="text"/>
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>Username</mat-label>
-            <input matInput formControlName="username" type="text"/>
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>Email</mat-label>
-            <input matInput formControlName="email" type="text"/>
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>Password</mat-label>
-            <input matInput formControlName="password" type="password"/>
-        </mat-form-field>
-    <button color="primary" type="submit" mat-raised-button>Register</button>
-    </div>
-</form>
+<mat-card elevation="5" fxFlex class="content">
 
+    <mat-card-title>
+        <h2>{{title}}</h2>
+    </mat-card-title>
 
+    <mat-card-content>
+        <p *ngIf="notification" [class]="notification.msgType">{{notification.msgBody}}</p>
+        <form (ngSubmit)="onSubmit()" *ngIf="!submitted" [formGroup]="form">
+            <mat-form-field>
+                <label>Username: </label>
+                <input formControlName="username" matInput required>
+            </mat-form-field>
+            
+            <mat-form-field>
+                <label>Password: </label>
+                <input formControlName="password" matInput required type="password">
+            </mat-form-field>
+
+            <mat-form-field>
+                <label>Confirm password: </label>
+                <input formControlName="confirmPassword" matInput required type="password">
+            </mat-form-field>
+            
+            <mat-form-field>
+                <label>First Name: </label>
+                <input formControlName="firstname" required matInput>
+            </mat-form-field>
+            
+            <mat-form-field>
+                <label>Last Name: </label>
+                <input formControlName="lastname" required matInput>
+            </mat-form-field>
+
+            <mat-form-field>
+                <label>Email: </label>
+                <input formControlName="email" required matInput>
+            </mat-form-field>
+
+            <div formGroupName="address" fxLayout="row" fxLayoutAlign="space-between center">
+                <mat-form-field fxFlex="20">
+                    <label for="country">Country:</label>
+                    <input id="country" formControlName="country" required type="text" />    
+                </mat-form-field>
+                
+                <mat-form-field fxFlex="20">
+                    <label for="city">City:</label>
+                    <input id="city" formControlName="city" required type="text" />
+                </mat-form-field>
+
+                <mat-form-field fxFlex="20">
+                    <label for="street">Street:</label>
+                    <input id="street" formControlName="street" required type="text" />
+                </mat-form-field>
+
+                <mat-form-field fxFlex="20">
+                    <label for="streetNumber">Street Number:</label>
+                    <input id="streetNumber" formControlName="streetNumber" required type="text" />
+                </mat-form-field>
+
+            </div>
+
+            <button [disabled]="!form.valid" color="primary" mat-raised-button type="submit">Sign up</button>
+            <br>
+            <button color="primary" mat-raised-button routerLink="/" >Go Back</button>
+        </form>
+        <br>
+        <mat-spinner *ngIf="submitted" mode="indeterminate"></mat-spinner>
+        <br>
+        <hr>
+    </mat-card-content>
+    
+</mat-card>
