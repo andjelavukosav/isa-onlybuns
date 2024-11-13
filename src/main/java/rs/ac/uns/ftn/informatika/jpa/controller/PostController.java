@@ -165,6 +165,7 @@ public class PostController {
     }
 
     @GetMapping("/user/{userId}/count")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Long> getPostCountForUser(@PathVariable int userId) {
         Long count = postService.getPostCountForUser(userId);
         return ResponseEntity.ok(count);

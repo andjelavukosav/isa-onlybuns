@@ -69,11 +69,8 @@ public class WebSecurityConfig {
         http.authorizeRequests().antMatchers("/auth/**").permitAll()		// /auth/**
                 .antMatchers("/h2-console/**").permitAll()	// /h2-console/** ako se koristi H2 baza)
                 .antMatchers("/api/foo").permitAll()		// /api/foo
-                // ukoliko ne zelimo da koristimo @PreAuthorize anotacije nad metodama kontrolera, moze se iskoristiti hasRole() metoda da se ogranici
-                // koji tip korisnika moze da pristupi odgovarajucoj ruti. Npr. ukoliko zelimo da definisemo da ruti 'admin' moze da pristupi
-                // samo korisnik koji ima rolu 'ADMIN', navodimo na sledeci nacin:
-                // .antMatchers("/admin").hasRole("ADMIN") ili .antMatchers("/admin").hasAuthority("ROLE_ADMIN")
-                .antMatchers("/api/posts/all").permitAll()  // Allow public access to posts
+                .antMatchers("/api/posts/all").permitAll()
+                .antMatchers("/api/posts/{postId}").permitAll()
                 .antMatchers("/api/users/{userId}").permitAll()
 
                 .anyRequest().authenticated().and()
