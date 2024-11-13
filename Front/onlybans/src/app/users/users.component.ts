@@ -28,6 +28,11 @@ export class UsersComponent {
     this.userService.getAllUsersForAdmin().subscribe(
       (data: UserDTO[]) => {
         this.registeredUsers = data;
+        this.registeredUsers.forEach(user => {
+          this.getPostCountForUser(user.id);
+        }
+  
+        );
       },
       (error) => {
         console.error('Greška prilikom učitavanja korisnika:', error);
@@ -62,11 +67,27 @@ export class UsersComponent {
     this.userService.searchUsers(firstName, lastName, email, sortBy, sortDirection, minPosts, maxPosts).subscribe(
       (data: UserDTO[]) => {
         this.registeredUsers = data;  // Ažuriranje liste sa rezultatima pretrage
+
       },
       (error) => {
         console.error('Greška prilikom pretrage korisnika:', error);
       }
     );
+  }
+
+
+  getPostCountForUser(userId: number): void {
+    this.userService.getUserPostCount(userId).subscribe(
+      (postCount: number) => {
+        const user = this.registeredUsers.find( u => u.id === userId );
+        if(user){
+          user.postsCount = postCount;
+        }
+      },
+      (error) => {
+        console.log('Error while loading posts for user: ', error);
+      }
+    )
   }
 
 

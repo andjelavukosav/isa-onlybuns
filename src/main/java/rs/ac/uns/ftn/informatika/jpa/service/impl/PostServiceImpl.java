@@ -48,4 +48,9 @@ public class PostServiceImpl implements PostService {
 
         return new PostDTO(post);
     }
+
+    @Override
+    public long getPostCountForUser(int userId) {
+        return postRepository.countPostByUser(userId);
+    }
 }

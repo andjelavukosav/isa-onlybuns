@@ -99,5 +99,17 @@ public class WebSecurityConfig {
 
     }
 
+    /*
+    @Bean
+    protected SecurityFilterChain configure(HttpSecurity http) throws Exception{
+        http.authorizeRequests()
+                .antMatchers("/api/posts/update/**").authenticated()
+                .antMatchers("/api/posts/delete/**").authenticated()
+                .antMatchers("/api/posts/**").permitAll()
+                .anyRequest().authenticated();
+
+        return http.build();
+    }*/
+
 }
 

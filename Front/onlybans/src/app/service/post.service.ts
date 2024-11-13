@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { TokenInterceptor } from '../interceptor/TokenInterceptor';
 import { PagedResults } from '../model/paged-result.model';
+import { environment } from '../env/enviroment';
 
 @Injectable({
   providedIn: 'root'
@@ -33,5 +34,10 @@ export class PostService {
   getPosts(): Observable<PagedResults<Post>> {
     return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/all');
   }
+
+  getPostById(id: number): Observable<Post> {
+    return this.http.get<Post>(`${environment.apiHost}/posts/${id}`);
+  }
+
 
 }

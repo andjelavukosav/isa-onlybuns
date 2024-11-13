@@ -9,4 +9,5 @@ public interface PostService {
     List<Post> findAll();
     Post save(PostDTO postDTO);
     PostDTO getPostById(Integer id);
+    public long getPostCountForUser(int userId);
 }

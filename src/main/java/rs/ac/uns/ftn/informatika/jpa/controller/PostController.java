@@ -164,4 +164,9 @@ public class PostController {
         return ResponseEntity.ok(postDTO);
     }
 
+    @GetMapping("/user/{userId}/count")
+    public ResponseEntity<Long> getPostCountForUser(@PathVariable int userId) {
+        Long count = postService.getPostCountForUser(userId);
+        return ResponseEntity.ok(count);
+    }
 }

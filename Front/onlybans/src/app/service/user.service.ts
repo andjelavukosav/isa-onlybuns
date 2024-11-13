@@ -66,4 +66,8 @@ export class UserService {
     return this.http.get<UserDTO>(environment.apiHost + `/users/${userId}`);
   }
 
+  getUserPostCount(userId: number): Observable<number> {
+    return this.http.get<number>(environment.apiHost + `/posts/user/${userId}`);
+  }
+
 }
