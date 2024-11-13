@@ -54,4 +54,11 @@
     border-top: 1px solid #eee;
     margin-top: 8px;
   }
+
+  img {
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
   

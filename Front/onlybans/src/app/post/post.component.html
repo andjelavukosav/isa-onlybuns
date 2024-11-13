@@ -16,8 +16,9 @@
       <span style="float: right; color: #888;">{{ p.creationDateTime | date:'short' }}</span>
     </div>
     <div class="post-image" style="text-align: center; margin: 16px 0;">
-      <img [src]="p.imagePath" alt="Post Image" style="max-width: 100%; border-radius: 8px;">
+      <img *ngIf="p.imagePath" [src]="p.imagePath" alt="Post Image" style="max-width: 100%; border-radius: 8px;">
     </div>
+    
     <div class="post-content">
       <p>{{ p.description }}</p>
     </div>
