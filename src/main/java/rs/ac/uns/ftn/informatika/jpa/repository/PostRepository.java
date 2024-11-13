@@ -12,4 +12,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     @Query("SELECT COUNT(p) FROM Post p WHERE p.user.id = :userId")
     long countPostByUser(int userId);
+
+    Post findById(int id);
 }

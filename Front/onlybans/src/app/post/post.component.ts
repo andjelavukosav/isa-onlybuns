@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Post } from '../model/post.model';
 import { PostService } from '../service/post.service';
-import { UserService } from '../service/user.service'; // Import UserService
+import { UserService } from '../service/user.service';
 import { PagedResults } from '../model/paged-result.model';
+import { MatSnackBar } from '@angular/material/snack-bar'; // Import MatSnackBar
 
 @Component({
   selector: 'app-post',
@@ -16,7 +17,8 @@ export class PostComponent implements OnInit {
 
   constructor(
     private postService: PostService,
-    private userService: UserService
+    private userService: UserService,
+    private snackBar: MatSnackBar // Inject MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -33,9 +35,7 @@ export class PostComponent implements OnInit {
           return dateB.getTime() - dateA.getTime();
         });
 
-        // For each post, get the userName based on userId
         sortedPosts.forEach(post => {
-
           this.userService.getUserById(post.user?.id || 0).subscribe({
             next: (user) => {
               post.usernameDisplay = user.username;
@@ -54,24 +54,41 @@ export class PostComponent implements OnInit {
     });
   }
 
+  likePost(post: Post): void {
+    // Check if the user is logged in
+    if (!this.currentUser) {
+      alert("You need to log in to access this feature.");
+      return;
+    }
 
+    // Increment the like count locally
+    post.likeCount = (post.likeCount || 0) + 1;
 
+    // Call the service to save the like on the backend
+    this.postService.likePost(post.id).subscribe({
+      next: () => {
+        console.log(`Post ${post.id} liked successfully.`);
+      },
+      error: () => {
+        console.error(`Failed to like post ${post.id}.`);
+      }
+    });
+  }
 
-
-  getCurrentUser(path:any): void {
+  getCurrentUser(path: any): void {
     this.userService.getMyInfo()
       .subscribe(res => {
         this.forgeResonseObj(this.whoamIResponse, res, path);
+        this.currentUser = res; // Assign user info to currentUser
       }, err => {
         this.forgeResonseObj(this.whoamIResponse, err, path);
       });
   }
 
-  forgeResonseObj(obj:any, res:any, path:any) {
+  forgeResonseObj(obj: any, res: any, path: any) {
     obj['path'] = path;
     obj['method'] = 'GET';
     if (res.ok === false) {
-      // err
       obj['status'] = res.status;
       try {
         obj['body'] = JSON.stringify(JSON.parse(res._body), null, 2);
@@ -80,7 +97,6 @@ export class PostComponent implements OnInit {
         obj['body'] = res.error.message;
       }
     } else {
-      // 200
       obj['status'] = 200;
       obj['body'] = JSON.stringify(res, null, 2);
     }

@@ -3,6 +3,7 @@ package rs.ac.uns.ftn.informatika.jpa.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -107,7 +108,7 @@ public class PostController {
         Post post = new Post();
         post.setUser(user); // Postavljanje korisnika
         post.setDescription(description);
-
+        post.setLikeCount(0);
         // Postavljanje lokacije ako je prisutna
         if (latitude != null && longitude != null) {
             post.setLocation(new Location(latitude, longitude));
@@ -170,4 +171,22 @@ public class PostController {
         Long count = postService.getPostCountForUser(userId);
         return ResponseEntity.ok(count);
     }
+    @PostMapping("/{postId}/like")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> likePost(@PathVariable int postId) {
+       try {
+            Post post = postService.findById(postId);
+            post.setLikeCount(post.getLikeCount() + 1);
+            PostDTO postDTO = new PostDTO(post);
+            postDTO.id = postId;
+            postService.update(postDTO);
+            return ResponseEntity.ok("Post liked successfully");
+        } catch (ConfigDataResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while liking the post.");
+        }
+
+    }
+
 }

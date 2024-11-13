@@ -18,19 +18,19 @@ export class PostService {
   addPost(createPost: Post, imageFile: File | null): Observable<Post> {
     const formData = new FormData();
     formData.append('description', createPost.description);
-  
+
     if (createPost.location) {
       formData.append('location.latitude', createPost.location.latitude.toString());
       formData.append('location.longitude', createPost.location.longitude.toString());
     }
-  
+
     if (imageFile) {
       formData.append('imageFile', imageFile);
     }
-  
+
     return this.http.post<Post>('http://localhost:8080/api/posts/create', formData);
   }
-  
+
   getPosts(): Observable<PagedResults<Post>> {
     return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/all');
   }
@@ -39,5 +39,9 @@ export class PostService {
     return this.http.get<Post>(`${environment.apiHost}/posts/${id}`);
   }
 
+
+  likePost(postId: number): Observable<any> {
+    return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/like', {});
+  }
 
 }
