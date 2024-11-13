@@ -8,9 +8,11 @@ import { min } from 'date-fns';
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.css']
 })
+
 export class UsersComponent {
 
   registeredUsers: UserDTO[] = [];
+
   searchCriteria = {
     firstName: '',
     lastName: '',
@@ -25,7 +27,7 @@ export class UsersComponent {
   constructor(private userService: UserService){}
 
   ngOnInit(): void{
-    this.userService.getAllUsersForAdmin().subscribe(
+    this.userService.getAllRegisteredUsers().subscribe(
       (data: UserDTO[]) => {
         this.registeredUsers = data;
         this.registeredUsers.forEach(user => {
@@ -58,19 +60,19 @@ export class UsersComponent {
     
     // Provera validnosti unetog opsega (ako su oba unesena)
     if (minPost !== null && maxPost !== null && minPost > maxPost) {
-        console.error('Greška: Minimalni broj postova ne može biti veći od maksimalnog.');
-        return;  // Zaustavlja dalji tok ako opseg nije validan
+        console.error('Min post count cannot be lower than max post count.');
+        return;
     }
       
 
 
     this.userService.searchUsers(firstName, lastName, email, sortBy, sortDirection, minPosts, maxPosts).subscribe(
       (data: UserDTO[]) => {
-        this.registeredUsers = data;  // Ažuriranje liste sa rezultatima pretrage
+        this.registeredUsers = data; 
 
       },
       (error) => {
-        console.error('Greška prilikom pretrage korisnika:', error);
+        console.error('Error during searching registered users:', error);
       }
     );
   }
