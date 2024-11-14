@@ -197,7 +197,7 @@ export class PostDetailsComponent {
       //this.userService.getUserById(this.currentUser.id).subscribe(
         //(user) => {
           if (this.post !== undefined) {  // Proveravamo da li je ID validan
-            const updatedPost = {
+            const updatedPost : Post= {
               id: this.post.id,  // Očuvanje originalnog ID-a
               description: this.postForm.value.description,
               likeCount: this.post.likeCount,
