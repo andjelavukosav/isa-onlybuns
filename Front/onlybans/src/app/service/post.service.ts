@@ -49,9 +49,32 @@ export class PostService {
     return this.http.delete(url);  
   }
 
-  updatePost(updatedPost: Post): Observable<Post> {
+  updatePost(updatedPost: Post, imageFile: File | null): Observable<Post> {
+    const formData = new FormData();
+    formData.append('id', updatedPost.id.toString());
+    formData.append('description', updatedPost.description);
+    
+    // Dodavanje `likeCount` sa podrazumevanom vrednošću `0` ako je `undefined`
+    formData.append('likeCount', (updatedPost.likeCount ?? 0).toString());
+    
+    if (updatedPost.location) {
+      formData.append('location.latitude', updatedPost.location.latitude.toString());
+      formData.append('location.longitude', updatedPost.location.longitude.toString());
+    }
+    
+    // Provera `imageFile` i dodavanje u `FormData` ako postoji
+    if (imageFile) {
+      formData.append('imageFile', imageFile);
+    }
+    
+    formData.append('imagePath', updatedPost.imagePath || '');
+    formData.append('creationDateTime', updatedPost.creationDateTime);
+    
+    // Osiguravanje da `user` i `user.id` postoje pre dodavanja u `FormData`
+    formData.append('userId', updatedPost.user?.id?.toString() ?? '0'); // Dodajemo '0' kao podrazumevanu vrednost
+    
     const url = `${environment.apiHost}/posts/`;  // URL za backend
-    return this.http.put<Post>(url, updatedPost);  // Poziv PUT metode sa PostDTO objektom
+    return this.http.put<Post>(url, formData);  // Poziv PUT metode sa PostDTO objektom
   }
 
 }

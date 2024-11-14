@@ -194,8 +194,8 @@ export class PostDetailsComponent {
     }
   
     if (this.postForm.valid && this.post) {
-      //this.userService.getUserById(this.currentUser.id).subscribe(
-        //(user) => {
+      this.userService.getUserById(this.currentUser.id).subscribe(
+        (user) => {
           if (this.post !== undefined) {  // Proveravamo da li je ID validan
             const updatedPost : Post= {
               id: this.post.id,  // Očuvanje originalnog ID-a
@@ -204,10 +204,10 @@ export class PostDetailsComponent {
               imagePath: this.post.imagePath,
               creationDateTime: new Date().toISOString().slice(0, 16), 
               location: this.post.location,
-             // user: user  // Dodajte kompletne podatke o korisniku
+              user: user  // Dodajte kompletne podatke o korisniku
             };
   
-            this.postService.updatePost(updatedPost).subscribe(
+            this.postService.updatePost(updatedPost, this.selectedImage).subscribe(
               (response) => {
                 this.post = response;
                 this.isEditing = false;
@@ -230,15 +230,15 @@ export class PostDetailsComponent {
                 alert('Error updating post.');
               }
             );
-          } /*else {
+          } else {
             alert('Post ID is invalid.');
           }
-       // },
+        },
         (error) => {
           console.log('Error fetching user data: ', error);
           alert('Error fetching user data.');
         }
-      );*/
+      );
     } else {
       alert('Post form is not valid or post does not exist.');
     }

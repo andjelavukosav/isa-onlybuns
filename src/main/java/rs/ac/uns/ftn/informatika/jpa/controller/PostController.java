@@ -197,14 +197,63 @@ public class PostController {
         }
     }
 
-    @PutMapping("/")
-    public ResponseEntity<?> updatePost(@RequestParam PostDTO postRequest){
+    /*@PutMapping("/")
+    public ResponseEntity<?> updatePost(@RequestBody PostDTO postRequest){
         PostDTO updatedPost =  new PostDTO(this.postService.update(postRequest));
         if (updatedPost != null) {
             return ResponseEntity.ok(updatedPost); // Vraćamo PostDTO kao odgovor
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this post.");
         }
+    }*/
+
+    @PutMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PostDTO> updatePost(
+            @RequestParam("id") int id,
+            @RequestParam("description") String description,
+            @RequestParam(value = "likeCount", required = false, defaultValue = "0") int likeCount,
+            @RequestParam(value = "location.latitude", required = false) Double latitude,
+            @RequestParam(value = "location.longitude", required = false) Double longitude,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+            @RequestParam(value = "imagePath", required = false) String imagePath,
+            @RequestParam("creationDateTime") String creationDateTime,
+            @RequestParam("userId") int userId
+    ) throws IOException {
+
+        // Pronalazi postojeći post po ID-u
+        Post existingPost = postService.findById(id);
+        if (existingPost == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        // Ažurira polja posta
+        existingPost.setDescription(description);
+        existingPost.setLikeCount(likeCount);
+        existingPost.setCreationDateTime(LocalDateTime.parse(creationDateTime));
+
+        // Ažurira korisnika po userId
+        User user = userService.findById(userId);
+        if (user != null) {
+            existingPost.setUser(user);
+        }
+
+        // Ažurira lokaciju ako su latitude i longitude prisutni
+        if (latitude != null && longitude != null) {
+            existingPost.setLocation(new Location(latitude, longitude));
+        }
+
+        // Obrada slike ako je prisutna
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String newImagePath = saveImage(imageFile);  // Metoda za čuvanje slike na serveru
+            existingPost.setImagePath(newImagePath);
+        } else {
+            existingPost.setImagePath(imagePath);  // Postavlja imagePath ako je prosleđen
+        }
+
+        // Čuvanje ažuriranog posta
+        PostDTO updatedPostDTO = new PostDTO(postService.save(new PostDTO(existingPost)));
+        return new ResponseEntity<>(updatedPostDTO, HttpStatus.OK);
     }
+
 
 }
