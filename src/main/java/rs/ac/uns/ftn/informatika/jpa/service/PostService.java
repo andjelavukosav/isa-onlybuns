@@ -12,4 +12,6 @@ public interface PostService {
     public long getPostCountForUser(int userId);
     Post findById(int id);
     Post update(PostDTO postDTO);
-}
+    boolean delete(int postId, int userId);
+
+    }

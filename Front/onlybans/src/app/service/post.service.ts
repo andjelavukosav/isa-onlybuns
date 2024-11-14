@@ -44,5 +44,14 @@ export class PostService {
     return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/like', {});
   }
 
+  deletePost(postId: number, userId: number){
+    const url = `${environment.apiHost}/posts/${postId}?userId=${userId}`;
+    return this.http.delete(url);  
+  }
+
+  updatePost(updatedPost: Post): Observable<Post> {
+    const url = `${environment.apiHost}/posts/`;  // URL za backend
+    return this.http.put<Post>(url, updatedPost);  // Poziv PUT metode sa PostDTO objektom
+  }
 
 }

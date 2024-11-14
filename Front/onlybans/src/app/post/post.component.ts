@@ -4,6 +4,7 @@ import { PostService } from '../service/post.service';
 import { UserService } from '../service/user.service';
 import { PagedResults } from '../model/paged-result.model';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Import MatSnackBar
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-post',
@@ -114,8 +115,10 @@ export class PostComponent implements OnInit {
       this.commentText[post.id] = '';
       return;
     } 
-
-    
-    
   }
+
+  
+  
+    
+
 }

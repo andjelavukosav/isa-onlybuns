@@ -186,4 +186,25 @@ public class PostController {
 
     }
 
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable int postId, @RequestParam int userId) {
+        boolean isDeleted = postService.delete(postId, userId);
+
+        if (isDeleted) {
+            return ResponseEntity.ok().body("Post deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to delete this post.");
+        }
+    }
+
+    @PutMapping("/")
+    public ResponseEntity<?> updatePost(@RequestParam PostDTO postRequest){
+        PostDTO updatedPost =  new PostDTO(this.postService.update(postRequest));
+        if (updatedPost != null) {
+            return ResponseEntity.ok(updatedPost); // Vraćamo PostDTO kao odgovor
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this post.");
+        }
+    }
+
 }

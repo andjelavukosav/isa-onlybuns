@@ -11,5 +11,67 @@
       <p>{{ post.description }}</p>
     </div>
     
-  </div>
+    <div *ngIf="post.user?.id === currentUser?.id" style="margin-top: 15px; display: flex; gap: 10px;">
+      <button  (click)="onEdit()" style="background-color: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+        Edit
+      </button>
+      <button (click)="deletePost(post)" style="background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+        Delete
+      </button>
+    </div>
+
+    <div *ngIf="isEditing">
+      <!-- create-post.component.html -->
+    <div class="create-post-container">
+      <h2>Update Post</h2>
+
+      <form [formGroup]="postForm" (ngSubmit)="update(post)">
+          <!-- Opis posta -->
+          <div class="form-group">
+              <label for="description">Opis:</label>
+              <textarea id="description" formControlName="description" rows="4" placeholder="Unesite opis posta" required>{{ post.description }}</textarea>
+              <div *ngIf="postForm.get('description')?.invalid && postForm.get('description')?.touched" class="error-message">
+                  Opis je obavezan i ne sme biti duži od 255 karaktera.
+              </div>
+          </div>
+
+          <!-- Mapa -->
+          <div class="form-group">
+              <label for="map">Odaberite lokaciju na mapi:</label>
+              <div style="height: 300px; width: 100%;">
+                  <div leaflet [leafletOptions]="options" (leafletMapReady)="onMapReady($event)"></div>
+              </div>
+          </div>
+
+          <!-- Unos za koordinate -->
+          <div class="form-group">
+              <label for="locationLatitude">Širina (Latitude):</label>
+              <input id="locationLatitude" type="text" formControlName="locationLatitude" placeholder="Unesite širinu" [value]="post.location.latitude" readonly />
+          </div>
+
+          <div class="form-group">
+              <label for="locationLongitude">Dužina (Longitude):</label>
+              <input id="locationLongitude" type="text" formControlName="locationLongitude" placeholder="Unesite dužinu" [value]="post.location.longitude" readonly />
+          </div>
+
+          <!-- Slika -->
+          <div class="form-group">
+              <label for="image">Slika:</label>
+              <input type="file" (change)="onImageSelected($event)" />
+              <img *ngIf="previewUrl" [src]="previewUrl" alt="Preview" />
+              <div *ngIf="!selectedImage" class="error-message">
+                  Morate odabrati sliku.
+              </div>
+          </div>
+
+          <!-- Dugme za submit -->
+          <button type="submit" [disabled]="postForm.invalid || !selectedImage" class="btn-submit">Update</button>
+      </form>
+    </div>
+
+
+    </div>
+  
+  
+</div>
   

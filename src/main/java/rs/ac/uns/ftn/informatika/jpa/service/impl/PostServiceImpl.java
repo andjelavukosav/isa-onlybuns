@@ -84,5 +84,13 @@ public class PostServiceImpl implements PostService {
         return postRepository.save(post);
     }
 
+    @Override
+    public boolean delete(int postId, int userId){
+        int rowAffected = this.postRepository.deleteByIdAndUserId(postId, userId);
+        return rowAffected > 0;
+    }
+
+
+
 
 }
