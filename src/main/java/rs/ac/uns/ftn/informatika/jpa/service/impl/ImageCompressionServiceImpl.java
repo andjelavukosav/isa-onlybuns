@@ -20,7 +20,7 @@ public class ImageCompressionServiceImpl {
     }
 
     // Zakazivanje zadatka koji se pokreće svakog dana u ponoć
-    @Scheduled(cron = "0 0 0 * * ?")  // Pokreće se svakog dana u 00:00
+    @Scheduled(cron = "0 2 9 * * ?")  // Pokreće se svakog dana u 00:00
     public void compressOldImages() {
         File directory = new File("uploads/images"); // Putanja do direktorijuma sa slikama
         File[] files = directory.listFiles((dir, name) -> name.endsWith(".jpg"));
