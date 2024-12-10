@@ -4,6 +4,7 @@ import { PostService } from '../service/post.service';
 import { UserService } from '../service/user.service';
 import { PagedResults } from '../model/paged-result.model';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Import MatSnackBar
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-post',
@@ -15,6 +16,8 @@ export class PostComponent implements OnInit {
   currentUser: any;
   whoamIResponse = {};
 
+  commentText: {[key: number]: string} = {};
+
   constructor(
     private postService: PostService,
     private userService: UserService,
@@ -22,6 +25,7 @@ export class PostComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.getCurrentUser('http://localhost:8080');
     this.getPosts();
   }
 
@@ -61,11 +65,14 @@ export class PostComponent implements OnInit {
   likePost(post: Post): void {
     // Check if the user is logged in
     if (!this.currentUser) {
-      alert("You need to log in to access this feature.");
+      alert("You need to log in to access this feature." );
+      console.log('Useeeeeeeeeer', this.currentUser)
       return;
     }
+   
 
     // Increment the like count locally
+    console.log(this.currentUser)
     post.likeCount = (post.likeCount || 0) + 1;
 
     // Call the service to save the like on the backend
@@ -105,4 +112,17 @@ export class PostComponent implements OnInit {
       obj['body'] = JSON.stringify(res, null, 2);
     }
   }
+
+  addComment(post: any): void{
+    if(!this.currentUser){
+      alert('Please, login first.')
+      this.commentText[post.id] = '';
+      return;
+    } 
+  }
+
+  
+  
+    
+
 }

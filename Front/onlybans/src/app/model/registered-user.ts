@@ -4,5 +4,6 @@ export interface UserDTO {
     lastname: string;
     email: string;
     followersCount: number;
+    postsCount: number;
     username?: string;
   }  

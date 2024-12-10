@@ -1,8 +1,15 @@
 <div id="post-management" style="display: flex; flex-wrap: wrap; gap: 20px;">
-  <div *ngFor="let p of post" class="post-card" style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; width: 300px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+  <div *ngFor="let p of post"
+        class="post-card"
+        [routerLink]="['/post', p.id]"
+        style="border: 1px solid #ccc;
+        border-radius: 8px; padding: 16px; width: 300px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
     <div class="post-header">
       <strong>
-        <a [routerLink]="['/profile', p.user?.id]" style="text-decoration: none; color: #007bff;">
+        <a [routerLink]="['/profile',p.user?.id]"
+            (click)="$event.stopPropagation()"
+        style="text-decoration: none; color: #007bff;">
+        
           {{ p.usernameDisplay }}
         </a>
       </strong>
@@ -16,14 +23,23 @@
       <p>{{ p.description }}</p>
     </div>
     <div class="post-footer" style="color: #888; font-size: 0.9em;">
-      <span>Location: {{ p.location }}</span>
       <div style="margin-top: 10px;">
         <!-- Like button with click event -->
-        <button (click)="likePost(p)" style="background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+        <button (click)="likePost(p)" (click)="$event.stopPropagation()" style="background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
           Like
         </button>
         <span style="margin-left: 8px;">{{ p.likeCount || 0 }} Likes</span>
       </div>
+
+    <div class="comment-section" style="margin-top: 15px;">
+      <textarea [(ngModel)]="commentText[p.id]" (click)="$event.stopPropagation()" placeholder="Add a comment..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+      <button (click)="addComment(p)" (click)="$event.stopPropagation()" style="background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 8px;">
+        Add Comment
+      </button>
+    </div>
+
+    
+
     </div>
   </div>
 </div>

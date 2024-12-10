@@ -42,6 +42,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public PostDTO getPostById(Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+
+        return new PostDTO(post);
+    }
+
+    @Override
+    public long getPostCountForUser(int userId) {
+        return postRepository.countPostByUser(userId);
+    }
+
+    @Override
     public Post findById(int id) {
         return this.postRepository.findById(id);
     }
@@ -70,6 +83,14 @@ public class PostServiceImpl implements PostService {
         // Save the updated post to the repository
         return postRepository.save(post);
     }
+
+    @Override
+    public boolean delete(int postId, int userId){
+        int rowAffected = this.postRepository.deleteByIdAndUserId(postId, userId);
+        return rowAffected > 0;
+    }
+
+
 
 
 }
