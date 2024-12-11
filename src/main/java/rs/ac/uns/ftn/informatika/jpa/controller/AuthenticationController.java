@@ -1,5 +1,6 @@
 package rs.ac.uns.ftn.informatika.jpa.controller;
 
+import io.github.resilience4j.ratelimiter.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,9 +18,14 @@ import rs.ac.uns.ftn.informatika.jpa.exception.ResourceConflictException;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.service.EmailSenderService;
+import rs.ac.uns.ftn.informatika.jpa.service.RateLimiterService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
@@ -38,37 +44,57 @@ public class AuthenticationController {
     @Autowired
     private EmailSenderService emailService;
 
+    @Autowired
+    private RateLimiterService rateLimiterService;
+
+    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationController.class);
+
 
     @PostMapping("/login")
     public ResponseEntity<UserTokenStateDTO> createAuthenticationToken(
-            @RequestBody JwtAuthenticationRequestDTO authenticationRequest, HttpServletResponse response) {
+            @RequestBody JwtAuthenticationRequestDTO authenticationRequest,
+            HttpServletRequest request) {
 
-        // Authenticate using email and password
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(), authenticationRequest.getPassword())
-        );
+        String ipAddress = request.getRemoteAddr();
+        RateLimiter rateLimiter = rateLimiterService.getRateLimiter(ipAddress);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            return RateLimiter.decorateCheckedSupplier(rateLimiter, () -> {
+                // Logika autentifikacije
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                authenticationRequest.getEmail(),
+                                authenticationRequest.getPassword()
+                        )
+                );
 
-        // Obtain the user object from the authentication
-        User user = (User) authentication.getPrincipal();
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Check if the user is enabled (i.e., account is verified)
-        if (!user.isEnabled()) {
-            // If user is not enabled, return a forbidden response
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new UserTokenStateDTO("Account not verified. Please check your email for activation link.", 0));
+                User user = (User) authentication.getPrincipal();
+
+                if (!user.isEnabled()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(new UserTokenStateDTO("Account not verified. Please check your email for activation link.", 0));
+                }
+
+                String jwt = tokenUtils.generateToken(user.getEmail());
+                int expiresIn = tokenUtils.getExpiredIn();
+
+                return ResponseEntity.ok(new UserTokenStateDTO(jwt, expiresIn));
+            }).apply(); // Koristimo apply() za rukovanje CheckedSupplier
+        } catch (Throwable throwable) {
+            // Rukovanje izuzetkom
+            if (throwable instanceof RequestNotPermitted) {
+                // Logovanje kada je premašeno ograničenje
+                LOG.warn("Too many login attempts from IP: {}", ipAddress);
+                System.out.println("Too many login attempts from IP: " + ipAddress); // Ispis u konzolu
+
+                return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                        .body(new UserTokenStateDTO("Too many login attempts. Please try again later.", 0));
+            }
+            throw new RuntimeException(throwable); // Ili prilagodite rukovanje
         }
-
-        // Generate the JWT using the user's email
-        String jwt = tokenUtils.generateToken(user.getEmail());
-        int expiresIn = tokenUtils.getExpiredIn();
-
-        return ResponseEntity.ok(new UserTokenStateDTO(jwt, expiresIn));
     }
-
-
-
 
     @PostMapping("/signup")
     public ResponseEntity<String> addUser(@RequestBody UserDTO userRequest) {

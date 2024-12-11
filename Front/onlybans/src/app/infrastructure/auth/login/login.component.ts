@@ -75,43 +75,53 @@ export class LoginComponent implements OnInit {
   }
 */
 
-  onSubmit() {
-    this.notification;
-    this.submitted = true;
-  
-    this.authService.login(this.form.value)
-      .subscribe({
-        next: (data) => {
-          console.log(data); // Ovo je odgovor sa tokenom
-  
-          this.userService.getMyInfo().subscribe((userInfo) => {
-            console.log(userInfo); 
-  
-            // Izvlačenje uloge korisnika
-            const userRole = userInfo.roles[0]?.name; 
-            
-            // Preusmeravanje na odgovarajuću stranicu u zavisnosti od uloge
-            if (userRole === 'ROLE_USER') {
-              this.router.navigate(['/user-home']);
-            } 
-            /*else if (userRole === 'ROLE_ADMIN') {
-              this.router.navigate(['/admin-home']);
-            }*/
-               else {
-              console.error('Nepoznata uloga:', userRole);
-              this.router.navigate(['/home']);
-            }
-          });
-        },
-        error: (error) => {
-          console.error(error);
-          this.submitted = false;
-          this.notification = {
-            msgType: 'error',
-            msgBody: 'Incorrect email or password.',
-          };
+onSubmit() {
+  this.notification;
+  this.submitted = true;
+
+  this.authService.login(this.form.value).subscribe({
+    next: (data) => {
+      console.log(data); // Odgovor sa tokenom
+
+      this.userService.getMyInfo().subscribe((userInfo) => {
+        console.log(userInfo);
+
+        // Izvlačenje uloge korisnika
+        const userRole = userInfo.roles[0]?.name;
+
+        // Preusmeravanje na odgovarajuću stranicu u zavisnosti od uloge
+        if (userRole === 'ROLE_USER') {
+          this.router.navigate(['/user-home']);
+        } 
+        /* else if (userRole === 'ROLE_ADMIN') {
+          this.router.navigate(['/admin-home']);
+        } */
+        else {
+          console.error('Unknown role:', userRole);
+          this.router.navigate(['/home']);
         }
       });
-  }
+    },
+    error: (error) => {
+      console.error(error);
+      this.submitted = false;
+
+      if (error.status === 429) {
+        // Ograničenje premašeno
+        this.notification = {
+          msgType: 'error',
+          msgBody: 'You have exceeded the allowed number of login attempts. Please try again later.',
+        };
+      } else {
+        // Ostale greške
+        this.notification = {
+          msgType: 'error',
+          msgBody: 'Incorrect email or password.',
+        };
+      }
+    },
+  });
+}
+
   
 }
