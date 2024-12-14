@@ -2,6 +2,7 @@ package rs.ac.uns.ftn.informatika.jpa.controller;
 
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import rs.ac.uns.ftn.informatika.jpa.dto.JwtAuthenticationRequestDTO;
@@ -27,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -97,27 +101,36 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ResponseEntity<String> addUser(@RequestBody UserDTO userRequest) {
-        User existUser = this.userService.findByEmail(userRequest.getEmail());
-
-        if (existUser != null) {
-            // Return a response with a conflict message if the email already exists
-            return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
-        }
-
-        // Continue with saving the new user if email doesn't exist
-        userRequest.setEnabled(false);
-        User user = this.userService.save(userRequest);
-
-        String activationLink = "http://localhost:8080/auth/verify?email=" + user.getEmail();
-
         try {
-            emailService.sendVerificationEmail(userRequest,activationLink);
-        }catch (Exception e){
+
+            // Zaključaj i proveri postojanje korisničkog imena
+            userService.findByUsernameWithLock(userRequest.getUsername())
+                    .ifPresent(user -> {
+                        throw new IllegalArgumentException("Username already exists");
+                    });
+
+            // Proveri postojanje korisnika po email-u
+            User existUser = this.userService.findByEmail(userRequest.getEmail());
+            if (existUser != null) {
+                return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
+            }
+
+            // Kreiraj novog korisnika
+            userRequest.setEnabled(false);
+            User user = this.userService.save(userRequest);
+
+            // Generiši i pošalji email za aktivaciju
+            String activationLink = "http://localhost:8080/auth/verify?email=" + user.getEmail();
+            emailService.sendVerificationEmail(userRequest, activationLink);
+
+            return new ResponseEntity<>("User created successfully", HttpStatus.CREATED);
+        } catch (PessimisticLockingFailureException ex) {
+            return new ResponseEntity<>("Concurrent access error", HttpStatus.CONFLICT);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new ResponseEntity<>("User created successfully", HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/verify")

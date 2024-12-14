@@ -3,10 +3,12 @@ package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import rs.ac.uns.ftn.informatika.jpa.dto.AddressDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
@@ -20,6 +22,7 @@ import rs.ac.uns.ftn.informatika.jpa.service.RoleService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +43,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUserName(username);
+    }
+
+    @Override
+    public Optional<User> findByUsernameWithLock(String username){
+        return  userRepository.findByUsernameWithLock(username);
     }
 
     @Override
@@ -57,7 +65,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User save(UserDTO userRequest) {
+        userRepository.findByUsernameWithLock(userRequest.getUsername())
+                .ifPresent(user -> {
+                    throw new IllegalArgumentException("Username already exists");
+                });
+
         // Create a new User entity
         User u = new User();
         u.setUsername(userRequest.getUsername());
