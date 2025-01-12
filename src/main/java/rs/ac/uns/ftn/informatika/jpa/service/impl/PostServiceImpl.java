@@ -90,7 +90,10 @@ public class PostServiceImpl implements PostService {
         return rowAffected > 0;
     }
 
-
+    @Override
+    public List<Post> findByUserId(int userId) throws AccessDeniedException {
+        return postRepository.findByUserId(userId);
+    }
 
 
 }

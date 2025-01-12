@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 
 @RestController
 @RequestMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -97,11 +98,17 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
+    @Transactional
     public ResponseEntity<String> addUser(@RequestBody UserDTO userRequest) {
-        User existUser = this.userService.findByEmail(userRequest.getEmail());
+        User existUser = this.userService.findByEmail(userRequest.getUsername());
 
         if (existUser != null) {
             // Return a response with a conflict message if the email already exists
+            return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
+        }
+
+        User existEmailUser = this.userService.findByEmail(userRequest.getEmail());
+        if (existEmailUser != null) {
             return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
         }
 

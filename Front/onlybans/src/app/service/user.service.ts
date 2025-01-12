@@ -70,4 +70,12 @@ export class UserService {
     return this.http.get<number>(environment.apiHost + `/posts/user/${userId}/count`);
   }
 
+  updatePassword(userId: number, newPassword: string): Observable<any> {
+    return this.http.put(
+        `${environment.apiHost}/users/update-password/${userId}`,
+        newPassword,
+        { responseType: 'text' } // Jasno naznačite da očekujete plain text odgovor
+    );
+  }
+
 }

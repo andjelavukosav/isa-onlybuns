@@ -39,6 +39,10 @@ export class PostService {
     return this.http.get<Post>(`${environment.apiHost}/posts/${id}`);
   }
 
+  getPostsByUserId(userId: number):Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/posts/user/${userId}`);
+  }
+
 
   likePost(postId: number): Observable<any> {
     return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/like', {});

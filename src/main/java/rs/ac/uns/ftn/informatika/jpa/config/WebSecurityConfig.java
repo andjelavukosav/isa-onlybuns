@@ -74,6 +74,7 @@ public class WebSecurityConfig {
                 .antMatchers("/api/posts/{postId}").permitAll()
                 .antMatchers("/api/users/{userId}").permitAll()
                 .antMatchers("/images/**").permitAll()
+                .antMatchers("/api/posts/user/{userId}").permitAll() // Dodato: omogućava pristup /api/posts/user/{userId} bez autentifikacije
                 .anyRequest().authenticated().and()
                 .cors().and()
 

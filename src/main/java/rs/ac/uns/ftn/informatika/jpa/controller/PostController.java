@@ -162,6 +162,29 @@ public class PostController {
         return ResponseEntity.ok(postDTO);
     }
 
+    @Operation(description = "Get posts by user ID", method = "GET")
+    @GetMapping(value = "/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PagedResults<PostDTO>> getPostsByUserId(@PathVariable int userId) {
+        // Fetch all posts for the given user ID
+        List<Post> userPosts = postService.findByUserId(userId);
+
+        // Sort the posts by creationDateTime in descending order (newest first)
+        userPosts.sort((p1, p2) -> p2.getCreationDateTime().compareTo(p1.getCreationDateTime()));
+
+        // Map posts to PostDTO
+        List<PostDTO> postsDTO = userPosts.stream()
+                .map(PostDTO::new)
+                .collect(Collectors.toList());
+
+        // Create paged results
+        PagedResults<PostDTO> pagedResults = new PagedResults<>();
+        pagedResults.setResults(postsDTO);
+        pagedResults.setTotalCount(userPosts.size());
+
+        return new ResponseEntity<>(pagedResults, HttpStatus.OK);
+    }
+
+
     @GetMapping("/user/{userId}/count")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Long> getPostCountForUser(@PathVariable int userId) {

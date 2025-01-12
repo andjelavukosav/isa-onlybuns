@@ -1,11 +1,87 @@
 <div *ngIf="user">
-    <h1>{{ user.username }}'s Profile</h1>
-    <p><strong>Username:</strong> {{ user.username }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <!-- Add any other user information you want to display -->
+  <h1>{{ user.username }}'s Profile</h1>
+  
+  <!-- Displaying First Name and Last Name -->
+  <p><strong>Name:</strong> {{ user.firstname }} {{ user.lastname }}</p>
+  
+  <!-- Displaying Email - Read-only -->
+  <p *ngIf="userId === currentUserId"><strong>Email:</strong> {{ user.email }}</p>
+  
+  <!-- Password section with double input for changing password, only if current user -->
+  <div *ngIf="userId === currentUserId">
+    <strong>Change Password:</strong>
+    <div>
+      <input
+        type="password"
+        [(ngModel)]="newPassword"
+        placeholder="Enter new password"
+      />
+      <input
+        type="password"
+        [(ngModel)]="confirmPassword"
+        placeholder="Confirm new password"
+      />
+    </div>
+    <button
+      (click)="updatePassword()"
+      [disabled]="newPassword !== confirmPassword || !newPassword"
+    >
+      Update Password
+    </button>
   </div>
   
-  <div *ngIf="!user">
-    <p>Loading user data...</p>
+  <!-- Displaying Address -->
+  <p>
+    <strong>Address:</strong>
+    {{ user.address.street }} {{ user.address.streetNumber }},
+    {{ user.address.city }}, {{ user.address.country }}
+  </p>
+
+  <!-- Displaying Number of Followers -->
+  <p><strong>Followers:</strong> {{ user.followersCount }}</p>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+    <div *ngFor="let p of posts"
+          class="post-card"
+          [routerLink]="['/post', p.id]"
+          style="border: 1px solid #ccc;
+          border-radius: 8px; padding: 16px; width: 300px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+      <div class="post-header">
+        <strong>
+          <a [routerLink]="['/profile',p.user?.id]"
+              (click)="$event.stopPropagation()"
+          style="text-decoration: none; color: #007bff;">
+          
+            {{ p.usernameDisplay }}
+          </a>
+        </strong>
+        <span style="float: right; color: #888;">{{ p.creationDateTime | date:'short' }}</span>
+      </div>
+      <div class="post-image" style="text-align: center; margin: 16px 0;">
+        <img *ngIf="p.imagePath" [src]="p.imagePath" alt="Post Image" style="max-width: 100%; border-radius: 8px;">
+      </div>
+      
+      <div class="post-content">
+        <p>{{ p.description }}</p>
+      </div>
+      <div class="post-footer" style="color: #888; font-size: 0.9em;">
+        <div style="margin-top: 10px;">
+          <!-- Like button with click event -->
+          
+          <span style="margin-left: 8px;">{{ p.likeCount || 0 }} Likes</span>
+        </div>
+
+      </div>
+  
+      
+  
+    </div>
   </div>
   
+
+</div>
+
+<!-- Loading message when user data is not available -->
+<div *ngIf="!user">
+  <p>Loading user data...</p>
+</div>

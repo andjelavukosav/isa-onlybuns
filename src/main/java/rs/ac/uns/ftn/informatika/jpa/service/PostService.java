@@ -13,5 +13,6 @@ public interface PostService {
     Post findById(int id);
     Post update(PostDTO postDTO);
     boolean delete(int postId, int userId);
+    List<Post> findByUserId(int userId);
 
     }

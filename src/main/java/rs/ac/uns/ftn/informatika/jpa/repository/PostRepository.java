@@ -22,4 +22,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Transactional
     @Query("DELETE FROM Post p WHERE p.id = :postId AND p.user.id = :userId")
     int deleteByIdAndUserId(@Param("postId") int postId, @Param("userId") int userId);
+
+    @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
+    List<Post> findByUserId(@Param("userId") int userId);
+
 }

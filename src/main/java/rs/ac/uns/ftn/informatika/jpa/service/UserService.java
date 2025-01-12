@@ -18,4 +18,5 @@ public interface UserService {
     List<Post> getAllPostsByUser(int userId);
     List<UserDTO> findUsersByRoleExcludingAdmin(int adminId);
     List<UserDTO> searchUsers(String firstName, String lastName, String email, Long minPosts, Long maxPosts, int adminId, Sort sort);
+    void updateUserPassword(int userId, String newPassword) throws Exception;
 }

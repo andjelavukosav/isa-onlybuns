@@ -19,6 +19,9 @@ import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.RoleService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,10 +36,15 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleService roleService;
+
     @Autowired
     private AddressRepository addressRepository;
+
     @Autowired
     private UserDTOMapper userDTOMapper;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
@@ -56,8 +64,16 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
+    @Transactional
     @Override
     public User save(UserDTO userRequest) {
+
+        // Proverite da li korisničko ime već postoji uz zaključavanje
+        entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username")
+                .setParameter("username", userRequest.getUsername())
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .getResultList();
+
         // Create a new User entity
         User u = new User();
         u.setUsername(userRequest.getUsername());
@@ -173,5 +189,18 @@ public class UserServiceImpl implements UserService {
     public List<UserDTO> searchUsers(String firstName, String lastName, String email, Long minPosts, Long maxPosts, int adminId, Sort sort) {
         return UserDTOMapper.toUserDTOList(userRepository.searchUserBy(firstName, lastName, email, minPosts, maxPosts, adminId, sort));
     }
+
+    @Override
+    public void updateUserPassword(int userId, String newPassword) throws Exception {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception("User not found."));
+
+        // Hashujte novu lozinku
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(hashedPassword);
+
+        userRepository.save(user);
+    }
+
 
 }
