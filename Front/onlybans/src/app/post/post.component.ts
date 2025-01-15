@@ -21,9 +21,9 @@ export class PostComponent implements OnInit {
   constructor(
     private postService: PostService,
     private userService: UserService,
-    private snackBar: MatSnackBar // Inject MatSnackBar
+    private snackBar: MatSnackBar,
   ) {}
-
+  
   ngOnInit(): void {
     this.getCurrentUser('http://localhost:8080');
     this.getPosts();
@@ -32,28 +32,58 @@ export class PostComponent implements OnInit {
   getPosts(): void {
     this.postService.getPosts().subscribe({
       next: (result: PagedResults<Post>) => {
+        // Sortiranje postova po datumu kreiranja (od najnovijeg ka najstarijem)
         const sortedPosts = result.results.sort((a, b) => {
           const dateA = new Date(a.creationDateTime);
           const dateB = new Date(b.creationDateTime);
           return dateB.getTime() - dateA.getTime();
         });
-
+  
+        // Obrada svakog posta
         sortedPosts.forEach(post => {
+          // Dohvatanje korisničkog imena autora posta
           this.userService.getUserById(post.user?.id || 0).subscribe({
             next: (user) => {
               post.usernameDisplay = user.username;
-              
+  
               if (post.imagePath) {
-                console.log('Image path: ', post.imagePath)
+                console.log('Image path: ', post.imagePath);
               }
-            
             },
             error: () => {
               console.error(`Failed to load user for post ID ${post.id}`);
             }
           });
-        });
 
+          this.postService.getLikesByPostId(post.id).subscribe({
+            next: (likeCount: number) => {
+              post.likeCount = likeCount; // Setovanje broja lajkova
+            },
+            error: () => {
+              console.error(`Failed to check like count for post ID ${post.id}`);
+            }
+          });
+  
+          // Provera da li je trenutni korisnik lajkovao post
+          if (this.currentUser) {
+            this.postService.getLikeByPostIdAndUserId(post.id, this.currentUser.id).subscribe({
+              next: (isLiked: boolean) => {
+                console.log(`Post ${post.id} - Server like status: ${isLiked}`);
+                post.isLikedByCurrentUser = isLiked;
+              },
+              error: () => {
+                console.error(`Failed to check like for post ID ${post.id}`);
+              }
+            });
+            
+            
+          } else {
+            // Ako korisnik nije prijavljen, postavite `isLikedByCurrentUser` na false
+            post.isLikedByCurrentUser = false;
+          }
+        });
+  
+        // Postavljanje sortirane liste postova
         this.post = sortedPosts;
       },
       error: () => {
@@ -61,30 +91,39 @@ export class PostComponent implements OnInit {
       }
     });
   }
-
+  
   likePost(post: Post): void {
-    // Check if the user is logged in
     if (!this.currentUser) {
-      alert("You need to log in to access this feature." );
-      console.log('Useeeeeeeeeer', this.currentUser)
+      alert("You need to log in to access this feature.");
       return;
     }
-   
-
-    // Increment the like count locally
-    console.log(this.currentUser)
-    post.likeCount = (post.likeCount || 0) + 1;
-
-    // Call the service to save the like on the backend
-    this.postService.likePost(post.id).subscribe({
+  
+    if (post.isLikedByCurrentUser) {
+      this.snackBar.open("You have already liked this post.", "Close", {
+        duration: 3000,
+      });
+      return;
+    }
+  
+    console.log(`Before liking: isLikedByCurrentUser=${post.isLikedByCurrentUser}, likeCount=${post.likeCount}`);
+  
+    post.isLikedByCurrentUser = true;  
+    console.log(`After liking (local): isLikedByCurrentUser=${post.isLikedByCurrentUser}, likeCount=${post.likeCount}`);
+  
+    this.postService.likePost(post.id, this.currentUser.id).subscribe({
       next: () => {
-        console.log(`Post ${post.id} liked successfully.`);
+        console.log(`Post ${post.id} liked successfully on server.`);
+        post.isLikedByCurrentUser = true;  // Označite kao lajkovano
+        post.likeCount = (post.likeCount || 0) + 1; // Povećajte broj lajkova
       },
-      error: () => {
-        console.error(`Failed to like post ${post.id}.`);
-      }
+      error: (err) => {
+        console.error(`Failed to like post ${post.id} on server.`, err);
+        // Nemojte vraćati status lajkova na početnu vrednost
+      },
     });
+    
   }
+  
 
   getCurrentUser(path: any): void {
     this.userService.getMyInfo()

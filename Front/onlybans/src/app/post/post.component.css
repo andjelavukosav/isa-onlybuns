@@ -60,5 +60,34 @@
     object-fit: cover;
     border-radius: 8px;
   }
+
+  /* Stil kada post nije lajkovan */
+button {
+  background-color: transparent; /* Bez boje pozadine */
+  color: #007bff; /* Plava boja za tekst */
+  border: 1px solid #007bff; /* Plava ivica */
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.liked {
+  background-color: #007bff; /* Plava pozadina kada je lajkovano */
+  color: white; /* Bele boje teksta */
+  font-weight: bold;
+  border: 1px solid #0056b3; /* Tamnija plava ivica */
+}
+
+/* Stil za hover efekat */
+button:hover {
+  background-color: #e6f0ff; /* Svetlo plava pozadina pri hoveru */
+  border-color: #0056b3; /* Tamnija plava ivica pri hoveru */
+}
+.liked {
+  background-color: #28a745; /* Zelena boja za "Liked" */
+  color: white;
+}
+
+  
   
   

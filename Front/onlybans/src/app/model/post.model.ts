@@ -10,6 +10,7 @@ export interface Post {
     usernameDisplay?: string;
     user?: UserDTO;
     likeCount?: number;
+    isLikedByCurrentUser?: boolean; 
   }
 
 

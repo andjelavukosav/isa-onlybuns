@@ -1,0 +1,14 @@
+package rs.ac.uns.ftn.informatika.jpa.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import rs.ac.uns.ftn.informatika.jpa.model.Like;
+
+import java.util.List;
+
+public interface LikeRepository extends JpaRepository<Like, Integer> {
+    Like save(Like like);
+    @Query("SELECT l FROM Like l WHERE l.post.id = :postId AND l.user.id = :userId")
+    Like findLikeByPostIdAndUserId(Integer postId, Integer userId);
+    List<Like> findLikesByPostId(Integer postId);
+}

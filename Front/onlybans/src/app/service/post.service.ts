@@ -44,9 +44,19 @@ export class PostService {
   }
 
 
-  likePost(postId: number): Observable<any> {
-    return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/like', {});
+  likePost(postId: number, userId: number): Observable<any> {
+    return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/likes/' + userId , {});
   }
+
+  getLikeByPostIdAndUserId(postId: number, userId: number): Observable<boolean> {
+    return this.http.get<boolean>(`http://localhost:8080/api/likes/${postId}/${userId}`);
+  }
+
+  getLikesByPostId(postId: number): Observable<number> {
+    return this.http.get<number>(`http://localhost:8080/api/likes/countLikes/${postId}`);
+  }
+  
+  
 
   deletePost(postId: number, userId: number){
     const url = `${environment.apiHost}/posts/${postId}?userId=${userId}`;

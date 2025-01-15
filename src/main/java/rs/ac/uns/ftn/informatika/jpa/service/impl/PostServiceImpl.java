@@ -37,7 +37,6 @@ public class PostServiceImpl implements PostService {
         post.setLocation(new Location(postRequest.location));
         post.setImagePath(postRequest.imagePath);
         post.setUser(UserDTOMapper.fromDTOtoUser(postRequest.getUser()));
-        post.setLikeCount(postRequest.likeCount);
         return this.postRepository.save(post);
     }
 
@@ -71,9 +70,6 @@ public class PostServiceImpl implements PostService {
         post.setImagePath(postRequest.imagePath);
         post.setCreationDateTime(postRequest.creationDateTime);
         // Only update the like count if explicitly specified (you may wish to exclude this for update consistency)
-
-        post.setLikeCount(postRequest.likeCount);
-
 
         // Update the user if needed (optional, based on requirements)
         if (postRequest.getUser() != null) {

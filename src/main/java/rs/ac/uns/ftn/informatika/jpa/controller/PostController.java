@@ -12,11 +12,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
+import rs.ac.uns.ftn.informatika.jpa.model.Like;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResult.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
+import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
@@ -41,6 +43,9 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private LikeService likeService;
 
     @Autowired
     private UserService userService;
@@ -110,7 +115,6 @@ public class PostController {
         Post post = new Post();
         post.setUser(user); // Postavljanje korisnika
         post.setDescription(description);
-        post.setLikeCount(0);
         // Postavljanje lokacije ako je prisutna
         if (latitude != null && longitude != null) {
             post.setLocation(new Location(latitude, longitude));
@@ -191,16 +195,20 @@ public class PostController {
         Long count = postService.getPostCountForUser(userId);
         return ResponseEntity.ok(count);
     }
-    @PostMapping("/{postId}/like")
+
+    @PostMapping("/{postId}/likes/{userId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> likePost(@PathVariable int postId) {
+    public ResponseEntity<?> likePost(@PathVariable int postId, @PathVariable int userId) {
        try {
-            Post post = postService.findById(postId);
-            post.setLikeCount(post.getLikeCount() + 1);
-            PostDTO postDTO = new PostDTO(post);
+            Like like = new Like();
+            like.setCreationDateTime(LocalDateTime.now());
+            like.setPost(postService.findById(postId));
+            like.setUser(userService.findById(userId));
+            this.likeService.save(like);
+            PostDTO postDTO = new PostDTO(postService.findById(postId));
             postDTO.id = postId;
             postService.update(postDTO);
-            return ResponseEntity.ok("Post liked successfully");
+            return ResponseEntity.ok().build();
         } catch (ConfigDataResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
@@ -251,7 +259,6 @@ public class PostController {
 
         // Ažurira polja posta
         existingPost.setDescription(description);
-        existingPost.setLikeCount(likeCount);
         existingPost.setCreationDateTime(LocalDateTime.parse(creationDateTime));
 
         // Ažurira korisnika po userId

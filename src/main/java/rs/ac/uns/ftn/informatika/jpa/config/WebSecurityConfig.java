@@ -73,6 +73,8 @@ public class WebSecurityConfig {
                 .antMatchers("/api/posts/all").permitAll()
                 .antMatchers("/api/posts/{postId}").permitAll()
                 .antMatchers("/api/users/{userId}").permitAll()
+                .antMatchers("/api/likes/countLikes/{postId}").permitAll()
+                .antMatchers("/api/likes/{postId}/{userId}").permitAll()
                 .antMatchers("/images/**").permitAll()
                 .antMatchers("/api/posts/user/{userId}").permitAll() // Dodato: omogućava pristup /api/posts/user/{userId} bez autentifikacije
                 .anyRequest().authenticated().and()
