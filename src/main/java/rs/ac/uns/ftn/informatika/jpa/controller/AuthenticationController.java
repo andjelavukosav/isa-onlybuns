@@ -24,6 +24,8 @@ import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -99,33 +101,40 @@ public class AuthenticationController {
 
     @PostMapping("/signup")
     @Transactional
-    public ResponseEntity<String> addUser(@RequestBody UserDTO userRequest) {
+    public ResponseEntity<Map<String, String>> addUser(@RequestBody UserDTO userRequest) {
         User existUser = this.userService.findByEmail(userRequest.getUsername());
 
         if (existUser != null) {
-            // Return a response with a conflict message if the email already exists
-            return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Username already exists");
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         }
 
         User existEmailUser = this.userService.findByEmail(userRequest.getEmail());
         if (existEmailUser != null) {
-            return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Email already exists");
+            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         }
 
-        // Continue with saving the new user if email doesn't exist
+        // Nastavi sa čuvanjem korisnika ako email ne postoji
         userRequest.setEnabled(false);
         User user = this.userService.save(userRequest);
 
         String activationLink = "http://localhost:8080/auth/verify?email=" + user.getEmail();
-
         try {
-            emailService.sendVerificationEmail(userRequest,activationLink);
-        }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            emailService.sendVerificationEmail(userRequest, activationLink);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to send verification email");
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>("User created successfully", HttpStatus.CREATED);
+        Map<String, String> successResponse = new HashMap<>();
+        successResponse.put("message", "User created successfully");
+        return new ResponseEntity<>(successResponse, HttpStatus.CREATED);
     }
+
 
     @GetMapping(value = "/verify")
     public ResponseEntity<String> verifyUser(@RequestParam("email") String email) {
