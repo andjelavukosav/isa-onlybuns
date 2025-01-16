@@ -65,7 +65,13 @@ export class UserService {
   getUserById(userId: number): Observable<UserDTO> {
     return this.http.get<UserDTO>(environment.apiHost + `/users/${userId}`);
   }
-
+  
+  updateUserData(userId: number, updatedUser: UserDTO) {
+    return this.http.put(environment.apiHost + `/users/update/${userId}`,updatedUser, {
+      responseType: 'text'  // Očekuje se tekstualni odgovor umesto JSON
+    });
+  }
+  
   getUserPostCount(userId: number): Observable<number> {
     return this.http.get<number>(environment.apiHost + `/posts/user/${userId}/count`);
   }

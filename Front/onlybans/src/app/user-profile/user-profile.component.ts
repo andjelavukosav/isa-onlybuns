@@ -21,7 +21,26 @@ export class UserProfileComponent implements OnInit {
   currentUserId: number | null = null;
   whoamIResponse = {};
   activeTab: string = 'posts'; // Kontrolni mehanizam za prikaz sadržaja (podrazumevano: Objave)
+  editingName = false;
+  editingLastName = false;
+  editingAddress = false;
 
+  editableUser: UserDTO = {
+    id: 0,
+    username: '',
+    email: '',
+    followersCount: 0,
+    firstname: '',
+    lastname: '',
+    postsCount: 0, // Dodato svojstvo
+    address: {
+      street: '',
+      streetNumber: '',
+      city: '',
+      country: ''
+    },
+    // Dodaj ostala svojstva iz UserDTO modela prema potrebi
+  };
   constructor(
     private route: ActivatedRoute,
     private userService: UserService,
@@ -35,6 +54,10 @@ export class UserProfileComponent implements OnInit {
     if (this.userId) {
       this.loadUser();
     }
+    if (this.user) {
+    this.editableUser = { ...this.user };
+  }
+    
     this.getPosts();
     this.getFriends(); // Učitavanje prijatelja
   }
@@ -44,6 +67,15 @@ export class UserProfileComponent implements OnInit {
     this.userService.getUserById(this.userId!).subscribe({
       next: (user) => {
         this.user = user;
+        this.editableUser = {
+          ...user,
+          address: user.address || {
+            street: '',
+            streetNumber: '',
+            city: '',
+            country: ''
+          }
+        };
       },
       error: (err) => console.error(`Failed to load user with ID ${this.userId}`, err)
     });
@@ -154,4 +186,60 @@ export class UserProfileComponent implements OnInit {
     }
   }
 
+  editField(field: string) {
+    if (field === 'firstname') this.editingName = true;
+    if (field === 'lastname') this.editingLastName = true;
+    if (field === 'address') this.editingAddress = true;
+  }
+  
+  cancelEdit(field: string): void {
+    // Isključivanje edit moda za polje koje se otkazuje
+    if (field === 'firstname') this.editingName = false;
+    if (field === 'lastname') this.editingLastName = false;
+    if (field === 'address') this.editingAddress = false;
+  
+    // Resetovanje editableUser na originalne vrednosti iz user objekta
+    this.editableUser = { 
+      id: this.user?.id || 0,
+      username: this.user?.username || '',
+      email: this.user?.email || '',
+      followersCount: this.user?.followersCount || 0,
+      postsCount: this.user?.postsCount || 0,
+      firstname: this.user?.firstname || '',
+      lastname: this.user?.lastname || '',
+      address: this.user?.address ? { 
+        street: this.user.address.street || '',
+        streetNumber: this.user.address.streetNumber || '',
+        city: this.user.address.city || '',
+        country: this.user.address.country || ''
+      } : {
+        street: '',
+        streetNumber: '',
+        city: '',
+        country: ''
+      }
+    };
+    this.loadUser();
+  }
+  
+  
+  
+  saveField(field: string) {
+    // Ažuriranje korisnika na serveru
+    this.userService.updateUserData(this.userId || 0, this.editableUser).subscribe({
+      next: (response: string) => {
+        console.log(response); // Očekivani tekstualni odgovor
+        alert('Updated successfully!');
+        this.cancelEdit(field); // Zatvaranje edit moda
+      },
+      error: (error) => {
+        console.error('Error saving user data', error);
+        alert('Greška pri čuvanju podataka');
+      }
+    });
+    
+  }
+  
+
 }
+

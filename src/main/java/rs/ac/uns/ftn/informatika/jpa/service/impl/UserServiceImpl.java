@@ -126,12 +126,11 @@ public class UserServiceImpl implements UserService {
 
     public User updateUser(int id, UserDTO userRequest) throws AccessDeniedException {
         // Find the user by ID
-        User existingUser = userRepository.findById(id).orElseThrow(() -> new AccessDeniedException("User not found"));
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new AccessDeniedException("User not found"));
 
         // Update the user fields
         existingUser.setUsername(userRequest.getUsername());
-
-
 
         // Update user details
         existingUser.setPassword(userRequest.getPassword());
@@ -140,35 +139,29 @@ public class UserServiceImpl implements UserService {
         existingUser.setEnabled(userRequest.isEnabled());
         existingUser.setEmail(userRequest.getEmail());
 
-        // Update roles if necessary
-        // If roles need to be updated, we can add logic to handle that. For simplicity, we retain the same role.
-        // List<Role> roles = roleService.findByName("ROLE_USER");
-        // existingUser.setRoles(roles);
 
-        // Handle address
-        if (userRequest.getAddress() != null) {
-            AddressDTO addressDTO = userRequest.getAddress();
+        // Update address if provided in the request
+        if (existingUser.getAddress() != null) {
+
+            //adresa korisnika koji se treba updatovat
             Address address = addressRepository.findByCountryAndCityAndStreetAndStreetNumber(
-                    addressDTO.getCountry(),
-                    addressDTO.getCity(),
-                    addressDTO.getStreet(),
-                    addressDTO.getStreetNumber()
+                    existingUser.getAddress().getCountry(),
+                    existingUser.getAddress().getCity(),
+                    existingUser.getAddress().getStreet(),
+                    existingUser.getAddress().getStreetNumber()
             );
+            // If the address exists, update it with the new details (optional if you want to allow changes)
+            address.setCountry(userRequest.getAddress().getCountry());
+            address.setCity(userRequest.getAddress().getCity());
+            address.setStreet(userRequest.getAddress().getStreet());
+            address.setStreetNumber(userRequest.getAddress().getStreetNumber());
+            addressRepository.save(address); // Save the updated address
 
-            // If address doesn't exist, create a new one
-            if (address == null) {
-                address = new Address();
-                address.setCountry(addressDTO.getCountry());
-                address.setCity(addressDTO.getCity());
-                address.setStreet(addressDTO.getStreet());
-                address.setStreetNumber(addressDTO.getStreetNumber());
-                addressRepository.save(address); // Save new address
-            }
-
-            // Update the user's address
+            // Set the user's address to the existing or newly created address
             existingUser.setAddress(address);
-        }
 
+        }
+        
         // Save the updated user and return the saved entity
         return userRepository.save(existingUser);
     }
