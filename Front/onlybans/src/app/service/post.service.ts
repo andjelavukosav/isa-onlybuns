@@ -56,6 +56,9 @@ export class PostService {
     return this.http.get<number>(`http://localhost:8080/api/likes/countLikes/${postId}`);
   }
   
+  unlikePost(postId: number, userId: number): Observable<void> {
+    return this.http.delete<void>(`http://localhost:8080/api/likes/unlike/${postId}/${userId}`);
+  }
   
 
   deletePost(postId: number, userId: number){

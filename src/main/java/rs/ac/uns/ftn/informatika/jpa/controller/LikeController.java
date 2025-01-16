@@ -39,5 +39,19 @@ public class LikeController {
         }
     }
 
+    @DeleteMapping("/unlike/{postId}/{userId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> deleteLike(@PathVariable int postId, @PathVariable int userId) {
+        boolean isDeleted = likeService.delete(postId, userId);
+
+        if (isDeleted) {
+            return ResponseEntity.noContent().build(); // Uspešno brisanje (204 No Content)
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Like not found or user not authorized to delete this like."); // Greška (404 Not Found)
+        }
+    }
+
+
 
 }

@@ -99,30 +99,32 @@ export class PostComponent implements OnInit {
     }
   
     if (post.isLikedByCurrentUser) {
-      this.snackBar.open("You have already liked this post.", "Close", {
-        duration: 3000,
+      // Ako je već lajkovan, uklonite lajk
+      this.postService.unlikePost(post.id, this.currentUser.id).subscribe({
+        next: () => {
+          console.log(`Post ${post.id} unliked successfully on server.`);
+          post.isLikedByCurrentUser = false; // Obeležite kao nelajkovano
+          post.likeCount = (post.likeCount || 1) - 1; // Smanjite broj lajkova
+        },
+        error: (err) => {
+          console.error(`Failed to unlike post ${post.id} on server.`, err);
+        },
       });
-      return;
+    } else {
+      // Ako nije lajkovan, dodajte lajk
+      this.postService.likePost(post.id, this.currentUser.id).subscribe({
+        next: () => {
+          console.log(`Post ${post.id} liked successfully on server.`);
+          post.isLikedByCurrentUser = true; // Obeležite kao lajkovano
+          post.likeCount = (post.likeCount || 0) + 1; // Povećajte broj lajkova
+        },
+        error: (err) => {
+          console.error(`Failed to like post ${post.id} on server.`, err);
+        },
+      });
     }
-  
-    console.log(`Before liking: isLikedByCurrentUser=${post.isLikedByCurrentUser}, likeCount=${post.likeCount}`);
-  
-    post.isLikedByCurrentUser = true;  
-    console.log(`After liking (local): isLikedByCurrentUser=${post.isLikedByCurrentUser}, likeCount=${post.likeCount}`);
-  
-    this.postService.likePost(post.id, this.currentUser.id).subscribe({
-      next: () => {
-        console.log(`Post ${post.id} liked successfully on server.`);
-        post.isLikedByCurrentUser = true;  // Označite kao lajkovano
-        post.likeCount = (post.likeCount || 0) + 1; // Povećajte broj lajkova
-      },
-      error: (err) => {
-        console.error(`Failed to like post ${post.id} on server.`, err);
-        // Nemojte vraćati status lajkova na početnu vrednost
-      },
-    });
-    
   }
+  
   
 
   getCurrentUser(path: any): void {
@@ -164,4 +166,4 @@ export class PostComponent implements OnInit {
   
     
 
-}
+}  

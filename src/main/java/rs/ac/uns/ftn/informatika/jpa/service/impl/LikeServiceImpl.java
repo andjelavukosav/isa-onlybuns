@@ -10,6 +10,7 @@ import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LikeServiceImpl implements LikeService {
@@ -45,6 +46,19 @@ public class LikeServiceImpl implements LikeService {
             likeDTOs.add(likeDTO);
         }
         return likeDTOs;
+    }
+
+    @Override
+    public boolean delete(int postId, int userId){
+        // Provera da li postoji zapis u bazi
+        Optional<Like> like = likeRepository.findByPostIdAndUserId(postId, userId);
+
+        if (like.isPresent()) {
+            likeRepository.delete(like.get()); // Brisanje ako postoji
+            return true;
+        } else {
+            return false; // Like nije pronađen
+        }
     }
 
 }
