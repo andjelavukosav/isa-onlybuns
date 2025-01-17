@@ -84,4 +84,12 @@ export class UserService {
     );
   }
 
+  verifyPassword(userId: number, currentPassword: string): Observable<boolean> {
+    return this.http.post<boolean>(`${environment.apiHost}/users/verify-password`, {
+      userId: userId,
+      currentPassword: currentPassword
+    });
+  }
+  
+
 }

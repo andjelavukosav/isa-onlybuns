@@ -23,6 +23,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -193,6 +194,17 @@ public class UserServiceImpl implements UserService {
         user.setPassword(hashedPassword);
 
         userRepository.save(user);
+    }
+
+    @Override
+    public boolean verifyPassword(int userId, String currentPassword) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional == null) {
+            throw new RuntimeException("User not found.");
+        }
+
+        User user = userOptional.get();
+        return passwordEncoder.matches(currentPassword, user.getPassword());
     }
 
 

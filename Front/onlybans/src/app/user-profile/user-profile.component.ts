@@ -24,6 +24,9 @@ export class UserProfileComponent implements OnInit {
   editingName = false;
   editingLastName = false;
   editingAddress = false;
+  currentPassword: string = ''; // Novo polje za trenutnu lozinku
+  oldPasswordVerified: boolean = false; // Praćenje da li je lozinka potvrđena
+  invalidPassword: boolean = false; // Indikator za neispravnu lozinku
 
   editableUser: UserDTO = {
     id: 0,
@@ -126,6 +129,11 @@ export class UserProfileComponent implements OnInit {
 
   // Ažuriranje lozinke
   updatePassword(): void {
+    if (!this.oldPasswordVerified) {
+      alert('You must verify your current password first.');
+      return;
+    }
+
     if (this.newPassword !== this.confirmPassword) {
       alert('Passwords do not match!');
       return;
@@ -136,17 +144,45 @@ export class UserProfileComponent implements OnInit {
       return;
     }
 
-    this.userService.updatePassword(this.userId, this.newPassword).subscribe(
-      () => {
+    this.userService.updatePassword(this.userId, this.newPassword).subscribe({
+      next: () => {
         alert('Password updated successfully!');
-        this.newPassword = '';
-        this.confirmPassword = '';
+        this.resetPasswordFields();
       },
-      (error) => {
-        console.error(error);
+      error: (error) => {
+        console.error('Failed to update password:', error);
         alert('Failed to update password.');
       }
-    );
+    });
+  }
+
+  verifyOldPassword(): void {
+    if (!this.currentPassword || !this.userId) {
+      alert('Current password is required.');
+      return;
+    }
+
+    this.userService.verifyPassword(this.userId, this.currentPassword).subscribe({
+      next: (isVerified) => {
+        if (isVerified) {
+          this.oldPasswordVerified = true;
+          this.invalidPassword = false;
+        } else {
+          this.invalidPassword = true;
+        }
+      },
+      error: (error) => {
+        console.error('Failed to verify password:', error);
+        alert('An error occurred while verifying the password.');
+      }
+    });
+  }
+
+  resetPasswordFields(): void {
+    this.currentPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.oldPasswordVerified = false;
   }
 
   // Dohvatanje trenutnog korisnika

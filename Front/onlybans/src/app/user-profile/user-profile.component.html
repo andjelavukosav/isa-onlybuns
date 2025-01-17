@@ -92,25 +92,37 @@
       <p><strong>Pratioci:</strong> {{ user.followersCount }}</p>
       <div *ngIf="userId === currentUserId">
         <strong>Promena lozinke:</strong>
-        <div>
+        <div *ngIf="!oldPasswordVerified">
           <input
             type="password"
-            [(ngModel)]="newPassword"
-            placeholder="Nova lozinka"
+            [(ngModel)]="currentPassword"
+            placeholder="Trenutna lozinka"
           />
-          <input
-            type="password"
-            [(ngModel)]="confirmPassword"
-            placeholder="Potvrda lozinke"
-          />
+          <button (click)="verifyOldPassword()">Potvrdi</button>
+          <p *ngIf="invalidPassword" class="error-message">Unesena lozinka nije tačna.</p>
         </div>
-        <button
-          (click)="updatePassword()"
-          [disabled]="newPassword !== confirmPassword || !newPassword"
-        >
-          Ažuriraj lozinku
-        </button>
+        <div *ngIf="oldPasswordVerified">
+          <div>
+            <input
+              type="password"
+              [(ngModel)]="newPassword"
+              placeholder="Nova lozinka"
+            />
+            <input
+              type="password"
+              [(ngModel)]="confirmPassword"
+              placeholder="Potvrda lozinke"
+            />
+          </div>
+          <button
+            (click)="updatePassword()"
+            [disabled]="newPassword !== confirmPassword || !newPassword"
+          >
+            Ažuriraj lozinku
+          </button>
+        </div>
       </div>
+      
     </div>
 
     <!-- Sekcija: Prijatelji -->
