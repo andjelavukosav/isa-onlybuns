@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import rs.ac.uns.ftn.informatika.jpa.dto.LikeDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Like;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
@@ -29,9 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -87,6 +86,144 @@ public class PostController {
         return new ResponseEntity<>(pagedResults, HttpStatus.OK);
     }
 
+    @Operation(description = "Get all posts without sort", method = "GET")
+    @GetMapping(value = "/allPosts", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PagedResults<PostDTO>> getAllPostsWithoutSort() {
+        List<Post> posts = postService.findAll();
+
+        List<PostDTO> postsDTO = posts.stream()
+                .map(PostDTO::new)
+                .collect(Collectors.toList());
+
+        PagedResults<PostDTO> pagedResults = new PagedResults<>();
+        pagedResults.setResults(postsDTO);
+        pagedResults.setTotalCount(posts.size());
+        return new ResponseEntity<>(pagedResults, HttpStatus.OK);
+    }
+
+    @Operation(description = "Get all posts with the most likes in the last seven days", method = "GET")
+    @GetMapping(value = "/allPostsMostPopular", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PagedResults<PostDTO>> getAllPostsMostPopular() {
+        List<Post> posts = postService.findAll();  // Dohvati sve postove
+        List<PostDTO> postsDTO = new ArrayList<>();
+
+        // Datum koji predstavlja pre 7 dana
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+
+        // Mapiraćemo Post objekte na broj lajkova
+        Map<Post, Long> postLikeCountMap = new HashMap<>();
+
+        // Iteriraj kroz sve postove i broj lajkove u poslednjih 7 dana
+        for (Post post : posts) {
+            // Dobavi lajkove za trenutni post
+            List<LikeDTO> likes = this.likeService.findLikesByPostId(post.getId());
+
+            //List<Like> likes = post.getLikes();  // Pretpostavljamo da post ima metodu getLikes()
+
+            // Filtriraj lajkove koji su postavljeni u poslednjih 7 dana
+            long likeCountLast7Days = likes.stream()
+                    .filter(like -> like.getCreationDateTime().isAfter(sevenDaysAgo))  // Filter za lajkove poslednjih 7 dana
+                    .count();
+
+            // Dodaj broj lajkova u mapu
+            postLikeCountMap.put(post, likeCountLast7Days);
+        }
+
+        // Sortiraj postove po broju lajkova u poslednjih 7 dana
+        List<Post> sortedPosts = postLikeCountMap.entrySet().stream()
+                .sorted((entry1, entry2) -> Long.compare(entry2.getValue(), entry1.getValue()))  // Sortiraj po broju lajkova
+                .map(Map.Entry::getKey)  // Uzmi samo postove (ne njihove brojeve lajkova)
+                .collect(Collectors.toList());
+
+        // Uzmi samo top 5 postova sa najviše lajkova
+        List<Post> topPosts = sortedPosts.stream().limit(5).collect(Collectors.toList());
+
+        // Konvertuj postove u DTO
+        for (Post post : topPosts) {
+            PostDTO postDTO = new PostDTO(post);
+            postsDTO.add(postDTO);
+        }
+
+        // Pripremi pagirane rezultate
+        PagedResults<PostDTO> pagedResults = new PagedResults<>();
+        pagedResults.setResults(postsDTO);
+        pagedResults.setTotalCount(postsDTO.size());  // Broj rezultata je 5 (top 5)
+
+        return new ResponseEntity<>(pagedResults, HttpStatus.OK);
+    }
+
+    @Operation(description = "Get the top 10 posts with the most likes ever", method = "GET")
+    @GetMapping(value = "/top10PostsMostPopular", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PagedResults<PostDTO>> getTop10PostsMostPopular() {
+        List<Post> posts = postService.findAll();  // Dohvati sve postove
+        List<PostDTO> postsDTO = new ArrayList<>();
+
+        // Mapiraćemo Post objekte na broj lajkova
+        Map<Post, Long> postLikeCountMap = new HashMap<>();
+
+        // Iteriraj kroz sve postove i broj lajkove
+        for (Post post : posts) {
+            // Dobavi lajkove za trenutni post
+            List<LikeDTO> likes = this.likeService.findLikesByPostId(post.getId());
+
+            // Dobavi ukupan broj lajkova za trenutni post
+            long likeCount = likes.stream().count();  // Ukupan broj lajkova za post
+
+            // Dodaj broj lajkova u mapu
+            postLikeCountMap.put(post, likeCount);
+        }
+
+        // Sortiraj postove po broju lajkova (od najviše ka najmanje)
+        List<Post> sortedPosts = postLikeCountMap.entrySet().stream()
+                .sorted((entry1, entry2) -> Long.compare(entry2.getValue(), entry1.getValue()))  // Sortiraj po broju lajkova
+                .map(Map.Entry::getKey)  // Uzmi samo postove (ne njihove brojeve lajkova)
+                .collect(Collectors.toList());
+
+        // Uzmi samo top 10 postova sa najviše lajkova
+        List<Post> topPosts = sortedPosts.stream().limit(10).collect(Collectors.toList());
+
+        // Konvertuj postove u DTO
+        for (Post post : topPosts) {
+            PostDTO postDTO = new PostDTO(post);
+            postsDTO.add(postDTO);
+        }
+
+        // Pripremi pagirane rezultate
+        PagedResults<PostDTO> pagedResults = new PagedResults<>();
+        pagedResults.setResults(postsDTO);
+        pagedResults.setTotalCount(postsDTO.size());  // Broj rezultata je 10 (top 10)
+
+        return new ResponseEntity<>(pagedResults, HttpStatus.OK);
+    }
+
+
+    @Operation(description = "Get all posts from the last month", method = "GET")
+    @GetMapping(value = "/allPostsLastMonth", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PagedResults<PostDTO>> getAllPostsLastMonth() {
+        // Dohvatanje svih postova
+        List<Post> posts = postService.findAll();
+
+        // Datum pre mesec dana
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+
+        // Filtriranje postova koji su kreirani u poslednjih mesec dana
+        List<Post> postsLastMonth = posts.stream()
+                .filter(post -> post.getCreationDateTime().isAfter(oneMonthAgo))
+                .collect(Collectors.toList());
+
+        // Konvertovanje postova u DTO
+        List<PostDTO> postsDTO = postsLastMonth.stream()
+                .map(PostDTO::new)
+                .collect(Collectors.toList());
+
+        // Kreiranje paginiranih rezultata
+        PagedResults<PostDTO> pagedResults = new PagedResults<>();
+        pagedResults.setResults(postsDTO);
+        pagedResults.setTotalCount(postsLastMonth.size());
+
+        // Vraćanje odgovora sa filtriranim postovima
+        return new ResponseEntity<>(pagedResults, HttpStatus.OK);
+    }
 
     @Operation(description = "Create a new post", method = "POST")
     @PostMapping(value = "/create", consumes = "multipart/form-data", produces = "application/json")
@@ -199,7 +336,7 @@ public class PostController {
     @PostMapping("/{postId}/likes/{userId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> likePost(@PathVariable int postId, @PathVariable int userId) {
-       try {
+        try {
             Like like = new Like();
             like.setCreationDateTime(LocalDateTime.now());
             like.setPost(postService.findById(postId));

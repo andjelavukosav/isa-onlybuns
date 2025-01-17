@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { UserDTO } from '../model/registered-user';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../env/enviroment';
+import { PagedResults } from '../model/paged-result.model';
 
 @Injectable({
   providedIn: 'root'
@@ -76,6 +77,9 @@ export class UserService {
     return this.http.get<number>(environment.apiHost + `/posts/user/${userId}/count`);
   }
 
+  getTopUsersMostLikes(): Observable<PagedResults<UserDTO>> {
+    return this.http.get<PagedResults<UserDTO>>(environment.apiHost + '/likes/top10UsersMostLikes');
+  }
   updatePassword(userId: number, newPassword: string): Observable<any> {
     return this.http.put(
         `${environment.apiHost}/users/update-password/${userId}`,

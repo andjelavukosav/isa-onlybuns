@@ -10,4 +10,5 @@ public interface LikeService {
     LikeDTO findLikeByPostIdAndUserId(Integer postId,Integer userId);
     List<LikeDTO> findLikesByPostId(Integer postId);
     boolean delete(int postId, int userId);
+    List<LikeDTO> findAll();
 }

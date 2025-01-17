@@ -35,6 +35,21 @@ export class PostService {
     return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/all');
   }
 
+  getPostsWithoutSort(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/allPosts');
+  }
+
+  getPostsLastMonth(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/allPostsLastMonth');
+  }
+
+  getPostsMostPopular(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/allPostsMostPopular');
+  }
+  
+  getPostsMostPopularEver(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/top10PostsMostPopular');
+  }
   getPostById(id: number): Observable<Post> {
     return this.http.get<Post>(`${environment.apiHost}/posts/${id}`);
   }

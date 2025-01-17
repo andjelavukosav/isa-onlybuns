@@ -49,6 +49,21 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    public List<LikeDTO> findAll(){
+        List<Like> likes = this.likeRepository.findAll();
+        List<LikeDTO> likeDTOs = new ArrayList<>();
+        for (Like like : likes) {
+            LikeDTO likeDTO = new LikeDTO();
+            likeDTO.setId(like.getId());
+            likeDTO.setPostId(like.getPost().getId());
+            likeDTO.setUserId(like.getUser().getId());
+            likeDTO.setCreationDateTime(like.getCreationDateTime());
+            likeDTOs.add(likeDTO);
+        }
+        return likeDTOs;
+    }
+
+    @Override
     public boolean delete(int postId, int userId){
         // Provera da li postoji zapis u bazi
         Optional<Like> like = likeRepository.findByPostIdAndUserId(postId, userId);

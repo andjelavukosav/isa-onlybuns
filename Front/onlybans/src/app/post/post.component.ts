@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Post } from '../model/post.model';
 import { PostService } from '../service/post.service';
 import { UserService } from '../service/user.service';
@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./post.component.css']
 })
 export class PostComponent implements OnInit {
-  post: Post[] = [];
+  @Input() post: Post[] = [];
   currentUser: any;
   whoamIResponse = {};
 
@@ -26,7 +26,7 @@ export class PostComponent implements OnInit {
   
   ngOnInit(): void {
     this.getCurrentUser('http://localhost:8080');
-    this.getPosts();
+   // this.getPosts();
   }
 
   getPosts(): void {
