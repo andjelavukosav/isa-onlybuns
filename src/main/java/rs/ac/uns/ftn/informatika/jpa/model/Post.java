@@ -11,7 +11,7 @@ public class Post {
     @Id
     @Column(name = "Id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "Description")
     private String description;
@@ -23,10 +23,12 @@ public class Post {
     private LocalDateTime creationDateTime;
 
     @Embedded
+    @JsonIgnore
     private Location location;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "Id")
+    @JsonIgnore
     private User user;
 
 

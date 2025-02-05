@@ -1,10 +1,13 @@
 package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.ac.uns.ftn.informatika.jpa.dto.LikeDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Like;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
+import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.repository.LikeRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
 
@@ -16,6 +19,8 @@ import java.util.Optional;
 public class LikeServiceImpl implements LikeService {
     @Autowired
     private LikeRepository likeRepository;
+
+    private final Logger LOG = LoggerFactory.getLogger(PostServiceImpl.class);
 
     @Override
     public Like save(Like like) {
@@ -62,6 +67,12 @@ public class LikeServiceImpl implements LikeService {
         }
         return likeDTOs;
     }
+
+   /* @Override
+    public Like findOne(int id) {
+        LOG.info("Product with id: " + id + " successfully cached!");
+        return this.likeRepository.findById(id);
+    }*/
 
     @Override
     public boolean delete(int postId, int userId){

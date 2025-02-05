@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import rs.ac.uns.ftn.informatika.jpa.model.Like;
+import rs.ac.uns.ftn.informatika.jpa.model.Post;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,5 +18,7 @@ public interface LikeRepository extends JpaRepository<Like, Integer> {
     List<Like> findLikesByPostId(Integer postId);
 
     Optional<Like> findByPostIdAndUserId(int postId, int userId);
+
+    Like findById(int id);
 
 }
