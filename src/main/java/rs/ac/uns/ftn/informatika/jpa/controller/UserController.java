@@ -190,5 +190,25 @@ public class UserController {
         }
     }
 
+    @PostMapping("/users/verify-password")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<Boolean> verifyPassword(@RequestBody Map<String, String> request, Principal principal) {
+        String currentPassword = request.get("currentPassword");
+        int userId = Integer.parseInt(request.get("userId"));
+
+        // Provera autentifikacije korisnika
+        User authenticatedUser = userService.findByUsername(principal.getName());
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        }
+
+        // Korisnik može proveriti samo svoju lozinku ili admin može proveriti bilo čiju
+        if (authenticatedUser.getId() != userId && !authenticatedUser.getRoles().contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(false);
+        }
+
+        boolean isPasswordValid = userService.verifyPassword(userId, currentPassword);
+        return ResponseEntity.ok(isPasswordValid);
+    }
 
 }
