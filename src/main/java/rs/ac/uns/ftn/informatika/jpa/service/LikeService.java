@@ -13,8 +13,7 @@ public interface LikeService {
     List<LikeDTO> findLikesByPostId(Integer postId);
     boolean delete(int postId, int userId);
     List<LikeDTO> findAll();
+    long countLikesByPostId(int postId);
 
-  //  @Cacheable("product")
-    //Like findOne(int id);
 
 }

@@ -5,7 +5,7 @@
         <mat-tab label="Sve objave">
             <p>Ukupan broj objava na mreži: {{ allPosts?.length }}</p>
           <div>
-            <app-post [post]="allPosts"></app-post>
+            <app-post [post]="allPosts" (refreshLists)="reloadData()"></app-post>
         </div>
           <ng-template #noPosts>
             <p>Nema objava.</p>
@@ -14,7 +14,7 @@
         <mat-tab label="Objave zadnjih mjesec dana">
             <p>Ukupan broj objava na mreži: {{ postsLastMonth?.length }}</p>
             <div>
-                <app-post [post]="postsLastMonth"></app-post>
+                <app-post [post]="postsLastMonth" (refreshLists)="reloadData()"></app-post>
             </div>
           <ng-template #noRecentPosts>
             <p>Nema objava iz zadnjeg mjeseca.</p>
@@ -29,7 +29,7 @@
           <mat-tab label="5 najlajkovanijih u poslednjih 7 dana">
             <p>Ukupan broj objava: {{ postsMostPopularLast7Days?.length }}</p>
             <div>
-              <app-post [post]="postsMostPopularLast7Days"></app-post>
+              <app-post [post]="postsMostPopularLast7Days" (refreshLists)="reloadData()"></app-post>
             </div>
             <ng-template #noPostsLast7Days>
               <p>Nema popularnih objava u poslednjih 7 dana.</p>
@@ -40,7 +40,7 @@
           <mat-tab label="10 najpopularnijih ikada">
             <p>Ukupan broj objava: {{ postsMostPopularEver?.length }}</p>
             <div>
-              <app-post [post]="postsMostPopularEver"></app-post>
+              <app-post [post]="postsMostPopularEver" (refreshLists)="reloadData()"></app-post>
             </div>
             <ng-template #noPopularPostsEver>
               <p>Nema popularnih objava ikada.</p>

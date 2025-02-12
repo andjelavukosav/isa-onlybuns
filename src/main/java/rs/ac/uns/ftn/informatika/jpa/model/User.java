@@ -3,6 +3,7 @@ package rs.ac.uns.ftn.informatika.jpa.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -12,7 +13,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "Users")
-public class User implements UserDetails {
+public class User implements UserDetails, Serializable {
+
+    private static final long serialVersionUID = 1L; // Preporučeno dodati serialVersionUID
 
     @Id
     @Column(name = "Id")
@@ -62,8 +65,9 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Role> roles;
 
-    @ManyToOne(fetch = FetchType.EAGER)  // One-to-many from Address to User
+    @OneToOne(fetch = FetchType.EAGER)  // One-to-many from Address to User
     @JoinColumn(name = "address_id")
+    @JsonIgnore
     private Address address;  // A user can have one address
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { Post } from '../model/post.model';
 import { PostService } from '../service/post.service';
 import { UserService } from '../service/user.service';
@@ -13,6 +13,8 @@ import { Observable } from 'rxjs';
 })
 export class PostComponent implements OnInit {
   @Input() post: Post[] = [];
+  @Output() refreshLists: EventEmitter<void> = new EventEmitter(); // Dodaj output event
+
   currentUser: any;
   whoamIResponse = {};
 
@@ -105,6 +107,7 @@ export class PostComponent implements OnInit {
           console.log(`Post ${post.id} unliked successfully on server.`);
           post.isLikedByCurrentUser = false; // Obeležite kao nelajkovano
           post.likeCount = (post.likeCount || 1) - 1; // Smanjite broj lajkova
+          this.refreshLists.emit(); // Emituj event za osvežavanje
         },
         error: (err) => {
           console.error(`Failed to unlike post ${post.id} on server.`, err);
@@ -117,6 +120,7 @@ export class PostComponent implements OnInit {
           console.log(`Post ${post.id} liked successfully on server.`);
           post.isLikedByCurrentUser = true; // Obeležite kao lajkovano
           post.likeCount = (post.likeCount || 0) + 1; // Povećajte broj lajkova
+          this.refreshLists.emit(); // Emituj event za osvežavanje
         },
         error: (err) => {
           console.error(`Failed to like post ${post.id} on server.`, err);

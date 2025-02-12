@@ -3,15 +3,19 @@ package rs.ac.uns.ftn.informatika.jpa.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name="post")
-public class Post {
+public class Post implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     @Column(name = "Id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
     @Column(name = "Description")
     private String description;

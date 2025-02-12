@@ -308,4 +308,12 @@ export class ActivityTrendsComponent implements OnInit {
     });
   }
 
+  reloadData(): void {
+    this.getPosts();
+    this.getPostsLastMonth();
+    this.getPostsMostPopular();
+    this.getPostsMostPopularEver();
+    this.getUsersMostPopular();
+  }
+  
 }

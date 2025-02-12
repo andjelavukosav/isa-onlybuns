@@ -54,6 +54,12 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    public long countLikesByPostId(int postId) {
+        return likeRepository.countByPostId(postId);
+    }
+
+
+    @Override
     public List<LikeDTO> findAll(){
         List<Like> likes = this.likeRepository.findAll();
         List<LikeDTO> likeDTOs = new ArrayList<>();
@@ -67,12 +73,6 @@ public class LikeServiceImpl implements LikeService {
         }
         return likeDTOs;
     }
-
-   /* @Override
-    public Like findOne(int id) {
-        LOG.info("Product with id: " + id + " successfully cached!");
-        return this.likeRepository.findById(id);
-    }*/
 
     @Override
     public boolean delete(int postId, int userId){

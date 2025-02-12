@@ -3,12 +3,15 @@ package rs.ac.uns.ftn.informatika.jpa.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name="Address")
-public class Address {
+public class Address implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,16 +29,15 @@ public class Address {
     @Column(name = "streetNumber")
     private String streetNumber;
 
-    @OneToMany(mappedBy = "address",fetch = FetchType.EAGER)  // One-to-many from Address to User
+    @OneToOne(mappedBy = "address", fetch = FetchType.EAGER)  // One-to-one from Address to User
     @JsonIgnore
-    private Set<User> users = new HashSet<User>();
+    private User user; // Jedan User povezan sa jednim Address
 
-    public Set<User> getUsers() {
-        return users;
+    public User getUser() {
+        return user;
     }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public void setId(Integer id) {

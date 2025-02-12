@@ -5,8 +5,18 @@ public class AddressDTO {
     private String city;
     private String street;
     private String streetNumber;
+    private int Id;
 
     // Getters and setters
+
+
+    public void setId(int id) {
+        Id = id;
+    }
+
+    public int getId() {
+        return Id;
+    }
 
     public String getCountry() {
         return country;

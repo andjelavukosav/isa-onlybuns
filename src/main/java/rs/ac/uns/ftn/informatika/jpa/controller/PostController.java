@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -61,13 +62,6 @@ public class PostController {
         List<Post> posts = new ArrayList<>(user.getPosts());
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
-
-
-    /*@GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
-        List<Post> posts = postService.findAll();
-        return new ResponseEntity<>(posts, HttpStatus.OK);
-    }*/
 
     @Operation(description = "Get all posts", method = "GET")
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -170,6 +164,7 @@ public class PostController {
             Principal principal
     ) throws IOException {
 
+        postService.removeFromCache();
         User user = this.userService.findByUsername(principal.getName());
         System.out.println(user.getEmail());
         if (user == null) {
@@ -180,7 +175,6 @@ public class PostController {
         if (user.getId() <= 0 || description == null || description.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
 
         // Kreiranje Post objekta
         Post post = new Post();
@@ -199,12 +193,11 @@ public class PostController {
 
         post.setCreationDateTime(LocalDateTime.now());
 
-
         // Čuvanje posta u bazi
         PostDTO postDTO = new PostDTO(post);
         post = postService.save(postDTO);
 
-
+        postService.clearCache();
         return new ResponseEntity<>(postDTO, HttpStatus.CREATED);
     }
 
@@ -271,21 +264,16 @@ public class PostController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> likePost(@PathVariable int postId, @PathVariable int userId) {
         try {
-            Like like = new Like();
-            like.setCreationDateTime(LocalDateTime.now());
-            like.setPost(postService.findById(postId));
-            like.setUser(userService.findById(userId));
-            this.likeService.save(like);
-            PostDTO postDTO = new PostDTO(postService.findById(postId));
-            postDTO.id = postId;
-            postService.update(postDTO);
+
+            // Ažuriraj leaderboard (top 5 postova)
+            postService.likePost(postId, userId);  // Ova metoda ažurira leaderboard i keš
+
             return ResponseEntity.ok().build();
         } catch (ConfigDataResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while liking the post.");
         }
-
     }
 
     @DeleteMapping("/{postId}")
@@ -293,21 +281,14 @@ public class PostController {
         boolean isDeleted = postService.delete(postId, userId);
 
         if (isDeleted) {
+            postService.removeFromCache();
             return ResponseEntity.ok().body("Post deleted successfully.");
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to delete this post.");
         }
     }
 
-    /*@PutMapping("/")
-    public ResponseEntity<?> updatePost(@RequestBody PostDTO postRequest){
-        PostDTO updatedPost =  new PostDTO(this.postService.update(postRequest));
-        if (updatedPost != null) {
-            return ResponseEntity.ok(updatedPost); // Vraćamo PostDTO kao odgovor
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this post.");
-        }
-    }*/
+
 
     @PutMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PostDTO> updatePost(
@@ -353,6 +334,7 @@ public class PostController {
 
         // Čuvanje ažuriranog posta
         PostDTO updatedPostDTO = new PostDTO(postService.save(new PostDTO(existingPost)));
+        postService.removeFromCache();
         return new ResponseEntity<>(updatedPostDTO, HttpStatus.OK);
     }
 

@@ -93,33 +93,46 @@ public class UserServiceImpl implements UserService {
         u.setRoles(roles);
 
         // Handle address
-        Address address = new Address();
 
         // If address data exists in the UserDTO, set it
         if (userRequest.getAddress() != null) {
             AddressDTO addressDTO = userRequest.getAddress();
+            Address address = new Address();;
 
-            // Check if the address already exists in the database (based on some unique criteria like country, city, etc.)
-            address = addressRepository.findByCountryAndCityAndStreetAndStreetNumber(
-                    addressDTO.getCountry(),
-                    addressDTO.getCity(),
-                    addressDTO.getStreet(),
-                    addressDTO.getStreetNumber()
-            );
+            if (addressDTO.getId() > 0) {
+                // Pokušaj pronalaska adrese u bazi
+                address = addressRepository.findById(addressDTO.getId()).orElse(null);
 
-            // If address doesn't exist, create a new one
-            if (address == null) {
+                // Ako postoji, ažuriraj podatke
+                if (address != null) {
+                    address.setCountry(addressDTO.getCountry());
+                    address.setCity(addressDTO.getCity());
+                    address.setStreet(addressDTO.getStreet());
+                    address.setStreetNumber(addressDTO.getStreetNumber());
+                } else {
+                    // Ako ne postoji, kreiraj novu
+                    address = new Address();
+                    address.setCountry(addressDTO.getCountry());
+                    address.setCity(addressDTO.getCity());
+                    address.setStreet(addressDTO.getStreet());
+                    address.setStreetNumber(addressDTO.getStreetNumber());
+                }
+            } else {
+                // Ako ID nije postavljen ili je 0, kreiraj novu adresu
                 address = new Address();
                 address.setCountry(addressDTO.getCountry());
                 address.setCity(addressDTO.getCity());
                 address.setStreet(addressDTO.getStreet());
                 address.setStreetNumber(addressDTO.getStreetNumber());
-                addressRepository.save(address); // Save new address
             }
 
-            // Set the address for the user
+            // Sačuvaj adresu u bazi (novu ili ažuriranu)
+            address = addressRepository.save(address);
+
+            // Postavi adresu korisniku
             u.setAddress(address);
         }
+
 
         // Save the user and return the saved entity
         return this.userRepository.save(u);
@@ -130,42 +143,51 @@ public class UserServiceImpl implements UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new AccessDeniedException("User not found"));
 
-        // Update the user fields
+        // Update user fields
         existingUser.setUsername(userRequest.getUsername());
-
-        // Update user details
         existingUser.setPassword(userRequest.getPassword());
         existingUser.setFirstName(userRequest.getFirstname());
         existingUser.setLastName(userRequest.getLastname());
         existingUser.setEnabled(userRequest.isEnabled());
         existingUser.setEmail(userRequest.getEmail());
 
-
         // Update address if provided in the request
-        if (existingUser.getAddress() != null) {
+        if (userRequest.getAddress() != null) {
+            AddressDTO addressDTO = userRequest.getAddress();
+            Address address = null;
 
-            //adresa korisnika koji se treba updatovat
-            Address address = addressRepository.findByCountryAndCityAndStreetAndStreetNumber(
-                    existingUser.getAddress().getCountry(),
-                    existingUser.getAddress().getCity(),
-                    existingUser.getAddress().getStreet(),
-                    existingUser.getAddress().getStreetNumber()
-            );
-            // If the address exists, update it with the new details (optional if you want to allow changes)
-            address.setCountry(userRequest.getAddress().getCountry());
-            address.setCity(userRequest.getAddress().getCity());
-            address.setStreet(userRequest.getAddress().getStreet());
-            address.setStreetNumber(userRequest.getAddress().getStreetNumber());
-            addressRepository.save(address); // Save the updated address
+            if (addressDTO.getId() > 0) {
+                // Ako ID postoji u request-u, pokušaj pronaći adresu u bazi
+                address = addressRepository.findById(addressDTO.getId()).orElse(null);
+            }
 
-            // Set the user's address to the existing or newly created address
+            if (address == null) {
+                // Ako adresa nije pronađena (ili ID nije dat), koristi postojeću adresu korisnika
+                address = existingUser.getAddress();
+            }
+
+            if (address == null) {
+                // Ako korisnik nema adresu i nije pronađena u bazi, kreiraj novu
+                address = new Address();
+            }
+
+            // Ažuriranje podataka o adresi
+            address.setCountry(addressDTO.getCountry());
+            address.setCity(addressDTO.getCity());
+            address.setStreet(addressDTO.getStreet());
+            address.setStreetNumber(addressDTO.getStreetNumber());
+
+            // Sačuvaj adresu u bazi
+            address = addressRepository.save(address);
+
+            // Postavi ažuriranu ili novu adresu korisniku
             existingUser.setAddress(address);
-
         }
-        
+
         // Save the updated user and return the saved entity
         return userRepository.save(existingUser);
     }
+
 
 
     public List<Post> getAllPostsByUser(int userId) {
