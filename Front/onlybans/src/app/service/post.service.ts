@@ -35,14 +35,46 @@ export class PostService {
     return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/all');
   }
 
+  getPostsWithoutSort(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/allPosts');
+  }
+
+  getPostsLastMonth(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/allPostsLastMonth');
+  }
+
+  getPostsMostPopular(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/allPostsMostPopular');
+  }
+  
+  getPostsMostPopularEver(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/top10PostsMostPopular');
+  }
   getPostById(id: number): Observable<Post> {
     return this.http.get<Post>(`${environment.apiHost}/posts/${id}`);
   }
 
-
-  likePost(postId: number): Observable<any> {
-    return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/like', {});
+  getPostsByUserId(userId: number):Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/posts/user/${userId}`);
   }
+
+
+  likePost(postId: number, userId: number): Observable<any> {
+    return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/likes/' + userId , {});
+  }
+
+  getLikeByPostIdAndUserId(postId: number, userId: number): Observable<boolean> {
+    return this.http.get<boolean>(`http://localhost:8080/api/likes/${postId}/${userId}`);
+  }
+
+  getLikesByPostId(postId: number): Observable<number> {
+    return this.http.get<number>(`http://localhost:8080/api/likes/countLikes/${postId}`);
+  }
+  
+  unlikePost(postId: number, userId: number): Observable<void> {
+    return this.http.delete<void>(`http://localhost:8080/api/likes/unlike/${postId}/${userId}`);
+  }
+  
 
   deletePost(postId: number, userId: number){
     const url = `${environment.apiHost}/posts/${postId}?userId=${userId}`;
@@ -76,5 +108,10 @@ export class PostService {
     const url = `${environment.apiHost}/posts/`;  // URL za backend
     return this.http.put<Post>(url, formData);  // Poziv PUT metode sa PostDTO objektom
   }
+
+  getNearbyPosts(latitude: number, longitude: number, radius: number = 100000) {
+    return this.http.get<any>(`http://localhost:8080/api/posts/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
+  }
+  
 
 }

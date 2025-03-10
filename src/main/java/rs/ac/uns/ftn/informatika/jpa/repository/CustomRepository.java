@@ -1,11 +1,8 @@
 package rs.ac.uns.ftn.informatika.jpa.repository;
-
 import java.io.Serializable;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.Repository;
-
 /*
  * Nacin za pisanje custom baznog repozitorijuma umesto koriscenja predefinisanih Spring Data JPA repozitorijuma:
  * 1. Kreira se interfejs koji nasledjuje Repository ili je anotiran sa @Repository
@@ -17,8 +14,6 @@ import org.springframework.data.repository.Repository;
  */
 @NoRepositoryBean
 public interface CustomRepository<T, ID extends Serializable> extends Repository<T, ID> {
-
-	Iterable<T> findAll(Pageable sort);
-
-	<S extends T> S save(S entity);
+    Iterable<T> findAll(Pageable sort);
+    <S extends T> S save(S entity);
 }

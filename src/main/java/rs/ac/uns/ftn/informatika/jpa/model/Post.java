@@ -3,11 +3,15 @@ package rs.ac.uns.ftn.informatika.jpa.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name="post")
-public class Post {
+public class Post implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     @Column(name = "Id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,14 +26,13 @@ public class Post {
     @Column(name = "CreationDateTime")
     private LocalDateTime creationDateTime;
 
-    @Column(name= "LikeCount" )
-    private int likeCount;
-
     @Embedded
+    @JsonIgnore
     private Location location;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "Id")
+    @JsonIgnore
     private User user;
 
 
@@ -93,11 +96,4 @@ public class Post {
         this.user = user;
     }
 
-    public int getLikeCount() {
-        return likeCount;
-    }
-
-    public void setLikeCount(int likeCount) {
-        this.likeCount = likeCount;
-    }
 }

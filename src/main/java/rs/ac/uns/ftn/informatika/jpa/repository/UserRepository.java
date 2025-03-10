@@ -2,18 +2,21 @@ package rs.ac.uns.ftn.informatika.jpa.repository;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 
+import javax.persistence.LockModeType;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
     User findByUsername(String username);
     User findByEmail(String email);
-
+ //   User findById(int id);
 
     @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
     List<Post> findPostsByUserId(int userId);
