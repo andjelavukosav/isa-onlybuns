@@ -37,4 +37,7 @@ public interface PostService {
 
     @CacheEvict(value = {"allPostsLastMonth", "allPosts"}, allEntries = true)
     void clearCache();
-}
+
+    List<Post> findNearbyPosts(double latitude, double longitude, double radius);
+
+    }

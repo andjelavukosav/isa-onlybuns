@@ -338,5 +338,28 @@ public class PostController {
         return new ResponseEntity<>(updatedPostDTO, HttpStatus.OK);
     }
 
+    @Operation(description = "Get nearby posts based on user's location", method = "GET")
+    @GetMapping(value = "/nearby", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PagedResults<PostDTO>> getNearbyPosts(
+            @RequestParam("latitude") double latitude,
+            @RequestParam("longitude") double longitude,
+            @RequestParam(value = "radius", defaultValue = "100000") double radius
+    ) {
+        List<Post> nearbyPosts = postService.findNearbyPosts(latitude, longitude, radius);
+
+        // Konverzija u DTO
+        List<PostDTO> postsDTO = nearbyPosts.stream()
+                .map(PostDTO::new)
+                .collect(Collectors.toList());
+
+        // Priprema pagiranih rezultata
+        PagedResults<PostDTO> pagedResults = new PagedResults<>();
+        pagedResults.setResults(postsDTO);
+        pagedResults.setTotalCount(postsDTO.size());
+
+        return new ResponseEntity<>(pagedResults, HttpStatus.OK);
+    }
+
+
 
 }

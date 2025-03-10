@@ -6,9 +6,18 @@ public class AddressDTO {
     private String street;
     private String streetNumber;
     private int Id;
+    public LocationDTO location;
 
     // Getters and setters
 
+
+    public void setLocation(LocationDTO location) {
+        this.location = location;
+    }
+
+    public LocationDTO getLocation() {
+        return location;
+    }
 
     public void setId(int id) {
         Id = id;

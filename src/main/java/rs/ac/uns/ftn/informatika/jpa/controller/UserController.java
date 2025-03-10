@@ -211,4 +211,14 @@ public class UserController {
         return ResponseEntity.ok(isPasswordValid);
     }
 
+    @GetMapping("/users/location/{userId}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<Map<String, Double>> getUserLocation(@PathVariable int userId) {
+        // Simulacija dohvaćanja koordinata iz baze
+        User user = userService.findById(userId);
+        Map<String, Double> location = new HashMap<>();
+        location.put("latitude", user.getAddress().getLocation().getLatitude());
+        location.put("longitude", user.getAddress().getLocation().getLongitude());
+        return ResponseEntity.ok(location);
+    }
 }

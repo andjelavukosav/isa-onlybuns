@@ -54,7 +54,7 @@ import { ChatComponent } from './chat/chat.component';
     FollowedUserPostComponent,
     ActivityTrendsComponent,
     NearbyPostsMapComponent,
-    ChatComponent
+    ChatComponent,
   ],
   imports: [
     BrowserModule,

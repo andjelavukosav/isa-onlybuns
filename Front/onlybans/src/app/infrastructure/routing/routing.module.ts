@@ -27,7 +27,7 @@ const routes: Routes = [
   {path: 'activity-trends', component: ActivityTrendsComponent},
   {path: 'chat', component: ChatComponent},
   {path: 'followed-user-post', component: FollowedUserPostComponent},
-  {path: 'nearby-posts-map', component: NearbyPostsMapComponent}
+  {path: 'nearby-posts-map/:userId', component: NearbyPostsMapComponent},
 ];
 
 @NgModule({

@@ -109,4 +109,9 @@ export class PostService {
     return this.http.put<Post>(url, formData);  // Poziv PUT metode sa PostDTO objektom
   }
 
+  getNearbyPosts(latitude: number, longitude: number, radius: number = 100000) {
+    return this.http.get<any>(`http://localhost:8080/api/posts/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
+  }
+  
+
 }

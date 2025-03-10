@@ -10,18 +10,17 @@ import org.springframework.stereotype.Service;
 import rs.ac.uns.ftn.informatika.jpa.dto.AddressDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
-import rs.ac.uns.ftn.informatika.jpa.model.Address;
-import rs.ac.uns.ftn.informatika.jpa.model.Post;
-import rs.ac.uns.ftn.informatika.jpa.model.Role;
-import rs.ac.uns.ftn.informatika.jpa.model.User;
+import rs.ac.uns.ftn.informatika.jpa.model.*;
 import rs.ac.uns.ftn.informatika.jpa.repository.AddressRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
+import rs.ac.uns.ftn.informatika.jpa.service.GeocodingService;
 import rs.ac.uns.ftn.informatika.jpa.service.RoleService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,6 +45,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private GeocodingService geocodingService;
 
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
@@ -125,6 +127,17 @@ public class UserServiceImpl implements UserService {
                 address.setStreet(addressDTO.getStreet());
                 address.setStreetNumber(addressDTO.getStreetNumber());
             }
+            String fullAddress = address.getStreet() + " " + address.getStreetNumber() + ", "
+                    + address.getCity() + ", "
+                    + address.getCountry();
+
+            try {
+                Location location = geocodingService.getCoordinates(fullAddress);
+                address.setLocation(location);
+            } catch (IOException e) {
+                e.printStackTrace(); // Bolja obrada greške može uključivati logovanje
+            }
+
 
             // Sačuvaj adresu u bazi (novu ili ažuriranu)
             address = addressRepository.save(address);
@@ -176,6 +189,18 @@ public class UserServiceImpl implements UserService {
             address.setCity(addressDTO.getCity());
             address.setStreet(addressDTO.getStreet());
             address.setStreetNumber(addressDTO.getStreetNumber());
+
+            String fullAddress = address.getStreet() + " " + address.getStreetNumber() + ", "
+                    + address.getCity() + ", "
+                    + address.getCountry();
+
+            try {
+                Location location = geocodingService.getCoordinates(fullAddress);
+                address.setLocation(location);
+            } catch (IOException e) {
+                e.printStackTrace(); // Bolja obrada greške može uključivati logovanje
+            }
+
 
             // Sačuvaj adresu u bazi
             address = addressRepository.save(address);

@@ -273,6 +273,11 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    @Override
+    public List<Post> findNearbyPosts(double latitude, double longitude, double radius) {
+        return postRepository.findNearbyPosts(latitude, longitude, radius);
+    }
+
 
  /*   @Override
     public List<Post> getTop10PostsMostPopular() {

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 
 import javax.transaction.Transactional;
@@ -36,5 +37,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("SELECT p FROM Post p WHERE p.creationDateTime >= :sevenDaysAgo ORDER BY p.creationDateTime DESC")
     List<Post> findTop5ByDateLast7Days(@Param("sevenDaysAgo") LocalDateTime sevenDaysAgo);
 
+    @Query("SELECT p FROM Post p WHERE 6371000 * acos(cos(radians(:latitude)) * cos(radians(p.location.latitude)) * cos(radians(p.location.longitude) - radians(:longitude)) + sin(radians(:latitude)) * sin(radians(p.location.latitude))) <= :radius")
+    List<Post> findNearbyPosts(@Param("latitude") double latitude,
+                                  @Param("longitude") double longitude,
+                                  @Param("radius") double radius);
 
 }
