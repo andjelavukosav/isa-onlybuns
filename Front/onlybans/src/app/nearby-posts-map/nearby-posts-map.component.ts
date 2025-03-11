@@ -37,6 +37,14 @@ export class NearbyPostsMapComponent implements OnInit, OnDestroy {
     shadowSize: [41, 41]
   });
 
+  private greenIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34]
+  });
+
   constructor(
     private route: ActivatedRoute,
     private userService: UserService,
@@ -64,7 +72,33 @@ export class NearbyPostsMapComponent implements OnInit, OnDestroy {
       // Sada kada imamo koordinate, učitavamo obližnje postove
       this.loadNearbyPosts();
     });
+    this.loadAsylumsAndVeterinarians();
   }
+
+  private loadAsylumsAndVeterinarians(): void {
+    this.userService.getAllLocations().subscribe(locations => {
+      console.log("Podaci primljeni sa backenda:", locations);
+  
+      if (Array.isArray(locations)) {
+        locations.forEach(location => {
+          const lat = location.address?.location?.latitude;
+          const lng = location.address?.location?.longitude;
+          const name = location.name;
+  
+          if (lat && lng) {
+            L.marker([lat, lng], { icon: this.greenIcon })
+              .addTo(this.map)
+              .bindPopup(`<b>${name}</b><br>${location.address.street} ${location.address.number}, ${location.address.city}, ${location.address.country}`);
+          } else {
+            console.warn('Nema validne lokacije za:', location);
+          }
+        });
+      } else {
+        console.error('Nevalidan format podataka:', locations);
+      }
+    });
+  }
+  
 
   loadNearbyPosts(): void {
     if (this.userLat !== null && this.userLng !== null) {
@@ -87,6 +121,8 @@ export class NearbyPostsMapComponent implements OnInit, OnDestroy {
       });
     }
   }
+
+
 
   private initMap(): void {
     if (!this.map) {

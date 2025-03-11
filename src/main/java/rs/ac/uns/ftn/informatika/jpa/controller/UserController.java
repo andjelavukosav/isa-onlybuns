@@ -13,8 +13,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
+import rs.ac.uns.ftn.informatika.jpa.model.AsylumAndVeterinarian;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
+import rs.ac.uns.ftn.informatika.jpa.service.AsylumAndVeterinarianService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
 import javax.transaction.Transactional;
@@ -26,6 +28,8 @@ import java.util.*;
 @CrossOrigin
 public class UserController {
 
+    @Autowired
+    private AsylumAndVeterinarianService asylumAndVeterinarianService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -220,5 +224,12 @@ public class UserController {
         location.put("latitude", user.getAddress().getLocation().getLatitude());
         location.put("longitude", user.getAddress().getLocation().getLongitude());
         return ResponseEntity.ok(location);
+    }
+
+    @GetMapping("/users/asylums-veterinarians")
+    @PreAuthorize("hasAnyRole('USER')")
+    public ResponseEntity<List<AsylumAndVeterinarian>> getAllLocations() {
+        List<AsylumAndVeterinarian> locations = asylumAndVeterinarianService.findAll();
+        return ResponseEntity.ok(locations);
     }
 }

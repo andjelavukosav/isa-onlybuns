@@ -1,6 +1,8 @@
 package rs.ac.uns.ftn.informatika.jpa;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -36,5 +38,15 @@ public class JpaExampleApplication implements WebMvcConfigurer {
 				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
 				.allowedHeaders("*")
 				.allowCredentials(true);
+	}
+
+	/*
+	 * Registrujemo bean koji ce sluziti za konekciju na RabbitMQ
+	 * gde se mi u primeru kacimo u lokalu 5672.
+	 */
+	@Bean
+	public ConnectionFactory connectionFactory() {
+		CachingConnectionFactory connectionFactory = new CachingConnectionFactory("localhost");
+		return connectionFactory;
 	}
 }
