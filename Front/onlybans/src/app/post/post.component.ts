@@ -1,19 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Post } from '../model/post.model';
 import { PostService } from '../service/post.service';
 import { UserService } from '../service/user.service';
 import { PagedResults } from '../model/paged-result.model';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Import MatSnackBar
 import { Observable } from 'rxjs';
+import { AuthUser } from '../model/registered-user';
+import { AuthService } from '../service';
 
 @Component({
   selector: 'app-post',
   templateUrl: './post.component.html',
   styleUrls: ['./post.component.css']
 })
-export class PostComponent implements OnInit {
-  post: Post[] = [];
-  currentUser: any;
+export class PostComponent implements OnInit, OnChanges {
+  @Input() userId?: number; //ako se postavi userId, uzmi postove od tog korisnika
+  posts: Post[] = [];
+  currentUser: AuthUser | null = null;
   whoamIResponse = {};
 
   commentText: {[key: number]: string} = {};
@@ -21,45 +24,78 @@ export class PostComponent implements OnInit {
   constructor(
     private postService: PostService,
     private userService: UserService,
-    private snackBar: MatSnackBar // Inject MatSnackBar
+    private snackBar: MatSnackBar, // Inject MatSnackBar
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.getCurrentUser('http://localhost:8080');
+    this.posts = [];
+
+    this.authService.user$.subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        console.log("Logged in user in post component: ", this.currentUser);
+        
+      }
+    })
     this.getPosts();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['userId'] && this.userId !== undefined) {
+      this.getPosts();
+    }
+  }
+
   getPosts(): void {
-    this.postService.getPosts().subscribe({
-      next: (result: PagedResults<Post>) => {
-        const sortedPosts = result.results.sort((a, b) => {
-          const dateA = new Date(a.creationDateTime);
-          const dateB = new Date(b.creationDateTime);
-          return dateB.getTime() - dateA.getTime();
-        });
 
-        sortedPosts.forEach(post => {
-          this.userService.getUserById(post.user?.id || 0).subscribe({
-            next: (user) => {
-              post.usernameDisplay = user.username;
-              
-              if (post.imagePath) {
-                console.log('Image path: ', post.imagePath)
-              }
-            
-            },
-            error: () => {
-              console.error(`Failed to load user for post ID ${post.id}`);
-            }
-          });
-        });
+    if(this.userId){
 
-        this.post = sortedPosts;
-      },
-      error: () => {
-        console.error('Failed to load posts.');
+      this.userService.getPostsByUser(this.userId).subscribe({
+        next: (result: PagedResults<Post>) => {
+          this.handlePosts(result);
+        },
+        error: () => {
+          console.error(`Failed to load posts for user ${this.userId}.`);
+        }
+      });
+    }
+    else{
+
+      this.userService.getFollowingPosts().subscribe({
+        next: (result: PagedResults<Post>) => {
+          this.handlePosts(result);
+        },
+        error: () => {
+          console.error('Failed to load following posts.');
+        }
+      });
+
+    }
+    
+  }
+
+  private handlePosts(result: PagedResults<Post>) {
+    if (!result || !result.results || result.results.length === 0) {
+      console.log('No posts to display.');
+      this.posts = [];
+      return;
+    }
+
+    const sortedPosts = result.results.sort((a, b) => {
+      const dateA = new Date(a.creationDateTime);
+      const dateB = new Date(b.creationDateTime);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    sortedPosts.forEach(post => {
+      post.usernameDisplay = post.user?.username || 'Unknown';
+      if (post.imagePath) {
+        console.log('Image path: ', post.imagePath);
       }
     });
+
+    this.posts = sortedPosts;
   }
 
   likePost(post: Post): void {

@@ -77,4 +77,8 @@ export class PostService {
     return this.http.put<Post>(url, formData);  // Poziv PUT metode sa PostDTO objektom
   }
 
+  getPostsByUser(userId: number): Observable<Post[]> {
+    return this.http.get<Post[]>(`${environment.apiHost}/posts/users/${userId}`);
+  }
+
 }

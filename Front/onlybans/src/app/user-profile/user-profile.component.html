@@ -1,11 +1,76 @@
-<div *ngIf="user">
-    <h1>{{ user.username }}'s Profile</h1>
-    <p><strong>Username:</strong> {{ user.username }}</p>
+<div *ngIf="userProfile$ | async as user" class="profile-container">
+  <!-- Korisničko ime -->
+  <h1 class="username">{{ user.username }}</h1>
+
+  <!-- Osnovni podaci o korisniku -->
+  <div class="user-info">
     <p><strong>Email:</strong> {{ user.email }}</p>
-    <!-- Add any other user information you want to display -->
   </div>
-  
-  <div *ngIf="!user">
-    <p>Loading user data...</p>
+
+  <!-- PostCount, Followers & Following sekcija -->
+  <div class="follow-info">
+
+    <div class="follow-item">
+      <span class="follow-number">{{ user.postsCount }}</span>
+      <span>Posts</span>
+    </div>
+
+    <!-- Broj pratilaca -->
+    <div class="follow-item">
+      <span class="follow-number">{{ user.followersCount }}</span>
+      <span class="followers-link" (click)="toggleFollowersList()">Followers</span>
+    </div>
+
+    <!-- Broj praćenih -->
+    <div class="follow-item">
+      <span class="follow-number">{{ user.followingCount }}</span>
+      <span class="following-link" (click)="toggleFollowingList()">Following</span>
+    </div>
   </div>
-  
+
+  <!-- Padajući meni - Followers lista -->
+  <div *ngIf="isFollowersListOpened" class="dropdown-list">
+    <h3>Followers</h3>
+    <ul>
+      <li *ngFor="let follower of followers$ | async">
+        <a [routerLink]="['/profile', follower.id]">{{ follower.username }}</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Padajući meni - Following lista -->
+  <div *ngIf="isFollowingListOpened" class="dropdown-list">
+    <h3>Following</h3>
+    <ul>
+      <li *ngFor="let followedUser of following$ | async">
+        <a [routerLink]="['/profile', followedUser.id]">{{ followedUser.username }}</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Dugme za praćenje -->
+  <div class="dropdown-container">
+    <button *ngIf="isNotLoggedInUserProfile" (click)="toggleFollow()" 
+      [ngClass]="(isFollowing$ | async ) ? 'following' : 'follow'">
+      {{ (isFollowing$ | async) ? 'Pracenje' : 'Prati' }}
+      <span *ngIf="(isFollowing$ | async)"> ▼ </span>
+    </button>
+
+    <!-- Padajući meni za otprati -->
+    <ul *ngIf="dropdownOpen" class="dropdown-menu" [ngClass]="{'show': dropdownOpen}">
+      <li (click)="unfollow()">Ne prati više</li>
+    </ul>
+  </div>
+
+  <!-- Sekcija sa objavama korisnika -->
+  <div class="posts-container">
+    <h2>Objave korisnika</h2>
+
+    <app-post *ngIf="userProfileId$ | async as id" [userId]="id"></app-post>
+  </div>
+</div>
+
+<!-- Ako korisnik nije učitan -->
+<div *ngIf="!user">
+  <p>Loading user data...</p>
+</div>

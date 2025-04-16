@@ -6,9 +6,10 @@ import { ConfigService } from './config.service';
 import { catchError, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { of } from 'rxjs/internal/observable/of';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
-
+import { AuthUser } from '../model/registered-user';
+import { JwtHelperService } from '@auth0/angular-jwt';
 @Injectable()
 export class AuthService {
 
@@ -20,7 +21,8 @@ export class AuthService {
   ) {
   }
 
-  private access_token = null;
+  private access_token : string | null = null;
+  user$ = new BehaviorSubject<AuthUser | null>(null);
 
   login(user:any) {
     const loginHeaders = new HttpHeaders({
@@ -34,9 +36,14 @@ export class AuthService {
     };
     return this.apiService.post(this.config.login_url, JSON.stringify(body), loginHeaders)
       .pipe(map((res) => {
+        const token = res.body?.accessToken;
+        if (!token) {
+          throw new Error('No access token received');
+        }
         console.log('Login success');
-        this.access_token = res.body.accessToken;
-        localStorage.setItem("jwt", res.body.accessToken)
+        this.access_token = token;
+        localStorage.setItem("jwt", token);
+        this.setUser(token);
       }));
   }
 
@@ -52,9 +59,9 @@ export class AuthService {
   }
 
   logout() {
-    this.userService.currentUser = null;
     localStorage.removeItem("jwt");
     this.access_token = null;
+    this.user$.next(null);
     this.router.navigate(['/login']);
   }
 
@@ -73,5 +80,33 @@ export class AuthService {
       return decodedToken; 
     }
     return null;
+  }
+
+  
+  private decodeToken(token: string): AuthUser | null{
+    try{
+      const jwtHelperService = new JwtHelperService();
+      const decodedToken = jwtHelperService.decodeToken(token);
+
+      let roles = decodedToken['roles'] || [];
+      if(typeof roles === 'string'){
+        roles = [roles];
+      }
+
+      const user: AuthUser = {
+        id: decodedToken.id,
+        username: decodedToken.username,
+        roles: roles
+      };
+      return user;
+    }catch(err){
+      console.log('Error during decoding token: ', err);
+      return null;
+    }
+  }
+
+  private setUser(token: string): void{
+    const decodedUser = this.decodeToken(token);
+    this.user$.next(decodedUser);
   }
 }

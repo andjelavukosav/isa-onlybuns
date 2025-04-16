@@ -1,21 +1,36 @@
 <mat-toolbar class="app-navbar" color="primary">
-    <div class="right">
-        <div fxFlex="1 1 auto" fxLayout="row" fxLayoutAlign="flex-end center">
-            <button *ngIf="!hasSignedIn()" mat-raised-button routerLink="/signup">
-                <span>Sign up</span>
-            </button>
-            <button *ngIf="!hasSignedIn()" mat-raised-button routerLink="/login">
-                <span>Login</span>
-            </button>
-            <button *ngIf="hasSignedIn()" [matMenuTriggerFor]="userMenu" mat-icon-button>
-                <span>Hello, {{userName()}}</span>
-                <mat-icon>menu</mat-icon>
-            </button>
-            
-            <mat-menu #userMenu ="matMenu">
-                <button mat-menu-item routerLink="/users">Registered Users</button>
-                <button mat-menu-item (click)="logout()">sign out</button>
-            </mat-menu>
-        </div>
+    <div fxFlex="1 1 auto" fxLayout="row" fxLayoutAlign="flex-end center" style="gap: 10px; align-items: center;">
+      
+      <!-- Ako korisnik NIJE prijavljen -->
+      <ng-container *ngIf="!(user$ | async); else signedInBlock">
+        <button mat-raised-button routerLink="/signup">Sign up</button>
+        <button mat-raised-button routerLink="/login">Login</button>
+      </ng-container>
+  
+      <!-- Ako jeste prijavljen -->
+      <ng-template #signedInBlock>
+        <!-- Prikazuje ime korisnika ako je dostupno -->
+        <ng-container *ngIf="user$ | async as user ; else loading">
+          <span class="greeting">Hello, {{ user.username }}</span>
+        </ng-container>
+  
+        <!-- Prikazuje Loading dok ime nije dostupno -->
+        <ng-template #loading>
+          <span class="greeting">Hello, Loading...</span>
+        </ng-template>
+
+  
+        <!-- Dugme koje otvara meni -->
+        <button mat-icon-button [matMenuTriggerFor]="userMenu">
+          <mat-icon>menu</mat-icon>
+        </button>        
+  
+        <!-- Padajući meni -->
+        <mat-menu #userMenu="matMenu" >
+          <button mat-menu-item *ngIf="isAdmin()" routerLink="/registered-users">Registered Users</button>
+          <button mat-menu-item (click)="logout()">Sign out</button>
+        </mat-menu> 
+      </ng-template>
+    
     </div>
-</mat-toolbar>
+  </mat-toolbar>

@@ -4,6 +4,7 @@ import { UsersComponent } from './users/users.component';
 import { CreatePostComponent } from './create-post/create-post.component';
 import { PostDetailsComponent } from './post-details/post-details.component';
 import { HomeComponent } from './home/home.component';
+import { UserProfileComponent } from './user-profile/user-profile.component';
 
 
 const routes: Routes = [
@@ -11,10 +12,11 @@ const routes: Routes = [
   {path: 'users', component: UsersComponent},
   {path: 'post/:id', component: PostDetailsComponent},
   { path: '', component: HomeComponent },
+  {path: 'profile/:userId', component: UserProfileComponent}
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { onSameUrlNavigation: 'reload' })],
   exports: [RouterModule,
   ]
 })

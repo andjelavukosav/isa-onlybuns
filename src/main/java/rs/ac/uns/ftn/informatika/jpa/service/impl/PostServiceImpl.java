@@ -12,6 +12,7 @@ import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -36,7 +37,7 @@ public class PostServiceImpl implements PostService {
         post.setCreationDateTime(postRequest.creationDateTime);
         post.setLocation(new Location(postRequest.location));
         post.setImagePath(postRequest.imagePath);
-        post.setUser(UserDTOMapper.fromDTOtoUser(postRequest.getUser()));
+        post.setUser(userDTOMapper.fromDTOtoUser(postRequest.getUser()));
         post.setLikeCount(postRequest.likeCount);
         return this.postRepository.save(post);
     }
@@ -77,7 +78,7 @@ public class PostServiceImpl implements PostService {
 
         // Update the user if needed (optional, based on requirements)
         if (postRequest.getUser() != null) {
-            post.setUser(UserDTOMapper.fromDTOtoUser(postRequest.getUser()));
+            post.setUser(userDTOMapper.fromDTOtoUser(postRequest.getUser()));
         }
 
         // Save the updated post to the repository
@@ -90,7 +91,13 @@ public class PostServiceImpl implements PostService {
         return rowAffected > 0;
     }
 
-
+    @Override
+    public List<PostDTO> findByUser(int userId) {
+        return postRepository.findByUserId(userId)
+                .stream()
+                .map(PostDTO :: new)
+                .collect(Collectors.toList());
+    }
 
 
 }

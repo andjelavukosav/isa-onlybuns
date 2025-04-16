@@ -3,9 +3,12 @@ import {ApiService} from './api.service';
 import {ConfigService} from './config.service';
 import {map} from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { UserDTO } from '../model/registered-user';
+import { UserDTO, UserFollowStateDTO, UserSearchCriteria } from '../model/registered-user';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../env/enviroment';
+import { PagedResults } from '../model/paged-result.model';
+import { Post } from '../model/post.model';
+import { Page } from '../model/pagination.model';
 
 @Injectable({
   providedIn: 'root'
@@ -33,8 +36,13 @@ export class UserService {
     return this.apiService.get(this.config.users_url);
   }
 
-  getAllRegisteredUsers(): Observable<UserDTO[]> {
-    return this.http.get<UserDTO[]>(environment.apiHost + '/users');
+
+  getUsersPage(page: number, size: number, sortBy: string, direction: string): Observable<Page<UserDTO>>{
+    return this.http.get<Page<UserDTO>>(`${environment.apiHost}/users?page=${page}&size=${size}&sortBy=${sortBy}&direction=${direction}`);
+  }
+
+  searchUserss(criteria: UserSearchCriteria, page: number, size: number, sortBy: string, direction: string): Observable<Page<UserDTO>>{
+    return this.http.post<Page<UserDTO>>(`${environment.apiHost}/users/search?page=${page}&size=${size}&sortBy=${sortBy}&direction=${direction}`, criteria);
   }
 
   searchUsers(firstName: string, lastName: string, email: string, sortBy: string, sortDirection: string ,minPosts?: number | null, maxPosts?: number | null): Observable<UserDTO[]> {
@@ -69,5 +77,43 @@ export class UserService {
   getUserPostCount(userId: number): Observable<number> {
     return this.http.get<number>(environment.apiHost + `/posts/user/${userId}/count`);
   }
+
+  searchUsersByUsername(username: string): Observable<UserDTO[]>{
+    return this.http.get<UserDTO[]>(environment.apiHost +  `/users/searchBy?username=${username}`);
+  }
+
+  followUser(followerId: number, followedId: number): Observable<UserFollowStateDTO>{
+    const body = { followerId, followedId}
+    return this.http.post<UserFollowStateDTO>(`${environment.apiHost}/users/follow`, body);
+  }
+
+  unfollowUser(followerId: number, followedId: number): Observable<UserFollowStateDTO>{
+    const body = { followerId, followedId}
+    return this.http.post<UserFollowStateDTO>(environment.apiHost + `/users/unfollow`, body);
+  }
+
+  checkIfFollowing(followerId: number, followedId: number): Observable<boolean> {
+    return this.http.get<any>(`${environment.apiHost}/users/${followerId}/is-following/${followedId}`)
+      .pipe(
+        map(response => response.isFollowing) // Ekstraktujemo samo 'isFollowing' vrednost
+      );
+  }
+
+  getFollowingPosts(): Observable<PagedResults<Post>>{
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/users/following-posts`);
+  }
+
+  getUserFollowing(userId: number): Observable<PagedResults<UserDTO>>{
+    return this.http.get<PagedResults<UserDTO>>(`${environment.apiHost}/users/${userId}/following`);
+  }
+
+  getUserFollowers(userId: number): Observable<PagedResults<UserDTO>>{
+    return this.http.get<PagedResults<UserDTO>>(`${environment.apiHost}/users/${userId}/followers`);
+  }
+  
+  getPostsByUser(userId: number): Observable<PagedResults<Post>>{
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/users/${userId}/posts`);
+  }
+  
 
 }

@@ -7,10 +7,14 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import rs.ac.uns.ftn.informatika.jpa.model.Role;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class TokenUtils {
@@ -49,14 +53,18 @@ public class TokenUtils {
      * @param username Korisničko ime korisnika kojem se token izdaje
      * @return JWT token
      */
-    public String generateToken(String email) {
+    public String generateToken(int userId, String email, String username, List<Role> roles) {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
                 .setSubject(email)
                 .setAudience(generateAudience())
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDate())
-                .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
+                .claim("id", userId)
+                .claim("username", username)
+                .claim("roles", roles.stream().map(Role :: getName).collect(Collectors.toList()))
+                .signWith(SIGNATURE_ALGORITHM, SECRET)
+                .compact();
 
 
         // moguce je postavljanje proizvoljnih podataka u telo JWT tokena pozivom funkcije .claim("key", value), npr. .claim("role", user.getRole())

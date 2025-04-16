@@ -16,6 +16,7 @@ import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResult.PagedResults;
+
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
@@ -26,8 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -48,13 +48,14 @@ public class PostController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/users/{userId}/posts")
-    public ResponseEntity<List<Post>> getPostsByUser(@PathVariable int userId) {
-        User user = userRepository.findById(userId)
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<List<PostDTO>> getPostsByUser(@PathVariable int userId) {
+        /*User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        List<Post> posts = new ArrayList<>(user.getPosts());
-        return new ResponseEntity<>(posts, HttpStatus.OK);
+        List<Post> posts = new ArrayList<>(user.getPosts());*/
+        List<PostDTO> results = postService.findByUser(userId);
+        return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
 
@@ -83,6 +84,7 @@ public class PostController {
     }
 
 
+    //POTREBNO CIJELU METODU PREPRAVITI I PREBACITI LOGIKU U SERVIS
     @Operation(description = "Create a new post", method = "POST")
     @PostMapping(value = "/create", consumes = "multipart/form-data", produces = "application/json")
     @PreAuthorize("hasRole('USER')")
@@ -108,7 +110,6 @@ public class PostController {
 
         // Kreiranje Post objekta
         Post post = new Post();
-        post.setUser(user); // Postavljanje korisnika
         post.setDescription(description);
         post.setLikeCount(0);
         // Postavljanje lokacije ako je prisutna
@@ -122,12 +123,13 @@ public class PostController {
             post.setImagePath(imagePath);
         }
 
-        post.setCreationDateTime(LocalDateTime.now());
-
+        post.setCreationDateTime(new Date());
+        user.addPost(post);
+        this.userRepository.save(user);
 
         // Čuvanje posta u bazi
         PostDTO postDTO = new PostDTO(post);
-        post = postService.save(postDTO);
+        //post = postService.save(postDTO);
 
 
         return new ResponseEntity<>(postDTO, HttpStatus.CREATED);
@@ -229,7 +231,7 @@ public class PostController {
         // Ažurira polja posta
         existingPost.setDescription(description);
         existingPost.setLikeCount(likeCount);
-        existingPost.setCreationDateTime(LocalDateTime.parse(creationDateTime));
+        existingPost.setCreationDateTime(new Date());
 
         // Ažurira korisnika po userId
         User user = userService.findById(userId);

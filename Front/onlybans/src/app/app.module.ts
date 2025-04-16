@@ -11,7 +11,6 @@ import { MaterialModule } from './infrastructure/material/material.module';
 import { LoginComponent } from './infrastructure/auth/login/login.component';
 import { RoutingModule } from './infrastructure/routing/routing.module';
 import { CardComponent } from './card/card.component';
-import { RegistrationComponent } from './infrastructure/auth/registration/registration.component';
 
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
@@ -35,6 +34,13 @@ import { FollowedUserPostComponent } from './followed-user-post/followed-user-po
 import { ActivityTrendsComponent } from './activity-trends/activity-trends.component';
 import { NearbyPostsMapComponent } from './nearby-posts-map/nearby-posts-map.component';
 import { ChatComponent } from './chat/chat.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { RegisteredUsersComponent } from './registered-users/registered-users.component';
+import { AuthModule } from './infrastructure/auth/auth.module';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenavModule } from '@angular/material/sidenav';
 
 @NgModule({
   declarations: [
@@ -43,10 +49,8 @@ import { ChatComponent } from './chat/chat.component';
     NavbarComponent,
     HomeComponent,
     CardComponent,
-    RegistrationComponent,
     PostComponent,
     CreatePostComponent,
-    RegistrationComponent,
     UsersComponent,
     UserProfileComponent,
     PostDetailsComponent,
@@ -54,7 +58,8 @@ import { ChatComponent } from './chat/chat.component';
     FollowedUserPostComponent,
     ActivityTrendsComponent,
     NearbyPostsMapComponent,
-    ChatComponent
+    ChatComponent,
+    RegisteredUsersComponent
   ],
   imports: [
     BrowserModule,
@@ -65,7 +70,12 @@ import { ChatComponent } from './chat/chat.component';
     ReactiveFormsModule,
     HttpClientModule,
     NoopAnimationsModule,
-    LeafletModule
+    LeafletModule,
+    MatSnackBarModule,
+    AuthModule,
+    MatMenuModule,
+    MatIconModule,
+    MatButtonModule
   ],
   providers: [
     {

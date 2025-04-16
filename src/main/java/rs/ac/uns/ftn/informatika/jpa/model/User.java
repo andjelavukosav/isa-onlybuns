@@ -35,21 +35,6 @@ public class User implements UserDetails {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "followersCount")
-    private long followersCount;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_following",
-            joinColumns = @JoinColumn(name = "follower_id"),
-            inverseJoinColumns = @JoinColumn(name = "following_id")
-    )
-    private Set<User> following = new HashSet<>(); //skup korisnika koje trenutni korisnik prati
-
-    @ManyToMany(mappedBy = "following")
-    @JsonIgnore
-    private Set<User> followers = new HashSet<>(); //korisnici koji prate ovog korisnika
-
     @Column(name = "enabled")
     private boolean enabled;
 
@@ -66,7 +51,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "address_id")
     private Address address;  // A user can have one address
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
     private Set<Post> posts = new HashSet<Post>();
 
@@ -78,8 +63,35 @@ public class User implements UserDetails {
         this.address = address;
     }
 
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Follow> following = new HashSet<>();
+
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Follow> followers = new HashSet<>();
+
+    @Column(name="following_count", nullable = false, columnDefinition = "int default 0")
+    private int followingCount = 0;
+
+    @Column(name="followers_count", nullable = false, columnDefinition = "int default 0")
+    private int followersCount = 0;
+
+    @Column(name="posts_count", nullable = false, columnDefinition = "int default 0")
+    private int postsCount = 0;
+
+    @Version
+    private Integer version;
+    @PrePersist
+    public void setVersionToZeroIfNull() {
+        if (version == null) {
+            version = 0; // Postavljanje verzije na 0 pre nego što se entitet sačuva
+        }
+    }
+
     public User() {super();}
-    public User(int id, String username, String password, String firstName, String lastName, String email, long followersCount) {
+
+    public User(int id, String username, String password, String firstName, String lastName, String email) {
         super();
         this.id = id;
         this.username = username;
@@ -87,7 +99,19 @@ public class User implements UserDetails {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+    }
+    
+    public User(int id, String username, String password, String firstName, String lastName, String email, int followingCount, int followersCount, int postsCount) {
+        super();
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.followingCount = followingCount;
         this.followersCount = followersCount;
+        this.postsCount = postsCount;
     }
 
     public int getId() {
@@ -140,28 +164,6 @@ public class User implements UserDetails {
         return roles;
     }
 
-    public void setFollowersCount(long followersCount) { this.followersCount = followersCount; }
-    public long getFollowersCount() { return followersCount; }
-
-    public void setFollowing(Set<User> following) { this.following = following; }
-    public Set<User> getFollowing() { return following; }
-    public void setFollowers(Set<User> followers) { this.followers = followers; }
-    public Set<User> getFollowers() { return followers; }
-
-    //Dodavanje korisnika u listu following - oni koje prati, a njega u njegovu listu
-    public void follow(User user) {
-        following.add(user);
-        user.getFollowers().add(this);
-        user.setFollowersCount(user.getFollowers().size()); // Ažurira broj pratilaca
-    }
-
-    public void unfollow(User user) {
-        following.remove(user);
-        user.getFollowers().remove(this);
-        user.setFollowersCount(user.getFollowers().size());
-    }
-
-
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -204,13 +206,30 @@ public class User implements UserDetails {
     public void addPost(Post post) {
         this.posts.add(post);
         post.setUser(this);
+        this.incrementPostsCount();
     }
 
     public  void removePost(Post post) {
         this.posts.remove(post);
         post.setUser(null);
+        this.decrementPostsCount();
     }
 
+    public int getPostsCount() { return this.postsCount; }
+
+    public void setPostsCount(int postsCount) { this.postsCount = postsCount; }
+
+    public int getFollowingCount() { return this.followingCount; }
+
+    public void setFollowingCount(int followingCount) { this.followingCount = followingCount; }
+
+    public int getFollowersCount() { return this.followersCount; }
+
+    public void setFollowersCount(int followerCount) { this.followersCount = followerCount; }
+
+    public Integer getVersion() { return version; }
+
+    public void setVersion(Integer version) { this.version = version; }
 
     @JsonIgnore
     @Override
@@ -229,5 +248,60 @@ public class User implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
+    public Set<Follow> getFollowers() { return followers; }
+
+    public void setFollowers(Set<Follow> followers) { this.followers = followers; }
+
+    public Set<Follow> getFollowing() { return following; }
+
+    public void setFollowing(Set<Follow> following) { this.following = following; }
+
+    public void addFollowing(Follow follow) {
+        this.following.add(follow);
+        follow.setFollower(this);
+        incrementFollowingCount();
+    }
+    public void removeFollowing(Follow follow) {
+        this.following.remove(follow);
+        follow.setFollower(null);
+        this.decrementFollowingCount();
+        System.out.println("Updated following count: " + this.followingCount);
+    }
+    public void addFollower(Follow follow) {
+        this.followers.add(follow);
+        follow.setFollowed(this);
+        incrementFollowersCount();
+    }
+    public void removeFollower(Follow follow) {
+        this.followers.remove(follow);
+        follow.setFollowed(null);
+        this.decrementFollowersCount();
+    }
+
+    private void incrementFollowersCount() { this.followersCount++; }
+
+    private void decrementFollowersCount(){
+        if(this.followersCount>0){
+            this.followersCount--;
+        }
+    }
+
+    private void incrementFollowingCount() { this.followingCount++; }
+
+    private void decrementFollowingCount(){
+        if(this.followingCount>0){
+            this.followingCount--;
+        }
+    }
+
+    private void incrementPostsCount() { this.postsCount++; }
+
+    private void decrementPostsCount(){
+        if(this.postsCount>0){
+            this.postsCount--;
+        }
+    }
+
 
 }

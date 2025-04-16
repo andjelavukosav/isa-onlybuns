@@ -1,7 +1,11 @@
 package rs.ac.uns.ftn.informatika.jpa.controller;
 
 import org.hibernate.Hibernate;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,12 +15,16 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
+import org.springframework.web.server.ResponseStatusException;
+import rs.ac.uns.ftn.informatika.jpa.dto.*;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
+import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
+import rs.ac.uns.ftn.informatika.jpa.service.FollowService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.security.Principal;
 import java.util.*;
@@ -32,6 +40,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FollowService followService;
 
     @Autowired
     private UserDTOMapper userDTOMapper;
@@ -69,68 +80,163 @@ public class UserController {
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<UserDTO> findRegisteredUsers(Principal principal) {
-        if (principal == null) {
-            throw new RuntimeException("Principal is null, user not authenticated.");
-        }
-
-        User adminUser = this.userService.findByUsername(principal.getName());
-        if (adminUser == null) {
-            throw new RuntimeException("User not found or does not have the required role.");
-        }
-
-        int adminId = adminUser.getId();
-        return this.userService.findUsersByRoleExcludingAdmin(adminId);
-    }
-
-    @GetMapping("/users/search")
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<UserDTO> searchUsers(
-            @RequestParam(required = false)String firstName,
-            @RequestParam(required = false)String lastName,
-            @RequestParam(required = false)String email,
-            @RequestParam(required = false)Long minPosts,
-            @RequestParam(required = false)Long maxPosts,
-            @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false, defaultValue = "ASC") String sortDirection,
+    public ResponseEntity<Page<UserDTO>> getUsers(
+            @RequestParam(defaultValue = "0")int page,
+            @RequestParam(defaultValue = "5")int size,
+            @RequestParam(defaultValue = "email")String sortBy,
+            @RequestParam(defaultValue = "asc")String direction,
             Principal principal) {
 
-         if(principal == null) {
-             throw new RuntimeException("Principal is null, user not authenticated.");
-         }
-         User adminUser = this.userService.findByUsername(principal.getName());
-         if (adminUser == null) {
-             throw new RuntimeException("User not found or does not have the required role.");
-         }
-         int adminId = adminUser.getId();
+        UserDTO admin = userDTOMapper.fromUsertoDTO(userService.findByUsername(principal.getName()));
 
-        List<String> validSortByFields = Arrays.asList("email", "followersCount");
+        Sort sort = direction.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 
-        // Ako je parametar 'sortBy' null ili nije validan, postavi default vrednost
-        if (sortBy == null || !validSortByFields.contains(sortBy)) {
-            sortBy = "email"; // Default vrednost
-        }
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        // Kreiranje Sort objekta na osnovu parametara
-        Sort sort = Sort.by(Sort.Order.asc(sortBy)); // Default je uzlazno sortiranje
-        if ("DESC".equalsIgnoreCase(sortDirection)) {
-            sort = Sort.by(Sort.Order.desc(sortBy)); // Ako je "DESC", koristi silazno sortiranje
-        }
+        Page<UserDTO> usersPage = userService.getUsersExcludingAdmin(admin.getId(), pageable);
 
-        return this.userService.searchUsers(firstName, lastName, email, minPosts, maxPosts, adminId, sort);
+        return  usersPage.getTotalElements() == 0 ?
+                ResponseEntity.noContent().build() : ResponseEntity.ok(usersPage);
+
     }
 
+    @PostMapping(value = "/users/search",
+                consumes = MediaType.APPLICATION_JSON_VALUE,
+                produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<UserDTO>> searchUsers(
+            @RequestBody(required = false) UserSearchCriteria criteria,
+            @RequestParam(defaultValue = "0")int page,
+            @RequestParam(defaultValue = "5")int size,
+            @RequestParam(defaultValue = "email")String sortBy,
+            @RequestParam(defaultValue = "asc")String direction,
+            Principal principal) {
+
+        UserDTO admin = userDTOMapper.fromUsertoDTO(userService.findByUsername(principal.getName()));
+
+        Sort sort = direction.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<UserDTO> usersPage = userService.searchUsers(criteria, pageable, admin.getId());
+
+        return  ResponseEntity.ok().body(usersPage);
+    }
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable int userId) {
          User user = userService.findById(userId);
         if (user != null) {
-            return ResponseEntity.ok(UserDTOMapper.fromUsertoDTO(user));
+            return ResponseEntity.ok(userDTOMapper.fromUsertoDTO(user));
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
 
+    @GetMapping("/users/searchBy")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<UserDTO>> searchUsersByUsername(@RequestParam String username) {
+
+        List<UserDTO> results = userService.findAllContainingUsername(username);
+
+        return ResponseEntity.ok(results);
+
+    }
+
+
+    @PostMapping(value = "/users/follow",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<UserFollowStateDTO> followUser(@RequestBody FollowRequest request) {
+       
+        UserFollowStateDTO result = followService.followUser(request.getFollowerId(), request.getFollowedId());
+
+        return ResponseEntity.ok().body(result);
+
+    }
+
+    @PostMapping(value="/users/unfollow",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<UserFollowStateDTO> unfollowUser(@RequestBody FollowRequest request) {
+
+        UserFollowStateDTO result = followService.unfollowUser(request.getFollowerId(), request.getFollowedId());
+
+        return ResponseEntity.ok().body(result);
+
+    }
+
+    @GetMapping("/users/{followerId}/is-following/{followedId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<Map<String, Boolean>> checkFollowing(@PathVariable("followerId")int followerId, @PathVariable("followedId")int followedId) {
+
+        boolean isFollowing = followService.isFollowing(followerId, followedId);
+
+        Map<String, Boolean> response = new HashMap<>();
+
+        response.put("isFollowing", isFollowing);
+
+        return ResponseEntity.ok(response);
+
+    }
+
+    @GetMapping("/users/following-posts")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<PagedResults<PostDTO>> getFollowingPosts(Principal principal){
+
+        UserDTO currentUser = userDTOMapper.fromUsertoDTO(userService.findByUsername(principal.getName()));
+
+        PagedResults<PostDTO> results = userService.getFollowingPosts(currentUser.getId());
+        if (results == null || results.getResults().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok().body(results);
+    }
+
+    @GetMapping("/users/{userId}/following")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<PagedResults<UserDTO>> getUserFollowing(@PathVariable("userId")int userId) {
+
+        PagedResults<UserDTO> followingUsers = userService.getUserFollowing(userId);
+
+        if (followingUsers.getResults().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok().body(followingUsers);
+    }
+
+    @GetMapping("/users/{userId}/followers")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<PagedResults<UserDTO>> getUserFollowers(@PathVariable("userId")int userId) {
+
+        PagedResults<UserDTO> results = userService.getUserFollowers(userId);
+
+        if(results.getResults().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok().body(results);
+    }
+
+    @GetMapping("/users/{userId}/posts")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<PagedResults<PostDTO>> getUserPosts(@PathVariable("userId")int userId) {
+        PagedResults<PostDTO> posts = userService.getPostsByUser(userId);
+
+        if(posts.getResults().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok().body(posts);
+    }
 
 }

@@ -38,6 +38,9 @@ public class AuthenticationController {
     @Autowired
     private EmailSenderService emailService;
 
+    @Autowired
+    private UserDTOMapper userDTOMapper;
+
 
     @PostMapping("/login")
     public ResponseEntity<UserTokenStateDTO> createAuthenticationToken(
@@ -61,7 +64,7 @@ public class AuthenticationController {
         }
 
         // Generate the JWT using the user's email
-        String jwt = tokenUtils.generateToken(user.getEmail());
+        String jwt = tokenUtils.generateToken(user.getId(), user.getEmail(), user.getUsername(), user.getRoles());
         int expiresIn = tokenUtils.getExpiredIn();
 
         return ResponseEntity.ok(new UserTokenStateDTO(jwt, expiresIn));
@@ -102,7 +105,7 @@ public class AuthenticationController {
         // Check if the user exists
         if (user != null) {
             // Map the User entity to UserDTO
-            UserDTO userDTO = UserDTOMapper.fromUsertoDTO(user);
+            UserDTO userDTO = this.userDTOMapper.fromUsertoDTO(user);
 
             // Update the verification status in the UserDTO
             userDTO.setEnabled(true);

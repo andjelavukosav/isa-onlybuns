@@ -1,9 +1,12 @@
 package rs.ac.uns.ftn.informatika.jpa.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import javax.xml.crypto.Data;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name="post")
@@ -20,7 +23,9 @@ public class Post {
     private String imagePath;
 
     @Column(name = "CreationDateTime")
-    private LocalDateTime creationDateTime;
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private Date creationDateTime;
 
     @Column(name= "LikeCount" )
     private int likeCount;
@@ -37,7 +42,7 @@ public class Post {
         super();
     }
 
-    public Post(User user, String description, String imagePath, LocalDateTime creationDateTime, Location location) {
+    public Post(User user, String description, String imagePath, Date creationDateTime, Location location) {
         this.user = user;
         this.description = description;
         this.imagePath = imagePath;
@@ -69,11 +74,11 @@ public class Post {
         this.imagePath = imagePath;
     }
 
-    public LocalDateTime getCreationDateTime() {
+    public Date getCreationDateTime() {
         return creationDateTime;
     }
 
-    public void setCreationDateTime(LocalDateTime creationDateTime) {
+    public void setCreationDateTime(Date creationDateTime) {
         this.creationDateTime = creationDateTime;
     }
 

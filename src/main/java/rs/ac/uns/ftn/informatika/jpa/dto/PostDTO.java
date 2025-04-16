@@ -5,11 +5,12 @@ import rs.ac.uns.ftn.informatika.jpa.model.Post;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 public class PostDTO {
     public int id;
     public String description;
-    public LocalDateTime creationDateTime;
+    public Date creationDateTime;
     public String imagePath;
     public LocationDTO location;
     public MultipartFile image;
@@ -18,7 +19,7 @@ public class PostDTO {
 
     public PostDTO() {}
 
-    public PostDTO(int id, String description, LocalDateTime creationDateTime, String imagePath, LocationDTO location) {
+    public PostDTO(int id, String description, Date creationDateTime, String imagePath, LocationDTO location) {
         this.id = id;
         this.description = description;
         this.creationDateTime = creationDateTime;
