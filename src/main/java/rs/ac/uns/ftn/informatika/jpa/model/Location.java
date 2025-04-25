@@ -3,9 +3,13 @@ package rs.ac.uns.ftn.informatika.jpa.model;
 import rs.ac.uns.ftn.informatika.jpa.dto.LocationDTO;
 
 import javax.persistence.Embeddable;
+import java.io.Serializable;
 
 @Embeddable
-public class Location {
+public class Location implements Serializable {
+
+    private static final long serialVersionUID = 1L; // Preporučeno dodati serialVersionUID
+
     private double latitude;
     private double longitude;
 

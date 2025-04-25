@@ -6,9 +6,9 @@ import { Observable } from 'rxjs';
 import { UserDTO, UserFollowStateDTO, UserSearchCriteria } from '../model/registered-user';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../env/enviroment';
-import { PagedResults } from '../model/paged-result.model';
 import { Post } from '../model/post.model';
 import { Page } from '../model/pagination.model';
+import { PagedResults } from '../model/paged-result.model';
 
 @Injectable({
   providedIn: 'root'
@@ -74,10 +74,38 @@ export class UserService {
     return this.http.get<UserDTO>(environment.apiHost + `/users/${userId}`);
   }
 
+  updateUserData(userId: number, updatedUser: UserDTO) {
+    return this.http.put(environment.apiHost + `/users/update/${userId}`,updatedUser, {
+      responseType: 'text'  // Očekuje se tekstualni odgovor umesto JSON
+    });
+  }
+
   getUserPostCount(userId: number): Observable<number> {
     return this.http.get<number>(environment.apiHost + `/posts/user/${userId}/count`);
   }
 
+  getTopUsersMostLikes(): Observable<PagedResults<UserDTO>> {
+    return this.http.get<PagedResults<UserDTO>>(environment.apiHost + '/likes/top10UsersMostLikes');
+  }
+  updatePassword(userId: number, newPassword: string): Observable<any> {
+    return this.http.put(
+        `${environment.apiHost}/users/update-password/${userId}`,
+        newPassword,
+        { responseType: 'text' } // Jasno naznačite da očekujete plain text odgovor
+    );
+  }
+
+  verifyPassword(userId: number, currentPassword: string): Observable<boolean> {
+    return this.http.post<boolean>(`${environment.apiHost}/users/verify-password`, {
+      userId: userId,
+      currentPassword: currentPassword
+    });
+  }
+
+
+  getUserLocation(userId: number): Observable<{ latitude: number, longitude: number }> {
+    return this.http.get<{ latitude: number, longitude: number }>(`${environment.apiHost}/users/location/${userId}`);
+  }
   searchUsersByUsername(username: string): Observable<UserDTO[]>{
     return this.http.get<UserDTO[]>(environment.apiHost +  `/users/searchBy?username=${username}`);
   }
@@ -110,10 +138,10 @@ export class UserService {
   getUserFollowers(userId: number): Observable<PagedResults<UserDTO>>{
     return this.http.get<PagedResults<UserDTO>>(`${environment.apiHost}/users/${userId}/followers`);
   }
-  
+
   getPostsByUser(userId: number): Observable<PagedResults<Post>>{
     return this.http.get<PagedResults<Post>>(`${environment.apiHost}/users/${userId}/posts`);
   }
-  
+
 
 }

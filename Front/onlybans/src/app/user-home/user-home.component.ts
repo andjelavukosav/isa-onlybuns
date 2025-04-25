@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { UserService } from '../service';
-import { UserDTO } from '../model/registered-user';
+import { AuthService, UserService } from '../service';
+import { AuthUser, UserDTO } from '../model/registered-user';
 import { catchError, debounceTime, filter, of, Subject, switchMap } from 'rxjs';
 import { query } from '@angular/animations';
 import { Router } from '@angular/router';
@@ -15,11 +15,30 @@ export class UserHomeComponent {
   searchResults: UserDTO[] = [];
   searchSubject = new Subject<string>(); //prati promjene u polju
   errorMessage: string = '';
-  fleg: boolean = false; 
+  fleg: boolean = false;
 
-  constructor(private userService: UserService, private router: Router){}
+  userId: number | null = null;
+  user: AuthUser | null = null;
+  whoamIResponse = {};
+
+  constructor(private userService: UserService,
+            private router: Router,
+            private authService: AuthService){}
 
   ngOnInit() {
+
+    this.authService.user$.subscribe({
+      next: (user) => {
+        if(user){
+          this.user = user;
+          this.userId = user.id;
+          console.log('Login user: ', user); 
+        }
+      },
+      error: (err) => {
+        console.log('An error occurred during logging in.');
+      }
+    })
     this.searchSubject.pipe(
       debounceTime(300),
       filter(query => query.length >= 1),
@@ -50,13 +69,15 @@ export class UserHomeComponent {
         console.log('searchResults:', this.searchResults);
         console.log('errorMessage:', this.errorMessage);
 
-      
+
     });
+
+
   }
 
   searchUsers() {
     this.searchSubject.next(this.searchQuery); // Svaki unos se šalje kroz Subject
   }
 
-  
+
 }

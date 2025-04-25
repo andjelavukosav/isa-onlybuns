@@ -2,33 +2,41 @@ package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rs.ac.uns.ftn.informatika.jpa.dto.AddressDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.UserSearchCriteria;
+import rs.ac.uns.ftn.informatika.jpa.dto.*;
+import rs.ac.uns.ftn.informatika.jpa.mapper.PostDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
+import rs.ac.uns.ftn.informatika.jpa.model.*;
 import rs.ac.uns.ftn.informatika.jpa.model.*;
 import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.repository.AddressRepository;
+import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
+import rs.ac.uns.ftn.informatika.jpa.service.GeocodingService;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 import rs.ac.uns.ftn.informatika.jpa.service.RoleService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 import rs.ac.uns.ftn.informatika.jpa.specification.UserSpecification;
 
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import java.io.IOException;
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,12 +50,20 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleService roleService;
+
     @Autowired
     private AddressRepository addressRepository;
     @Autowired
     private UserDTOMapper userDTOMapper;
+
     @Autowired
-    private PostService postService;
+    private PostDTOMapper postDTOMapper;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private GeocodingService geocodingService;
 
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
@@ -60,15 +76,23 @@ public class UserServiceImpl implements UserService {
     }
 
     public User findById(int id) throws AccessDeniedException {
-        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return userRepository.findById(id).orElseGet(null);
     }
 
     public List<User> findAll() throws AccessDeniedException {
         return userRepository.findAll();
     }
 
+    @Transactional
     @Override
     public User save(UserDTO userRequest) {
+
+        // Proverite da li korisničko ime već postoji uz zaključavanje
+        entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username")
+                .setParameter("username", userRequest.getUsername())
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .getResultList();
+
         // Create a new User entity
         User u = new User();
         u.setUsername(userRequest.getUsername());
@@ -87,33 +111,57 @@ public class UserServiceImpl implements UserService {
         u.setRoles(roles);
 
         // Handle address
-        Address address = new Address();
 
         // If address data exists in the UserDTO, set it
         if (userRequest.getAddress() != null) {
             AddressDTO addressDTO = userRequest.getAddress();
+            Address address = new Address();
 
-            // Check if the address already exists in the database (based on some unique criteria like country, city, etc.)
-            address = addressRepository.findByCountryAndCityAndStreetAndStreetNumber(
-                    addressDTO.getCountry(),
-                    addressDTO.getCity(),
-                    addressDTO.getStreet(),
-                    addressDTO.getStreetNumber()
-            );
+            if (addressDTO.getId() > 0) {
+                // Pokušaj pronalaska adrese u bazi
+                address = addressRepository.findById(addressDTO.getId()).orElse(null);
 
-            // If address doesn't exist, create a new one
-            if (address == null) {
+                // Ako postoji, ažuriraj podatke
+                if (address != null) {
+                    address.setCountry(addressDTO.getCountry());
+                    address.setCity(addressDTO.getCity());
+                    address.setStreet(addressDTO.getStreet());
+                    address.setStreetNumber(addressDTO.getStreetNumber());
+                } else {
+                    // Ako ne postoji, kreiraj novu
+                    address = new Address();
+                    address.setCountry(addressDTO.getCountry());
+                    address.setCity(addressDTO.getCity());
+                    address.setStreet(addressDTO.getStreet());
+                    address.setStreetNumber(addressDTO.getStreetNumber());
+                }
+            } else {
+                // Ako ID nije postavljen ili je 0, kreiraj novu adresu
                 address = new Address();
                 address.setCountry(addressDTO.getCountry());
                 address.setCity(addressDTO.getCity());
                 address.setStreet(addressDTO.getStreet());
                 address.setStreetNumber(addressDTO.getStreetNumber());
-                addressRepository.save(address); // Save new address
+            }
+            String fullAddress = address.getStreet() + " " + address.getStreetNumber() + ", "
+                    + address.getCity() + ", "
+                    + address.getCountry();
+
+            try {
+                Location location = geocodingService.getCoordinates(fullAddress);
+                address.setLocation(location);
+            } catch (IOException e) {
+                e.printStackTrace(); // Bolja obrada greške može uključivati logovanje
             }
 
-            // Set the address for the user
+
+            // Sačuvaj adresu u bazi (novu ili ažuriranu)
+            address = addressRepository.save(address);
+
+            // Postavi adresu korisniku
             u.setAddress(address);
         }
+
 
         // Save the user and return the saved entity
         return this.userRepository.save(u);
@@ -121,9 +169,10 @@ public class UserServiceImpl implements UserService {
 
     public User updateUser(int id, UserDTO userRequest) throws AccessDeniedException {
         // Find the user by ID
-        User existingUser = userRepository.findById(id).orElseThrow(() -> new AccessDeniedException("User not found"));
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new AccessDeniedException("User not found"));
 
-        // Update the user fields
+        // Update user fields
         existingUser.setUsername(userRequest.getUsername());
 
 
@@ -135,32 +184,48 @@ public class UserServiceImpl implements UserService {
         existingUser.setEnabled(userRequest.isEnabled());
         existingUser.setEmail(userRequest.getEmail());
 
-        // Update roles if necessary
-        // If roles need to be updated, we can add logic to handle that. For simplicity, we retain the same role.
-        // List<Role> roles = roleService.findByName("ROLE_USER");
-        // existingUser.setRoles(roles);
-
-        // Handle address
+        // Update address if provided in the request
         if (userRequest.getAddress() != null) {
             AddressDTO addressDTO = userRequest.getAddress();
-            Address address = addressRepository.findByCountryAndCityAndStreetAndStreetNumber(
-                    addressDTO.getCountry(),
-                    addressDTO.getCity(),
-                    addressDTO.getStreet(),
-                    addressDTO.getStreetNumber()
-            );
+            Address address = null;
 
-            // If address doesn't exist, create a new one
-            if (address == null) {
-                address = new Address();
-                address.setCountry(addressDTO.getCountry());
-                address.setCity(addressDTO.getCity());
-                address.setStreet(addressDTO.getStreet());
-                address.setStreetNumber(addressDTO.getStreetNumber());
-                addressRepository.save(address); // Save new address
+            if (addressDTO.getId() > 0) {
+                // Ako ID postoji u request-u, pokušaj pronaći adresu u bazi
+                address = addressRepository.findById(addressDTO.getId()).orElse(null);
             }
 
-            // Update the user's address
+            if (address == null) {
+                // Ako adresa nije pronađena (ili ID nije dat), koristi postojeću adresu korisnika
+                address = existingUser.getAddress();
+            }
+
+            if (address == null) {
+                // Ako korisnik nema adresu i nije pronađena u bazi, kreiraj novu
+                address = new Address();
+            }
+
+            // Ažuriranje podataka o adresi
+            address.setCountry(addressDTO.getCountry());
+            address.setCity(addressDTO.getCity());
+            address.setStreet(addressDTO.getStreet());
+            address.setStreetNumber(addressDTO.getStreetNumber());
+
+            String fullAddress = address.getStreet() + " " + address.getStreetNumber() + ", "
+                    + address.getCity() + ", "
+                    + address.getCountry();
+
+            try {
+                Location location = geocodingService.getCoordinates(fullAddress);
+                address.setLocation(location);
+            } catch (IOException e) {
+                e.printStackTrace(); // Bolja obrada greške može uključivati logovanje
+            }
+
+
+            // Sačuvaj adresu u bazi
+            address = addressRepository.save(address);
+
+            // Postavi ažuriranu ili novu adresu korisniku
             existingUser.setAddress(address);
         }
 
@@ -169,10 +234,11 @@ public class UserServiceImpl implements UserService {
     }
 
 
+
     public List<Post> getAllPostsByUser(int userId) {
         return userRepository.findPostsByUserId(userId);
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public Page<UserDTO> getUsersExcludingAdmin(int adminId, Pageable pageable) {
@@ -180,7 +246,7 @@ public class UserServiceImpl implements UserService {
         Page<User> userPage =  userRepository.getUsersByRoleNameExcludingId("ROLE_USER", adminId, pageable);
 
         List<UserDTO> usersOnCurrentPage = userDTOMapper.toUserDTOList(userPage.getContent());
-       
+
         return new PageImpl<>(usersOnCurrentPage, pageable, userPage.getTotalElements());
     }
 
@@ -291,5 +357,30 @@ public class UserServiceImpl implements UserService {
                 .map(Follow :: getFollower)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void updateUserPassword(int userId, String newPassword) throws Exception {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception("User not found."));
+
+        // Hashujte novu lozinku
+        String hashedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(hashedPassword);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public boolean verifyPassword(int userId, String currentPassword) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional == null) {
+            throw new RuntimeException("User not found.");
+        }
+
+        User user = userOptional.get();
+        return passwordEncoder.matches(currentPassword, user.getPassword());
+    }
+
+
 
 }

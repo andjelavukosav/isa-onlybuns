@@ -4,8 +4,8 @@
       <li><a routerLink="/chat">Chat</a></li> 
       <li><a routerLink="/activity-trends">Activity trends</a></li> 
       <li><a routerLink="/followed-user-post">Followed user post</a></li> 
-      <li><a routerLink="/nearby-posts-map">Nearby posts map</a></li> 
-      <li><a routerLink="/profile/:userId">Profil</a></li>
+      <li><a [routerLink]="['/nearby-posts-map', userId]">Nearby posts map</a></li>
+      <li><a [routerLink]="['/profile', userId]">Profil</a></li>
     </ul>
 
     <div class="search-container">

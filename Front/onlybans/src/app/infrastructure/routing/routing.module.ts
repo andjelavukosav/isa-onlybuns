@@ -16,16 +16,16 @@ import { roleGuard } from 'src/app/guards/role.guard';
 
 const routes: Routes = [
   {path: 'home', component: HomeComponent},
-  { 
+  {
     path: '',
-    component: HomeComponent,  
+    component: HomeComponent,
     pathMatch: 'full'
   },
   {path: 'login', component: LoginComponent},
   {path: 'signup', component: RegistrationComponent},
   {path: 'create-post', component: CreatePostComponent},
   {path: 'profile/:userId', component: UserProfileComponent},
-  {path: 'user-home', 
+  {path: 'user-home',
     component: UserHomeComponent,
     canActivate: [roleGuard],
     data: {roles: ['ROLE_USER']}
@@ -33,12 +33,12 @@ const routes: Routes = [
   {path: 'activity-trends', component: ActivityTrendsComponent},
   {path: 'chat', component: ChatComponent},
   {path: 'followed-user-post', component: FollowedUserPostComponent},
-  {path: 'nearby-posts-map', component: NearbyPostsMapComponent},
-  {path: 'registered-users', 
+  {path: 'registered-users',
     component: RegisteredUsersComponent,
     canActivate: [roleGuard],
     data: { roles: ['ROLE_ADMIN']}
-  }
+  },
+  {path: 'nearby-posts-map/:userId', component: NearbyPostsMapComponent},
 ];
 
 @NgModule({

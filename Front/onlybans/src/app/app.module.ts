@@ -11,6 +11,7 @@ import { MaterialModule } from './infrastructure/material/material.module';
 import { LoginComponent } from './infrastructure/auth/login/login.component';
 import { RoutingModule } from './infrastructure/routing/routing.module';
 import { CardComponent } from './card/card.component';
+import { RegistrationComponent } from './infrastructure/auth/registration/registration.component';
 
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
@@ -41,6 +42,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { UserProfileDetailsComponent } from './user-profile-details/user-profile-details.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +53,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
     CardComponent,
     PostComponent,
     CreatePostComponent,
+    //RegistrationComponent,
     UsersComponent,
     UserProfileComponent,
     PostDetailsComponent,
@@ -59,7 +62,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
     ActivityTrendsComponent,
     NearbyPostsMapComponent,
     ChatComponent,
-    RegisteredUsersComponent
+    RegisteredUsersComponent,
+    UserProfileDetailsComponent
   ],
   imports: [
     BrowserModule,

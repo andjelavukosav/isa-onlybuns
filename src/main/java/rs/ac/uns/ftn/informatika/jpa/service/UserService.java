@@ -3,6 +3,7 @@ package rs.ac.uns.ftn.informatika.jpa.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import rs.ac.uns.ftn.informatika.jpa.dto.CreatePostDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserSearchCriteria;
@@ -29,4 +30,6 @@ public interface UserService {
     PagedResults<UserDTO> getUserFollowing(int userId);
     PagedResults<UserDTO> getUserFollowers(int userId);
     PagedResults<PostDTO> getPostsByUser(int userId);
+    void updateUserPassword(int userId, String newPassword) throws Exception;
+    boolean verifyPassword(int userId, String currentPassword);
 }

@@ -1,162 +1,110 @@
+/* Glavni kontejner */
 .profile-container {
-  text-align: center;
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-}
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Visina celog ekrana */
+    margin: 0;
+    padding: 0;
+  }
 
-.username {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
+  /* Navigaciona linija (tabovi) */
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 2px solid #ddd;
+    margin: 0;
+    padding: 10px 0;
+    background-color: #f9f9f9;
+  }
 
-.user-info {
-  margin-bottom: 20px; /* Veći razmak ispod osnovnih informacija */
-}
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
 
-.user-info p {
-  font-size: 16px;
-  color: #666;
-}
+  .tab:hover {
+    background-color: #f0f0f0;
+  }
 
-/* Sekcija za broj pratilaca i praćenja */
-.follow-info {
-  display: flex;
-  justify-content: center;
-  gap: 50px;
-  margin-top: 20px;
-  padding: 10px 0;
-}
+  .tab.active {
+    font-weight: bold;
+    border-bottom: 2px solid #007bff;
+    color: #007bff;
+  }
 
-.follow-item {
-  text-align: center;
-}
+  /* Sadržaj sekcija */
+  .tab-content {
+    flex: 1; /* Preuzima preostali prostor */
+    overflow-y: auto; /* Omogućava skrolovanje ako sadržaj premaši ekran */
+    padding: 20px;
+  }
 
-.follow-number {
-  font-size: 20px;
-  font-weight: bold;
-  display: block;
-  margin-bottom: 5px;
-}
+  .posts-section,
+  .info-section,
+  .friends-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
-.followers-link, .following-link {
-  color: #004D3B;
-  cursor: pointer;
-  font-size: 14px;
-}
+  /* Stil za postove */
+  .post-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
 
-.followers-link:hover, .following-link:hover {
-  text-decoration: underline;
-}
+  .post-image img {
+    max-width: 100%;
+    border-radius: 8px;
+  }
 
-/* Padajući meni - lista pratilaca i praćenih */
-.dropdown-list {
-  margin-top: 10px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
-  max-height: 200px;
-  overflow-y: auto;
-  overflow-x: hidden; 
-}
+  /* Stil za prijatelje */
+  .friend-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-.dropdown-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+  .friend-card img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
 
-.dropdown-list li {
-  padding: 8px;
-  cursor: pointer;
-}
+  /* Header profila */
+  .profile-header {
 
-.dropdown-list li:hover {
-  background: #f0f0f0;
-}
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border-bottom: 2px solid #ddd;
 
-.dropdown-list li a {
-  display: block;
-  width: 100%;
-  text-decoration: none;
-  color: #004D3B; /* Tvoja sekundarna boja */
-  font-weight: bold;
-  padding: 10px;
-}
-
-
-.dropdown-container {
-  margin-top: 30px;
-  position: relative;
-  display: inline-block;
-}
-/* Dugme za praćenje */
-button {
-  font-size: 1rem;
-  padding: 0.75rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  margin-top: 15px;
-  width: 100%;
-}
+    display: flex;
+    align-items: center; /* Vertikalno centriranje */
+    justify-content: center; /* Horizontalno centriranje */
+    gap: 20px;
+    padding: 20px 0;
+  }
 
 
-.dropdown-menu {
-  position: absolute;
-  top: 100%; /* Postavlja meni tačno ispod dugmeta */
-  left: 0;
-  width: 100%; /* Ista širina kao dugme */
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 8px 0;
-  list-style: none;
-  margin: 0;
-  display: none; /* Sakriveno dok nije otvoreno */
-  z-index: 100; /* Da ne bude prekriveno drugim elementima */
-}
+  /* Opcioni stil za dugmad */
+  .follow-button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
 
-.dropdown-menu.show {
-  display: block; /* Prikaz kad se otvori */
-}
-
-.dropdown-menu li {
-  padding: 10px;
-  text-align: center;
-  cursor: pointer;
-}
-
-.dropdown-menu li:hover {
-  background: #f0f0f0;
-}
-
-.following {
-  background-color: #f5f5f5;
-  color: black;
-}
-
-.following:hover {
-  background-color: #e0e0e0;
-  border-color: #e0e0e0;
-}
-
-.follow {
-  background-color: blue;
-  color: white;
-}
-
-/* Sekcija sa objavama korisnika */
-.posts-container {
-  margin-top: 30px;
-  padding: 10px;
-  background: #fff;
-  border-radius: 5px;
-}
-
-
+  .follow-button:hover {
+    background-color: #0056b3;
+  }

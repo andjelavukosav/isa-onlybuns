@@ -5,6 +5,7 @@ import { CreatePostComponent } from './create-post/create-post.component';
 import { PostDetailsComponent } from './post-details/post-details.component';
 import { HomeComponent } from './home/home.component';
 import { UserProfileComponent } from './user-profile/user-profile.component';
+import { UserProfileDetailsComponent } from './user-profile-details/user-profile-details.component';
 
 
 const routes: Routes = [

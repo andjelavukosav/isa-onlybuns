@@ -5,12 +5,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.xml.crypto.Data;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
 @Table(name="post")
-public class Post {
+public class Post implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     @Column(name = "Id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,18 +27,19 @@ public class Post {
     private String imagePath;
 
     @Column(name = "CreationDateTime")
-    @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private Date creationDateTime;
+    private LocalDateTime creationDateTime;
 
     @Column(name= "LikeCount" )
     private int likeCount;
 
     @Embedded
+    @JsonIgnore
     private Location location;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "Id")
+    @JsonIgnore
     private User user;
 
 
@@ -42,7 +47,7 @@ public class Post {
         super();
     }
 
-    public Post(User user, String description, String imagePath, Date creationDateTime, Location location) {
+    public Post(User user, String description, String imagePath, LocalDateTime creationDateTime, Location location) {
         this.user = user;
         this.description = description;
         this.imagePath = imagePath;
@@ -50,6 +55,12 @@ public class Post {
         this.location = location;
     }
 
+    public Post(String description, String imagePath, LocalDateTime creationDateTime, Double latitude, Double longitude) {
+        this.description = description;
+        this.imagePath = imagePath;
+        this.creationDateTime = creationDateTime;
+        this.location = new Location(latitude, longitude);
+    }
     public int getId() {
         return id;
     }
@@ -74,11 +85,11 @@ public class Post {
         this.imagePath = imagePath;
     }
 
-    public Date getCreationDateTime() {
+    public LocalDateTime getCreationDateTime() {
         return creationDateTime;
     }
 
-    public void setCreationDateTime(Date creationDateTime) {
+    public void setCreationDateTime(LocalDateTime creationDateTime) {
         this.creationDateTime = creationDateTime;
     }
 
