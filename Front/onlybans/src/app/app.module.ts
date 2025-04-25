@@ -35,6 +35,14 @@ import { FollowedUserPostComponent } from './followed-user-post/followed-user-po
 import { ActivityTrendsComponent } from './activity-trends/activity-trends.component';
 import { NearbyPostsMapComponent } from './nearby-posts-map/nearby-posts-map.component';
 import { ChatComponent } from './chat/chat.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { RegisteredUsersComponent } from './registered-users/registered-users.component';
+import { AuthModule } from './infrastructure/auth/auth.module';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { UserProfileDetailsComponent } from './user-profile-details/user-profile-details.component';
 
 @NgModule({
   declarations: [
@@ -43,10 +51,9 @@ import { ChatComponent } from './chat/chat.component';
     NavbarComponent,
     HomeComponent,
     CardComponent,
-    RegistrationComponent,
     PostComponent,
     CreatePostComponent,
-    RegistrationComponent,
+    //RegistrationComponent,
     UsersComponent,
     UserProfileComponent,
     PostDetailsComponent,
@@ -55,6 +62,8 @@ import { ChatComponent } from './chat/chat.component';
     ActivityTrendsComponent,
     NearbyPostsMapComponent,
     ChatComponent,
+    RegisteredUsersComponent,
+    UserProfileDetailsComponent
   ],
   imports: [
     BrowserModule,
@@ -65,7 +74,12 @@ import { ChatComponent } from './chat/chat.component';
     ReactiveFormsModule,
     HttpClientModule,
     NoopAnimationsModule,
-    LeafletModule
+    LeafletModule,
+    MatSnackBarModule,
+    AuthModule,
+    MatMenuModule,
+    MatIconModule,
+    MatButtonModule
   ],
   providers: [
     {

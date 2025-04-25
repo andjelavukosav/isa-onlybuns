@@ -10,19 +10,31 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import rs.ac.uns.ftn.informatika.jpa.dto.CreatePostDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.LikeDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
+import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
+import rs.ac.uns.ftn.informatika.jpa.mapper.PostDTOMapper;
+import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.Like;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResult.PagedResults;
+
+import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
+
+
+import javax.validation.ConstraintViolation;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,14 +66,31 @@ public class PostController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/users/{userId}/posts")
-    public ResponseEntity<List<Post>> getPostsByUser(@PathVariable int userId) {
-        User user = userRepository.findById(userId)
+    @Autowired
+    private UserDTOMapper userDTOMapper;
+    @Autowired
+    private PostDTOMapper postDTOMapper;
+    @Autowired
+    private PostRepository postRepository;
+
+
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<List<PostDTO>> getPostsByUser(@PathVariable int userId) {
+        /*User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        List<Post> posts = new ArrayList<>(user.getPosts());
-        return new ResponseEntity<>(posts, HttpStatus.OK);
+        List<Post> posts = new ArrayList<>(user.getPosts());*/
+        List<PostDTO> results = postService.findByUser(userId);
+        return new ResponseEntity<>(results, HttpStatus.OK);
     }
+
+
+    /*@GetMapping
+    public ResponseEntity<List<Post>> getAllPosts() {
+        List<Post> posts = postService.findAll();
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }*/
 
     @Operation(description = "Get all posts", method = "GET")
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -154,74 +183,35 @@ public class PostController {
     }
 
     @Operation(description = "Create a new post", method = "POST")
-    @PostMapping(value = "/create", consumes = "multipart/form-data", produces = "application/json")
+    @PostMapping(value = "/create",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<PostDTO> createPost(
-            @RequestParam("description") String description,
-            @RequestParam(value = "location.latitude", required = false) Double latitude,
-            @RequestParam(value = "location.longitude", required = false) Double longitude,
+    public ResponseEntity<?> createPost(
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-            Principal principal
-    ) throws IOException {
+            Principal principal) {
+
+        CreatePostDTO postRequest = new CreatePostDTO(description, imageFile, latitude, longitude);
+
+        if(!postRequest.isValid()){
+            return new ResponseEntity<>("Missing input data.",HttpStatus.BAD_REQUEST);
+        }
 
         postService.removeFromCache();
-        User user = this.userService.findByUsername(principal.getName());
-        System.out.println(user.getEmail());
-        if (user == null) {
-            System.out.println("Korisnik nije pronađen.");
-        }
 
-        // Validacija inputa
-        if (user.getId() <= 0 || description == null || description.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        System.out.println("REQUEST: description: " + description + ", longitude: " + longitude + ", latitude: " + latitude + ", imageFile: " + imageFile);
 
-        // Kreiranje Post objekta
-        Post post = new Post();
-        post.setUser(user); // Postavljanje korisnika
-        post.setDescription(description);
-        // Postavljanje lokacije ako je prisutna
-        if (latitude != null && longitude != null) {
-            post.setLocation(new Location(latitude, longitude));
-        }
+        int userId = this.userService.findByUsername(principal.getName()).getId();
 
-        // Obrada slike ako je prisutna
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String imagePath = saveImage(imageFile);  // Metoda za čuvanje slike na serveru
-            post.setImagePath(imagePath);
-        }
-
-        post.setCreationDateTime(LocalDateTime.now());
-
-        // Čuvanje posta u bazi
-        PostDTO postDTO = new PostDTO(post);
-        post = postService.save(postDTO);
+        PostDTO result = postService.createPost(postRequest, userId);
 
         postService.clearCache();
-        return new ResponseEntity<>(postDTO, HttpStatus.CREATED);
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
-
-    private String saveImage(MultipartFile imageFile) throws IOException {
-        // Definišite folder za čuvanje slika unutar statičkog direktorijuma
-        String uploadDir = "uploads/images";
-        Path uploadPath = Paths.get(uploadDir);
-
-        // Kreirajte folder ako ne postoji
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        // Generišite jedinstveno ime za fajl
-        String fileName = UUID.randomUUID().toString() + "-" + imageFile.getOriginalFilename();
-        Path filePath = uploadPath.resolve(fileName);
-
-        // Sačuvajte fajl u folder
-        Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        // Vratite ime fajla koje će se koristiti za pristup slici
-        return "/images/" + fileName;
-    }
 
 
     @GetMapping("/{postId}")
@@ -276,8 +266,11 @@ public class PostController {
         }
     }
 
-    @DeleteMapping("/{postId}")
-    public ResponseEntity<?> deletePost(@PathVariable int postId, @RequestParam int userId) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable("id") int postId, Principal principal) {
+
+        int userId = this.userService.findByUsername(principal.getName()).getId();
+
         boolean isDeleted = postService.delete(postId, userId);
 
         if (isDeleted) {
@@ -288,78 +281,44 @@ public class PostController {
         }
     }
 
-
-
-    @PutMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(
+            value = {"/update/{id}"},
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<PostDTO> updatePost(
-            @RequestParam("id") int id,
-            @RequestParam("description") String description,
-            @RequestParam(value = "likeCount", required = false, defaultValue = "0") int likeCount,
-            @RequestParam(value = "location.latitude", required = false) Double latitude,
-            @RequestParam(value = "location.longitude", required = false) Double longitude,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-            @RequestParam(value = "imagePath", required = false) String imagePath,
-            @RequestParam("creationDateTime") String creationDateTime,
-            @RequestParam("userId") int userId
-    ) throws IOException {
+            @PathVariable("id") int id,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile){
 
-        // Pronalazi postojeći post po ID-u
-        Post existingPost = postService.findById(id);
-        if (existingPost == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        CreatePostDTO postRequest = new CreatePostDTO(description, imageFile, latitude, longitude);
 
-        // Ažurira polja posta
-        existingPost.setDescription(description);
-        existingPost.setCreationDateTime(LocalDateTime.parse(creationDateTime));
+        PostDTO updatedPost = postService.update(postRequest, id);
 
-        // Ažurira korisnika po userId
-        User user = userService.findById(userId);
-        if (user != null) {
-            existingPost.setUser(user);
-        }
+        this.postService.removeFromCache();
 
-        // Ažurira lokaciju ako su latitude i longitude prisutni
-        if (latitude != null && longitude != null) {
-            existingPost.setLocation(new Location(latitude, longitude));
-        }
+        return ResponseEntity.ok(updatedPost);
 
-        // Obrada slike ako je prisutna
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String newImagePath = saveImage(imageFile);  // Metoda za čuvanje slike na serveru
-            existingPost.setImagePath(newImagePath);
-        } else {
-            existingPost.setImagePath(imagePath);  // Postavlja imagePath ako je prosleđen
-        }
-
-        // Čuvanje ažuriranog posta
-        PostDTO updatedPostDTO = new PostDTO(postService.save(new PostDTO(existingPost)));
-        postService.removeFromCache();
-        return new ResponseEntity<>(updatedPostDTO, HttpStatus.OK);
     }
 
-    @Operation(description = "Get nearby posts based on user's location", method = "GET")
-    @GetMapping(value = "/nearby", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PagedResults<PostDTO>> getNearbyPosts(
-            @RequestParam("latitude") double latitude,
-            @RequestParam("longitude") double longitude,
-            @RequestParam(value = "radius", defaultValue = "100000") double radius
-    ) {
-        List<Post> nearbyPosts = postService.findNearbyPosts(latitude, longitude, radius);
-
-        // Konverzija u DTO
-        List<PostDTO> postsDTO = nearbyPosts.stream()
-                .map(PostDTO::new)
-                .collect(Collectors.toList());
-
-        // Priprema pagiranih rezultata
-        PagedResults<PostDTO> pagedResults = new PagedResults<>();
+    @Operation(
+            description = "Get nearby posts based on user's location",
+            method = "GET"
+    )
+    @GetMapping(
+            value = {"/nearby"},
+            produces = {"application/json"}
+    )
+    public ResponseEntity<PagedResults<PostDTO>> getNearbyPosts(@RequestParam("latitude") double latitude, @RequestParam("longitude") double longitude, @RequestParam(value = "radius",defaultValue = "100000") double radius) {
+        List<Post> nearbyPosts = this.postService.findNearbyPosts(latitude, longitude, radius);
+        List<PostDTO> postsDTO = (List)nearbyPosts.stream().map(PostDTO::new).collect(Collectors.toList());
+        PagedResults<PostDTO> pagedResults = new PagedResults();
         pagedResults.setResults(postsDTO);
         pagedResults.setTotalCount(postsDTO.size());
-
-        return new ResponseEntity<>(pagedResults, HttpStatus.OK);
+        return new ResponseEntity(pagedResults, HttpStatus.OK);
     }
-
-
 
 }

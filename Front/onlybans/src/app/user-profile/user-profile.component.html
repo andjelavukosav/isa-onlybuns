@@ -2,26 +2,34 @@
   <!-- Profilna sekcija -->
   <div class="profile-header">
     <h1>{{ user.username }}</h1>
-    <button class="follow-button">Follow</button>
+    <ng-container *ngIf="(userProfile$ | async) as user">
+      <ng-container *ngIf="(userProfileId$ | async) as userId">
+        <app-user-profile-details
+          [loggedInUser]="currentUser"
+          [user]="user"
+          [userId]="userId"
+        ></app-user-profile-details>
+      </ng-container>
+    </ng-container>    
   </div>
 
   <!-- Navigaciona linija -->
   <div class="tabs">
-    <button 
-      class="tab" 
-      [class.active]="activeTab === 'posts'" 
+    <button
+      class="tab"
+      [class.active]="activeTab === 'posts'"
       (click)="setActiveTab('posts')">
       Objave
     </button>
-    <button 
-      class="tab" 
-      [class.active]="activeTab === 'info'" 
+    <button
+      class="tab"
+      [class.active]="activeTab === 'info'"
       (click)="setActiveTab('info')">
       Informacije
     </button>
-    <button 
-      class="tab" 
-      [class.active]="activeTab === 'friends'" 
+    <button
+      class="tab"
+      [class.active]="activeTab === 'friends'"
       (click)="setActiveTab('friends')">
       Prijatelji
     </button>
@@ -82,7 +90,7 @@
           </ng-container>
           <ng-template #addressView>
             <span>
-              {{ user.address.street }} {{ user.address.streetNumber }}, 
+              {{ user.address.street }} {{ user.address.streetNumber }},
               {{ user.address.city }}, {{ user.address.country }}
             </span>
             <button *ngIf="userId === currentUserId" (click)="editField('address')">Izmeni</button>
@@ -121,7 +129,7 @@
             Ažuriraj lozinku
           </button>
         </div>
-      </div>      
+      </div>
     </div>
 
     <!-- Sekcija: Prijatelji -->

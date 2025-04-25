@@ -3,19 +3,23 @@ package rs.ac.uns.ftn.informatika.jpa.service;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.multipart.MultipartFile;
+import rs.ac.uns.ftn.informatika.jpa.dto.CreatePostDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
+import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
+import rs.ac.uns.ftn.informatika.jpa.model.User;
 
 import java.util.List;
 
 public interface PostService {
     List<Post> findAll();
-    Post save(PostDTO postDTO);
     PostDTO getPostById(Integer id);
     long getPostCountForUser(int userId);
     Post findById(int id);
-    Post update(PostDTO postDTO);
+    PostDTO update(CreatePostDTO updatePostRequest, int postId);
     boolean delete(int postId, int userId);
+    List<PostDTO> findByUser(int userId);
     List<Post> findByUserId(int userId);
 
     @Cacheable(value = "allPostsLastMonth", key = "'allPostsLastMonth'")
@@ -40,4 +44,7 @@ public interface PostService {
 
     List<Post> findNearbyPosts(double latitude, double longitude, double radius);
 
+    PostDTO createPost(CreatePostDTO postRequest, int userId);
+
+    String saveImage(MultipartFile file);
     }

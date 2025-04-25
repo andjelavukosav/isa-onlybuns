@@ -1,5 +1,5 @@
 <div id="post-management" style="display: flex; flex-wrap: wrap; gap: 20px;">
-  <div *ngFor="let p of post"
+  <div *ngFor="let p of posts"
         class="post-card"
         [routerLink]="['/post', p.id]"
         style="border: 1px solid #ccc;

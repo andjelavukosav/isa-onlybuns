@@ -1,6 +1,8 @@
 package rs.ac.uns.ftn.informatika.jpa.controller;
 
 import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,25 +12,21 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 import rs.ac.uns.ftn.informatika.jpa.dto.JwtAuthenticationRequestDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserTokenStateDTO;
-import rs.ac.uns.ftn.informatika.jpa.exception.ResourceConflictException;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.service.EmailSenderService;
 import rs.ac.uns.ftn.informatika.jpa.service.RateLimiterService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
 @RestController
@@ -47,6 +45,9 @@ public class AuthenticationController {
     @Autowired
     private EmailSenderService emailService;
 
+    @Autowired
+    private UserDTOMapper userDTOMapper;
+    
     @Autowired
     private RateLimiterService rateLimiterService;
 
@@ -80,7 +81,8 @@ public class AuthenticationController {
                             .body(new UserTokenStateDTO("Account not verified. Please check your email for activation link.", 0));
                 }
 
-                String jwt = tokenUtils.generateToken(user.getEmail());
+                //String jwt = tokenUtils.generateToken(user.getEmail());
+                String jwt = tokenUtils.generateToken(user.getId(), user.getEmail(), user.getUsername(), user.getRoles());
                 int expiresIn = tokenUtils.getExpiredIn();
 
                 return ResponseEntity.ok(new UserTokenStateDTO(jwt, expiresIn));
@@ -136,6 +138,7 @@ public class AuthenticationController {
     }
 
 
+
     @GetMapping(value = "/verify")
     public ResponseEntity<String> verifyUser(@RequestParam("email") String email) {
         // Find the user by email
@@ -144,7 +147,7 @@ public class AuthenticationController {
         // Check if the user exists
         if (user != null) {
             // Map the User entity to UserDTO
-            UserDTO userDTO = UserDTOMapper.fromUsertoDTO(user);
+            UserDTO userDTO = userDTOMapper.fromUsertoDTO(user);
 
             // Update the verification status in the UserDTO
             userDTO.setEnabled(true);

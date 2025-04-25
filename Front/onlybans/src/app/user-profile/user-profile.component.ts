@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../service/user.service';
 import { PostService } from '../service/post.service';
-import { UserDTO } from '../model/registered-user';
+import { AuthUser, UserDTO } from '../model/registered-user';
 import { Post } from '../model/post.model';
 import { PagedResults } from '../model/paged-result.model';
+import { AuthService } from '../service';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-user-profile',
@@ -13,13 +15,15 @@ import { PagedResults } from '../model/paged-result.model';
 })
 export class UserProfileComponent implements OnInit {
   userId: number | null = null;
+  userProfileId$ : BehaviorSubject<number | null> = new BehaviorSubject<number | null>(null);
   user: UserDTO | null = null;
+  userProfile$ : BehaviorSubject<UserDTO | null> = new BehaviorSubject<UserDTO | null>(null);
   posts: Post[] = [];
   friends: UserDTO[] = []; // Lista prijatelja
   newPassword: string = '';
   confirmPassword: string = '';
+  currentUser: AuthUser | null = null;
   currentUserId: number | null = null;
-  whoamIResponse = {};
   activeTab: string = 'posts'; // Kontrolni mehanizam za prikaz sadržaja (podrazumevano: Objave)
   editingName = false;
   editingLastName = false;
@@ -33,6 +37,7 @@ export class UserProfileComponent implements OnInit {
     username: '',
     email: '',
     followersCount: 0,
+    followingCount: 0,
     firstname: '',
     lastname: '',
     postsCount: 0, // Dodato svojstvo
@@ -47,29 +52,47 @@ export class UserProfileComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private userService: UserService,
-    private postService: PostService
+    private postService: PostService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.getCurrentUser('http://localhost:8080');
-    this.userId = Number(this.route.snapshot.paramMap.get('userId'));
+    //this.userId = Number(this.route.snapshot.paramMap.get('userId'));
 
-    if (this.userId) {
-      this.loadUser();
-    }
-    if (this.user) {
-    this.editableUser = { ...this.user };
-  }
-    
-    this.getPosts();
-    this.getFriends(); // Učitavanje prijatelja
-  }
+    this.route.paramMap.subscribe(params =>{
+      this.userId = Number(params.get('userId'));
+      this.userProfileId$.next(this.userId);
+      console.log('user id in parent: ', this.userProfileId$.value)
+      if(this.userId){
+        this.loadUser();
+        if (this.user) {
+          this.editableUser = { ...this.user };
+        }
+        this.getPosts();
+        this.getFriends();
+      }
+    });
+
+    this.authService.user$.subscribe({
+      next: (user) => {
+        if(user){
+          this.currentUser = user;
+          this.currentUserId = user.id;
+        }
+      },
+      error: (err) => {
+        console.log('An error occurred while trying to log in. ', err);
+      }
+    });
+
+ }
 
   // Učitavanje korisničkih podataka
   loadUser(): void {
     this.userService.getUserById(this.userId!).subscribe({
       next: (user) => {
         this.user = user;
+        this.userProfile$.next(user);
         this.editableUser = {
           ...user,
           address: user.address || {
@@ -185,38 +208,12 @@ export class UserProfileComponent implements OnInit {
     this.oldPasswordVerified = false;
   }
 
-  // Dohvatanje trenutnog korisnika
-  getCurrentUser(path: any): void {
-    this.userService.getMyInfo()
-      .subscribe(res => {
-        this.forgeResonseObj(this.whoamIResponse, res, path);
-        this.currentUserId = res.id;
-      }, err => {
-        this.forgeResonseObj(this.whoamIResponse, err, path);
-      });
-  }
-
-  forgeResonseObj(obj: any, res: any, path: any): void {
-    obj['path'] = path;
-    obj['method'] = 'GET';
-    if (res.ok === false) {
-      obj['status'] = res.status;
-      try {
-        obj['body'] = JSON.stringify(JSON.parse(res._body), null, 2);
-      } catch (err) {
-        console.log(res);
-        obj['body'] = res.error.message;
-      }
-    } else {
-      obj['status'] = 200;
-      obj['body'] = JSON.stringify(res, null, 2);
-    }
-  }
+  
 
   // Postavljanje aktivnog taba
   setActiveTab(tab: string): void {
     this.activeTab = tab;
-  
+
     if (tab === 'posts') {
       this.getPosts(); // Ponovo učitava objave kada je "Objave" tab aktivan
     }
@@ -227,23 +224,24 @@ export class UserProfileComponent implements OnInit {
     if (field === 'lastname') this.editingLastName = true;
     if (field === 'address') this.editingAddress = true;
   }
-  
+
   cancelEdit(field: string): void {
     // Isključivanje edit moda za polje koje se otkazuje
     if (field === 'firstname') this.editingName = false;
     if (field === 'lastname') this.editingLastName = false;
     if (field === 'address') this.editingAddress = false;
-  
+
     // Resetovanje editableUser na originalne vrednosti iz user objekta
-    this.editableUser = { 
+    this.editableUser = {
       id: this.user?.id || 0,
       username: this.user?.username || '',
       email: this.user?.email || '',
       followersCount: this.user?.followersCount || 0,
+      followingCount: this.user?.followingCount || 0,
       postsCount: this.user?.postsCount || 0,
       firstname: this.user?.firstname || '',
       lastname: this.user?.lastname || '',
-      address: this.user?.address ? { 
+      address: this.user?.address ? {
         street: this.user.address.street || '',
         streetNumber: this.user.address.streetNumber || '',
         city: this.user.address.city || '',
@@ -257,9 +255,9 @@ export class UserProfileComponent implements OnInit {
     };
     this.loadUser();
   }
-  
-  
-  
+
+
+
   saveField(field: string) {
     // Ažuriranje korisnika na serveru
     this.userService.updateUserData(this.userId || 0, this.editableUser).subscribe({
@@ -273,9 +271,9 @@ export class UserProfileComponent implements OnInit {
         alert('Greška pri čuvanju podataka');
       }
     });
-    
+
   }
-  
+
 
 }
 

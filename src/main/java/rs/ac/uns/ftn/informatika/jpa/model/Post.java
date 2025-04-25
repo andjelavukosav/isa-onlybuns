@@ -1,10 +1,13 @@
 package rs.ac.uns.ftn.informatika.jpa.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import javax.xml.crypto.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name="post")
@@ -24,7 +27,11 @@ public class Post implements Serializable {
     private String imagePath;
 
     @Column(name = "CreationDateTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime creationDateTime;
+
+    @Column(name= "LikeCount" )
+    private int likeCount;
 
     @Embedded
     @JsonIgnore
@@ -48,6 +55,12 @@ public class Post implements Serializable {
         this.location = location;
     }
 
+    public Post(String description, String imagePath, LocalDateTime creationDateTime, Double latitude, Double longitude) {
+        this.description = description;
+        this.imagePath = imagePath;
+        this.creationDateTime = creationDateTime;
+        this.location = new Location(latitude, longitude);
+    }
     public int getId() {
         return id;
     }
@@ -96,4 +109,11 @@ public class Post implements Serializable {
         this.user = user;
     }
 
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
 }

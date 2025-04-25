@@ -27,7 +27,7 @@ export class UsersComponent {
   constructor(private userService: UserService){}
 
   ngOnInit(): void{
-    this.userService.getAllRegisteredUsers().subscribe(
+    /*this.userService.getUsers().subscribe(
       (data: UserDTO[]) => {
         this.registeredUsers = data;
         this.registeredUsers.forEach(user => {
@@ -40,7 +40,7 @@ export class UsersComponent {
         console.error('Greška prilikom učitavanja korisnika:', error);
 
       }
-    )
+    )*/
   }
 
   searchUsers(): void{

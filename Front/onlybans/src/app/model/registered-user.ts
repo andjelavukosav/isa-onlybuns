@@ -4,10 +4,11 @@ export interface UserDTO {
     lastname: string;
     email: string;
     followersCount: number;
+    followingCount: number;
     postsCount: number;
     username?: string;
     address: AddressDTO;
-  }  
+  }
 
   export interface AddressDTO {
     country: String;
@@ -15,3 +16,22 @@ export interface UserDTO {
     street: String;
     streetNumber: String;
   }
+
+export interface AuthUser{
+  id: number;
+  username: string;
+  roles: string[];
+}
+
+export interface UserFollowStateDTO{
+  followersCount: number;
+  followingCount: number;
+}
+
+export interface UserSearchCriteria{
+  firstName: string;
+  lastName: string;
+  email: string;
+  minPostsCount: number | null;
+  maxPostsCount: number | null;
+}

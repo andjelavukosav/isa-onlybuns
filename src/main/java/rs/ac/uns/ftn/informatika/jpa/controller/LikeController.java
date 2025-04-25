@@ -15,6 +15,7 @@ import rs.ac.uns.ftn.informatika.jpa.pagedResult.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,8 @@ public class LikeController {
     private UserService userService;
 
     @GetMapping("/{postId}/{userId}")
-    public ResponseEntity<Boolean> likePost(@PathVariable int postId, @PathVariable int userId) {
+    public ResponseEntity<Boolean> likePost(@PathVariable int postId, Principal principal) {
+        int userId = userService.findByUsername(principal.getName()).getId();
         boolean exists = false;
         LikeDTO existsLike = this.likeService.findLikeByPostIdAndUserId(postId, userId);
         if(existsLike != null) {
