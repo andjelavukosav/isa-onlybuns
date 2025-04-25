@@ -274,7 +274,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> findAllContainingUsername(String username){
-        return userDTOMapper.toUserDTOList(userRepository.findByUsernameContaining(username));
+        return userDTOMapper.toUserDTOList(userRepository.findByUsernameContainingIgnoreCase(username));
     }
 
     @Override

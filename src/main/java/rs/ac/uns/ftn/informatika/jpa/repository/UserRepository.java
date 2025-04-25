@@ -31,7 +31,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Page<User> findAll(Specification<User> spec, Pageable pageable);
 
-    List<User> findByUsernameContaining(String username);
+    List<User> findByUsernameContainingIgnoreCase(String username);
 
 }
 
