@@ -13,6 +13,7 @@ import rs.ac.uns.ftn.informatika.jpa.model.Like;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResult.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
+import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
 import java.security.Principal;
@@ -32,18 +33,28 @@ public class LikeController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{postId}/{userId}")
-    public ResponseEntity<Boolean> likePost(@PathVariable int postId, Principal principal) {
+    @Autowired
+    private PostService postService;
+
+    @PostMapping(value = "like-post/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> likePost(@PathVariable int postId, Principal principal) {
         int userId = userService.findByUsername(principal.getName()).getId();
-        boolean exists = false;
-        LikeDTO existsLike = this.likeService.findLikeByPostIdAndUserId(postId, userId);
-        if(existsLike != null) {
-            exists=true;
+
+        boolean isPostLiked = postService.likePost(postId, userId);
+
+        Map<String, String> response = new HashMap<>();
+
+        if (isPostLiked) {
+            response.put("message", "Post successfully liked.");
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.ok(exists);
+        response.put("message", "Post is already liked by this user.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @GetMapping("/countLikes/{postId}")
+
+    /*@GetMapping("/countLikes/{postId}")
     public ResponseEntity<Integer> getAll(@PathVariable int postId) {
         try {
             List<LikeDTO> likeDTOS = this.likeService.findLikesByPostId(postId);
@@ -53,20 +64,8 @@ public class LikeController {
             // Ako se desi greška, vraćamo 0, a ne 500
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(0);
         }
-    }
+    }*/
 
-    @DeleteMapping("/unlike/{postId}/{userId}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> deleteLike(@PathVariable int postId, @PathVariable int userId) {
-        boolean isDeleted = likeService.delete(postId, userId);
-
-        if (isDeleted) {
-            return ResponseEntity.noContent().build(); // Uspešno brisanje (204 No Content)
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Like not found or user not authorized to delete this like."); // Greška (404 Not Found)
-        }
-    }
 
     @Operation(description = "Get the top 10 users who liked the most posts in the last 7 days", method = "GET")
     @GetMapping(value = "/top10UsersMostLikes", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -113,6 +112,33 @@ public class LikeController {
         return new ResponseEntity<>(pagedResults, HttpStatus.OK);
     }
 
+    @DeleteMapping(value = "/unlike-post/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> unlikePost(@PathVariable int postId, Principal principal) {
+
+        int userId = userService.findByUsername(principal.getName()).getId();
+
+        boolean isPostUnliked = postService.unlikePost(postId, userId);
+
+        Map<String, String> response = new HashMap<>();
+
+        if (isPostUnliked) {
+            response.put("message", "Post successfully unliked.");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("message", "An error has occurred.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(response);
+        }
+    }
+
+    @GetMapping(value = "/post/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<UserDTO>> getLikesFromPost(@PathVariable int postId) {
+
+        List<UserDTO> likesList = postService.getLikesFromPost(postId);
+
+        return ResponseEntity.ok(likesList);
+    }
 
 
 }

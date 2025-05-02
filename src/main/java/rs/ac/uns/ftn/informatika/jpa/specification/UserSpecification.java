@@ -24,11 +24,11 @@ public class UserSpecification implements Specification<User> {
         List<Predicate> predicates = new ArrayList<Predicate>();
 
         if(!criteria.getFirstName().isEmpty()) {
-            predicates.add(cb.like(cb.lower(root.get("firstName")), "%" + criteria.getFirstName() + "%"));
+            predicates.add(cb.like(cb.lower(root.get("firstName")), "%" + criteria.getFirstName().toLowerCase() + "%"));
         }
 
         if(!criteria.getLastName().isEmpty()) {
-            predicates.add(cb.like(cb.lower(root.get("lastName")), "%" + criteria.getLastName() + "%"));
+            predicates.add(cb.like(cb.lower(root.get("lastName")), "%" + criteria.getLastName().toLowerCase() + "%"));
         }
 
         if(!criteria.getEmail().isEmpty()) {

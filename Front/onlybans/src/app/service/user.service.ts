@@ -9,6 +9,7 @@ import { environment } from '../env/enviroment';
 import { Post } from '../model/post.model';
 import { Page } from '../model/pagination.model';
 import { PagedResults } from '../model/paged-result.model';
+import { PostService } from './post.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +20,7 @@ export class UserService {
 
   constructor(
     private apiService: ApiService,
+    private postService: PostService,
     private config: ConfigService,
     private http: HttpClient
   ) {
@@ -41,38 +43,14 @@ export class UserService {
     return this.http.get<Page<UserDTO>>(`${environment.apiHost}/users?page=${page}&size=${size}&sortBy=${sortBy}&direction=${direction}`);
   }
 
-  searchUserss(criteria: UserSearchCriteria, page: number, size: number, sortBy: string, direction: string): Observable<Page<UserDTO>>{
+  searchUsers(criteria: UserSearchCriteria, page: number, size: number, sortBy: string, direction: string): Observable<Page<UserDTO>>{
     return this.http.post<Page<UserDTO>>(`${environment.apiHost}/users/search?page=${page}&size=${size}&sortBy=${sortBy}&direction=${direction}`, criteria);
-  }
-
-  searchUsers(firstName: string, lastName: string, email: string, sortBy: string, sortDirection: string ,minPosts?: number | null, maxPosts?: number | null): Observable<UserDTO[]> {
-    let params = new HttpParams();
-    if(firstName) params = params.set('firstName', firstName);
-    if(lastName) params = params.set('lastName', lastName);
-    if(email) params = params.set('email', email);
-
-
-    if (minPosts !== null && minPosts !== undefined) {
-      params = params.set('minPosts', minPosts.toString()); // Pretvaramo broj u string
-    }
-
-    if (maxPosts !== null && maxPosts !== undefined) {
-      params = params.set('maxPosts', maxPosts.toString()); // Pretvaramo broj u string
-    }
-
-    if (sortBy) {
-      params = params.set('sortBy', sortBy);
-    }
-    if (sortDirection) {
-      params = params.set('sortDirection', sortDirection);
-    }
-
-    return this.http.get<UserDTO[]>(environment.apiHost + '/users/search', { params});
   }
 
   getUserById(userId: number): Observable<UserDTO> {
     return this.http.get<UserDTO>(environment.apiHost + `/users/${userId}`);
   }
+
 
   updateUserData(userId: number, updatedUser: UserDTO) {
     return this.http.put(environment.apiHost + `/users/update/${userId}`,updatedUser, {
@@ -128,7 +106,13 @@ export class UserService {
   }
 
   getFollowingPosts(): Observable<PagedResults<Post>>{
-    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/users/following-posts`);
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/users/following-posts`).pipe(
+      map(response => ({
+        ...response,
+        results: response.results.map(post => this.postService.convertPostDate(post))
+      })
+      )
+    );
   }
 
   getUserFollowing(userId: number): Observable<PagedResults<UserDTO>>{
@@ -139,9 +123,7 @@ export class UserService {
     return this.http.get<PagedResults<UserDTO>>(`${environment.apiHost}/users/${userId}/followers`);
   }
 
-  getPostsByUser(userId: number): Observable<PagedResults<Post>>{
-    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/users/${userId}/posts`);
-  }
 
+  
 
 }

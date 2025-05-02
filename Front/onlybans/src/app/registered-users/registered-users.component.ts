@@ -175,7 +175,7 @@ export class RegisteredUsersComponent {
 
   onSearchChange(): void{
 
-    this.userService.searchUserss(this.search, this.currentPage - 1, this.pageSize, this.sortBy, this.sortDirection)
+    this.userService.searchUsers(this.search, this.currentPage - 1, this.pageSize, this.sortBy, this.sortDirection)
     .subscribe({
       next: (results: Page<UserDTO>) => {
         this.usersPage = results;

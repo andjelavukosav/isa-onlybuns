@@ -5,11 +5,13 @@ import java.time.LocalDateTime;
 public class LikeDTO {
     private Integer id;
     private LocalDateTime creationDateTime;
-    private Integer userId;      // ID korisnika koji je lajkovao
-    private Integer postId;      // ID objave koja je lajkovana
+    private Integer userId;
+    private Integer postId;
 
-    public LikeDTO(Integer id, LocalDateTime creationDateTime) {
+    public LikeDTO(Integer id, Integer userId, Integer postId, LocalDateTime creationDateTime) {
         this.id = id;
+        this.userId = userId;
+        this.postId = postId;
         this.creationDateTime = creationDateTime;
     }
 

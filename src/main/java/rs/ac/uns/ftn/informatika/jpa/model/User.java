@@ -55,7 +55,7 @@ public class User implements UserDetails, Serializable {
     @JsonIgnore
     private Address address;  // A user can have one address
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<Post> posts = new HashSet<Post>();
 
@@ -83,6 +83,10 @@ public class User implements UserDetails, Serializable {
 
     @Column(name="posts_count", nullable = false, columnDefinition = "int default 0")
     private int postsCount = 0;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Like> likes = new HashSet<>();
 
     @Version
     private Integer version;
@@ -230,6 +234,20 @@ public class User implements UserDetails, Serializable {
     public int getFollowersCount() { return this.followersCount; }
 
     public void setFollowersCount(int followerCount) { this.followersCount = followerCount; }
+
+    public Set<Like> getLikes() { return this.likes; }
+
+    public void setLikes(Set<Like> likes) { this.likes = likes; }
+
+    public void addLike(Like like) {
+        this.likes.add(like);
+        like.setUser(this);
+    }
+
+    public void removeLike(Like like) {
+        this.likes.remove(like);
+        like.setUser(null);
+    }
 
     public Integer getVersion() { return version; }
 

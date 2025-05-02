@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { TokenInterceptor } from '../interceptor/TokenInterceptor';
 import { PagedResults } from '../model/paged-result.model';
 import { environment } from '../env/enviroment';
+import { UserDTO } from '../model/registered-user';
 
 @Injectable({
   providedIn: 'root'
@@ -63,7 +64,7 @@ export class PostService {
     );
   }
 
-  getPostsByUserId(userId: number):Observable<PagedResults<Post>> {
+  getPostsByUser(userId: number):Observable<PagedResults<Post>> {
     return this.http.get<PagedResults<Post>>(`${environment.apiHost}/posts/user/${userId}`).pipe(
       map(response =>({
         ...response,
@@ -73,8 +74,8 @@ export class PostService {
   }
 
 
-  likePost(postId: number, userId: number): Observable<any> {
-    return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/likes/' + userId , {});
+  likePost(postId: number): Observable<any> {
+    return this.http.post<any>(`${environment.apiHost}/likes/like-post/${postId}`, {});
   }
 
   getLikeByPostIdAndUserId(postId: number, userId: number): Observable<boolean> {
@@ -85,8 +86,8 @@ export class PostService {
     return this.http.get<number>(`http://localhost:8080/api/likes/countLikes/${postId}`);
   }
 
-  unlikePost(postId: number, userId: number): Observable<void> {
-    return this.http.delete<void>(`http://localhost:8080/api/likes/unlike/${postId}/${userId}`);
+  unlikePost(postId: number): Observable<any> {
+    return this.http.delete<any>(`${environment.apiHost}/likes/unlike-post/${postId}`);
   }
 
 
@@ -116,16 +117,17 @@ export class PostService {
     );
   }
 
-  getPostsByUser(userId: number): Observable<Post[]> {
-    return this.http.get<Post[]>(`${environment.apiHost}/posts/users/${userId}`);
-  }
 
   getNearbyPosts(latitude: number, longitude: number, radius: number = 100000) {
     return this.http.get<any>(`http://localhost:8080/api/posts/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
   }
 
+  getLikesFromPost(postId: number): Observable<UserDTO[]> {
+    return this.http.get<UserDTO[]>(`${environment.apiHost}/likes/post/${postId}`);
+  }
+
   
-  private convertPostDate(post: any): Post {
+   convertPostDate(post: any): Post {
     if (Array.isArray(post.creationDateTime)) {
       const arr = post.creationDateTime;
       post.creationDateTime = new Date(

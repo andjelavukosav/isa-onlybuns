@@ -9,7 +9,7 @@ export interface Post {
     location: Location | null; // Lokacija objave
     usernameDisplay?: string;
     user?: UserDTO;
-    likeCount?: number;
+    likeCount: number;
     isLikedByCurrentUser?: boolean; 
   }
 

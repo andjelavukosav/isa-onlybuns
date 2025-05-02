@@ -4,8 +4,8 @@ import { PostService } from '../service/post.service';
 import { UserService } from '../service/user.service';
 import { PagedResults } from '../model/paged-result.model';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Import MatSnackBar
-import { Observable } from 'rxjs';
-import { AuthUser } from '../model/registered-user';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { AuthUser, UserDTO } from '../model/registered-user';
 import { AuthService } from '../service';
 
 @Component({
@@ -16,11 +16,16 @@ import { AuthService } from '../service';
 export class PostComponent implements OnInit, OnChanges {
   @Input() userId?: number; //ako se postavi userId, uzmi postove od tog korisnika
   posts: Post[] = [];
+  @Input() inputPosts: Post[] = [];
   @Output() refreshLists: EventEmitter<void> = new EventEmitter(); // Dodaj output event
   currentUser: AuthUser | null = null;
   whoamIResponse = {};
 
   commentText: {[key: number]: string} = {};
+
+  isLikesListOpened: boolean = false;
+  likes$: BehaviorSubject<UserDTO[]> = new BehaviorSubject<UserDTO[]>([]);
+
 
   constructor(
     private postService: PostService,
@@ -30,29 +35,50 @@ export class PostComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit(): void {
+
     this.posts = [];
 
     this.authService.user$.subscribe({
       next: (user) => {
-        this.currentUser = user;
-        console.log("Logged in user in post component: ", this.currentUser);
-
+        if(user){
+          this.currentUser = user;
+          console.log("Logged in user in post component: ", this.currentUser);
+          this.getPosts();
+        }
       }
-    })
-    this.getPosts();
-  }
+    });
 
+    
+   }
+
+  get displayedPosts(): Post[] {
+    return this.inputPosts.length > 0 ? this.inputPosts : this.posts;
+  }
+  
   ngOnChanges(changes: SimpleChanges): void {
+  
     if (changes['userId'] && this.userId !== undefined) {
+      this.inputPosts = [];
+      console.log('USAO SAM OVDJE 2')
       this.getPosts();
+    }
+
+    if (changes['inputPosts']) {
+      if (this.inputPosts && this.inputPosts.length > 0) {
+        this.posts = []; // Isprazni default postove, koristi inputovane
+      } else if (!this.userId) {
+        //this.getPosts();
+      }
     }
   }
 
   getPosts(): void {
+   
+    this.inputPosts = [];
 
     if(this.userId){
 
-      this.userService.getPostsByUser(this.userId).subscribe({
+      this.postService.getPostsByUser(this.userId).subscribe({
         next: (result: PagedResults<Post>) => {
           this.handlePosts(result);
         },
@@ -92,118 +118,14 @@ export class PostComponent implements OnInit, OnChanges {
     // Obrada svakog posta
     sortedPosts.forEach(post => {
       // Dohvatanje korisničkog imena autora posta
-      this.userService.getUserById(post.user?.id || 0).subscribe({
-        next: (user) => {
-          post.usernameDisplay = user.username;
-
-          if (post.imagePath) {
-            console.log('Image path: ', post.imagePath);
-          }
-        },
-        error: () => {
-          console.error(`Failed to load user for post ID ${post.id}`);
-        }
-      });
-
-      this.postService.getLikesByPostId(post.id).subscribe({
-        next: (likeCount: number) => {
-          post.likeCount = likeCount; // Setovanje broja lajkova
-        },
-        error: () => {
-          console.error(`Failed to check like count for post ID ${post.id}`);
-        }
-      });
-
-      // Provera da li je trenutni korisnik lajkovao post
-      if (this.currentUser) {
-        this.postService.getLikeByPostIdAndUserId(post.id, this.currentUser.id).subscribe({
-          next: (isLiked: boolean) => {
-            console.log(`Post ${post.id} - Server like status: ${isLiked}`);
-            post.isLikedByCurrentUser = isLiked;
-          },
-          error: () => {
-            console.error(`Failed to check like for post ID ${post.id}`);
-          }
-        });
-
-
-      } else {
-        // Ako korisnik nije prijavljen, postavite `isLikedByCurrentUser` na false
-        post.isLikedByCurrentUser = false;
-      }
+      post.usernameDisplay = post.user?.username;
     });
 
     // Postavljanje sortirane liste postova
     this.posts = sortedPosts;
- 
-
-    /*
-    sortedPosts.forEach(post => {
-      post.usernameDisplay = post.user?.username || 'Unknown';
-      if (post.imagePath) {
-        console.log('Image path: ', post.imagePath);
-      }
-    });
-
-    this.posts = sortedPosts;*/
 
   }
 
-  /*
-
-  getPosts(): void {
-    
-        
-
-        // Obrada svakog posta
-        sortedPosts.forEach(post => {
-          // Dohvatanje korisničkog imena autora posta
-          this.userService.getUserById(post.user?.id || 0).subscribe({
-            next: (user) => {
-              post.usernameDisplay = user.username;
-
-              if (post.imagePath) {
-                console.log('Image path: ', post.imagePath);
-              }
-            },
-            error: () => {
-              console.error(`Failed to load user for post ID ${post.id}`);
-            }
-          });
-
-          this.postService.getLikesByPostId(post.id).subscribe({
-            next: (likeCount: number) => {
-              post.likeCount = likeCount; // Setovanje broja lajkova
-            },
-            error: () => {
-              console.error(`Failed to check like count for post ID ${post.id}`);
-            }
-          });
-
-          // Provera da li je trenutni korisnik lajkovao post
-          if (this.currentUser) {
-            this.postService.getLikeByPostIdAndUserId(post.id, this.currentUser.id).subscribe({
-              next: (isLiked: boolean) => {
-                console.log(`Post ${post.id} - Server like status: ${isLiked}`);
-                post.isLikedByCurrentUser = isLiked;
-              },
-              error: () => {
-                console.error(`Failed to check like for post ID ${post.id}`);
-              }
-            });
-
-
-          } else {
-            // Ako korisnik nije prijavljen, postavite `isLikedByCurrentUser` na false
-            post.isLikedByCurrentUser = false;
-          }
-        });
-
-        // Postavljanje sortirane liste postova
-        this.post = sortedPosts;
-     
-  }
-   */
 
   likePost(post: Post): void {
     if (!this.currentUser) {
@@ -213,9 +135,9 @@ export class PostComponent implements OnInit, OnChanges {
 
     if (post.isLikedByCurrentUser) {
       // Ako je već lajkovan, uklonite lajk
-      this.postService.unlikePost(post.id, this.currentUser.id).subscribe({
-        next: () => {
-          console.log(`Post ${post.id} unliked successfully on server.`);
+      this.postService.unlikePost(post.id).subscribe({
+        next: (response: string) => {
+          console.log(response);
           post.isLikedByCurrentUser = false; // Obeležite kao nelajkovano
           post.likeCount = (post.likeCount || 1) - 1; // Smanjite broj lajkova
           this.refreshLists.emit(); // Emituj event za osvežavanje
@@ -226,9 +148,9 @@ export class PostComponent implements OnInit, OnChanges {
       });
     } else {
       // Ako nije lajkovan, dodajte lajk
-      this.postService.likePost(post.id, this.currentUser.id).subscribe({
-        next: () => {
-          console.log(`Post ${post.id} liked successfully on server.`);
+      this.postService.likePost(post.id).subscribe({
+        next: (response: string) => {
+          console.log(response);
           post.isLikedByCurrentUser = true; // Obeležite kao lajkovano
           post.likeCount = (post.likeCount || 0) + 1; // Povećajte broj lajkova
           this.refreshLists.emit(); // Emituj event za osvežavanje
@@ -277,7 +199,23 @@ export class PostComponent implements OnInit, OnChanges {
     }
   }
 
+  toggleLikesList(postId: number): void{
+    this.isLikesListOpened = !this.isLikesListOpened;
 
+    this.postService.getLikesFromPost(postId).subscribe({
+      next: (response: UserDTO[]) => {
+        this.likes$.next(response);
+      },
+      error: (err) => {
+        console.log(`An error occurred while fetching likes from post with id ${postId}, `, err );
+      }
+    })
+  }
+
+
+  closeLikesList(): void{
+    this.isLikesListOpened = false;
+  }
 
 
 

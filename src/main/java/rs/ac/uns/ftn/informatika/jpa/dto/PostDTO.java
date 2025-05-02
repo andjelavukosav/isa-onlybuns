@@ -25,6 +25,9 @@ public class PostDTO {
     @NotNull
     public MultipartFile image;
 
+    public boolean isLikedByCurrentUser = false;
+
+    public int likeCount;
 
     public UserDTO user;
 
@@ -48,6 +51,7 @@ public class PostDTO {
         }
         this.user = new UserDTO(post.getUser());
         this.creationDateTime = post.getCreationDateTime();
+        this.likeCount = post.getLikeCount();
     }
 
     public UserDTO getUser() { return user; }
@@ -58,4 +62,8 @@ public class PostDTO {
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 
     public void setCreationDateTime(LocalDateTime creationDateTime) { this.creationDateTime = creationDateTime; }
+
+    public LocalDateTime getCreationDateTime() { return creationDateTime; }
+
+
 }

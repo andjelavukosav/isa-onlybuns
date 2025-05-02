@@ -27,7 +27,6 @@ import { PostComponent } from './post/post.component';
 import { CreatePostComponent } from './create-post/create-post.component';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
-import { UsersComponent } from './users/users.component';
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { PostDetailsComponent } from './post-details/post-details.component';
 import { UserHomeComponent } from './user-home/user-home.component';
@@ -54,7 +53,6 @@ import { UserProfileDetailsComponent } from './user-profile-details/user-profile
     PostComponent,
     CreatePostComponent,
     //RegistrationComponent,
-    UsersComponent,
     UserProfileComponent,
     PostDetailsComponent,
     UserHomeComponent,

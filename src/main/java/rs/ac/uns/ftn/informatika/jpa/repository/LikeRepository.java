@@ -12,16 +12,14 @@ import java.util.Optional;
 public interface LikeRepository extends JpaRepository<Like, Integer> {
     Like save(Like like);
 
-    @Query("SELECT l FROM Like l WHERE l.post.id = :postId AND l.user.id = :userId")
-    Like findLikeByPostIdAndUserId(Integer postId, Integer userId);
+    Like findByPostIdAndUserId(Integer postId, Integer userId);
 
     List<Like> findLikesByPostId(Integer postId);
-
-    Optional<Like> findByPostIdAndUserId(int postId, int userId);
 
     Like findById(int id);
 
     @Query("SELECT COUNT(l) FROM Like l WHERE l.post.id = :postId")
     long countByPostId(@Param("postId") int postId);
 
+    void deleteById(int id);
 }
