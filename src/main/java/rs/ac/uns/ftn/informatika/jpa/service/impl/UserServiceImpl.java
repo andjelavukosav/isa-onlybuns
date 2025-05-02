@@ -21,10 +21,7 @@ import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.repository.AddressRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
-import rs.ac.uns.ftn.informatika.jpa.service.GeocodingService;
-import rs.ac.uns.ftn.informatika.jpa.service.PostService;
-import rs.ac.uns.ftn.informatika.jpa.service.RoleService;
-import rs.ac.uns.ftn.informatika.jpa.service.UserService;
+import rs.ac.uns.ftn.informatika.jpa.service.*;
 import rs.ac.uns.ftn.informatika.jpa.specification.UserSpecification;
 
 import javax.persistence.EntityManager;
@@ -64,6 +61,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private GeocodingService geocodingService;
+
+    @Autowired
+    private LikeService likeService;
 
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
@@ -289,7 +289,13 @@ public class UserServiceImpl implements UserService {
         List<PostDTO> posts = followings.stream()
                 .flatMap(followed -> followed.getPosts().stream())
                 .sorted(Comparator.comparing(Post::getCreationDateTime).reversed())
-                .map(PostDTO:: new)
+                .map(post -> {
+                    boolean isLiked = likeService.findLikeByPostIdAndUserId(post.getId(), userId) != null ;
+
+                    PostDTO postDTO = new PostDTO(post);
+                    postDTO.isLikedByCurrentUser = isLiked;
+                    return postDTO;
+                })
                 .collect(Collectors.toList());
 
         return new PagedResults<>(posts, posts.size());

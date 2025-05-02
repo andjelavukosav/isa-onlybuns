@@ -88,6 +88,79 @@ button:hover {
   color: white;
 }
 
+ /* Zatamnjena pozadina */
+ .overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* providna crna */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.overlay ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.overlay li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.overlay li:hover {
+  background: #f0f0f0;
+}
+
+.overlay li a {
+  display: block;
+  width: 100%;
+  text-decoration: none;
+  color: #004D3B; /* Tvoja sekundarna boja */
+  font-weight: bold;
+  padding: 10px;
+}
+
+/* Modal prozor */
+.modal {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+.likes-link {
+  color: #004D3B;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.likes-link:hover {
+  text-decoration: underline;
+}
+
+
   
   
   

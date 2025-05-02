@@ -115,7 +115,8 @@ export class CreatePostComponent {
         description: formValues.description!,
         imagePath: '', 
         creationDateTime: formValues.createdAt!,
-        location: this.location
+        location: this.location,
+        likeCount: 0
       };
 
       // Pozovi servis i proslijedi newPost i selectedImage

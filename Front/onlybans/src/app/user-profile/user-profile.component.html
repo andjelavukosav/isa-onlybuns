@@ -2,15 +2,11 @@
   <!-- Profilna sekcija -->
   <div class="profile-header">
     <h1>{{ user.username }}</h1>
-    <ng-container *ngIf="(userProfile$ | async) as user">
-      <ng-container *ngIf="(userProfileId$ | async) as userId">
-        <app-user-profile-details
+    <app-user-profile-details
           [loggedInUser]="currentUser"
           [user]="user"
           [userId]="userId"
         ></app-user-profile-details>
-      </ng-container>
-    </ng-container>    
   </div>
 
   <!-- Navigaciona linija -->

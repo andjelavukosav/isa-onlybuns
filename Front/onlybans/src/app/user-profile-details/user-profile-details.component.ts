@@ -14,7 +14,7 @@ import { AuthUser, UserDTO, UserFollowStateDTO } from '../model/registered-user'
   templateUrl: './user-profile-details.component.html',
   styleUrls: ['./user-profile-details.component.css']
 })
-export class UserProfileDetailsComponent implements OnInit, OnChanges{
+export class UserProfileDetailsComponent implements OnChanges{
   @Input() userId: number | null = null; //id korisnika ciji se profil posjecuje
   @Input() user: UserDTO | null = null;
    userProfile$ : BehaviorSubject<UserDTO | null> = new BehaviorSubject<UserDTO | null>(null);
@@ -39,14 +39,6 @@ export class UserProfileDetailsComponent implements OnInit, OnChanges{
     private snackBar: MatSnackBar
   ) {}
 
-  ngOnInit(): void {
-   
-    if(this.userId){
-      console.log('User ID:', this.userId); 
-      this.loadUserData(this.userId);
-    }
-        
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['userId'] && this.userId) {

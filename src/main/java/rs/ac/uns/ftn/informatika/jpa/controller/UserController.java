@@ -220,9 +220,6 @@ public class UserController {
         UserDTO currentUser = userDTOMapper.fromUsertoDTO(userService.findByUsername(principal.getName()));
 
         PagedResults<PostDTO> results = userService.getFollowingPosts(currentUser.getId());
-        if (results == null || results.getResults().isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
 
         return ResponseEntity.ok().body(results);
     }
@@ -253,14 +250,11 @@ public class UserController {
         return ResponseEntity.ok().body(results);
     }
 
-    @GetMapping("/users/{userId}/posts")
+    @GetMapping("/user/{userId}/posts")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<PagedResults<PostDTO>> getUserPosts(@PathVariable("userId")int userId) {
-        PagedResults<PostDTO> posts = userService.getPostsByUser(userId);
 
-        if(posts.getResults().isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
+        PagedResults<PostDTO> posts = userService.getPostsByUser(userId);
 
         return ResponseEntity.ok().body(posts);
     }

@@ -11,7 +11,7 @@ import { PagedResults } from '../model/paged-result.model';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  post: Post[] = [];
+  posts: Post[] = [];
   fooResponse = {};
   whoamIResponse = {};
   allUserResponse = {};
@@ -26,7 +26,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getCurrentUser('http://localhost:8080');
+    //this.getCurrentUser('http://localhost:8080');
     this.getPosts();
   }
 
@@ -97,30 +97,21 @@ export class HomeComponent implements OnInit {
           // Obrada svakog posta
           sortedPosts.forEach(post => {
             // Dohvatanje korisničkog imena autora posta
-            this.userService.getUserById(post.user?.id || 0).subscribe({
-              next: (user) => {
-                post.usernameDisplay = user.username;
-    
-                if (post.imagePath) {
-                  console.log('Image path: ', post.imagePath);
-                }
-              },
-              error: () => {
-                console.error(`Failed to load user for post ID ${post.id}`);
-              }
-            });
+            post.usernameDisplay = post.user?.username;
+            //post.likeCount = post.likeCount;
   
-            this.postService.getLikesByPostId(post.id).subscribe({
+            /*this.postService.getLikesByPostId(post.id).subscribe({
               next: (likeCount: number) => {
                 post.likeCount = likeCount; // Setovanje broja lajkova
               },
               error: () => {
                 console.error(`Failed to check like count for post ID ${post.id}`);
               }
-            });
+            });*/
     
             // Provera da li je trenutni korisnik lajkovao post
-            if (this.currentUser) {
+            /*if (this.currentUser) {
+              
               this.postService.getLikeByPostIdAndUserId(post.id, this.currentUser.id).subscribe({
                 next: (isLiked: boolean) => {
                   console.log(`Post ${post.id} - Server like status: ${isLiked}`);
@@ -135,11 +126,11 @@ export class HomeComponent implements OnInit {
             } else {
               // Ako korisnik nije prijavljen, postavite `isLikedByCurrentUser` na false
               post.isLikedByCurrentUser = false;
-            }
+            }*/
           });
     
           // Postavljanje sortirane liste postova
-          this.post = sortedPosts;
+          this.posts = sortedPosts;
         },
         error: () => {
           console.error('Failed to load posts.');

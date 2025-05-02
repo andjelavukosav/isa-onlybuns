@@ -38,5 +38,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                                @Param("longitude") double longitude,
                                @Param("radius") double radius);
 
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.likes WHERE p.id = :postId")
+    Post findPostWithLikes(@Param("postId") int postId);
+
+
 }
 

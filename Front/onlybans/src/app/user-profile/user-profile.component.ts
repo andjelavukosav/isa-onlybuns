@@ -15,9 +15,7 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class UserProfileComponent implements OnInit {
   userId: number | null = null;
-  userProfileId$ : BehaviorSubject<number | null> = new BehaviorSubject<number | null>(null);
   user: UserDTO | null = null;
-  userProfile$ : BehaviorSubject<UserDTO | null> = new BehaviorSubject<UserDTO | null>(null);
   posts: Post[] = [];
   friends: UserDTO[] = []; // Lista prijatelja
   newPassword: string = '';
@@ -57,12 +55,10 @@ export class UserProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    //this.userId = Number(this.route.snapshot.paramMap.get('userId'));
 
     this.route.paramMap.subscribe(params =>{
       this.userId = Number(params.get('userId'));
-      this.userProfileId$.next(this.userId);
-      console.log('user id in parent: ', this.userProfileId$.value)
+      console.log('user id in parent: ', this.userId)
       if(this.userId){
         this.loadUser();
         if (this.user) {
@@ -92,7 +88,6 @@ export class UserProfileComponent implements OnInit {
     this.userService.getUserById(this.userId!).subscribe({
       next: (user) => {
         this.user = user;
-        this.userProfile$.next(user);
         this.editableUser = {
           ...user,
           address: user.address || {
@@ -109,7 +104,7 @@ export class UserProfileComponent implements OnInit {
 
   // Učitavanje objava korisnika
   getPosts(): void {
-    this.postService.getPostsByUserId(this.userId || 0).subscribe({
+    this.postService.getPostsByUser(this.userId || 0).subscribe({
       next: (result: PagedResults<Post>) => {
         const sortedPosts = result.results.sort((a, b) => {
           const dateA = new Date(a.creationDateTime);
@@ -118,18 +113,7 @@ export class UserProfileComponent implements OnInit {
         });
 
         sortedPosts.forEach(post => {
-          this.userService.getUserById(post.user?.id || 0).subscribe({
-            next: (user) => {
-              post.usernameDisplay = user.username;
-
-              if (post.imagePath) {
-                console.log('Image path: ', post.imagePath);
-              }
-            },
-            error: () => {
-              console.error(`Failed to load user for post ID ${post.id}`);
-            }
-          });
+          post.usernameDisplay = this.user?.username;
         });
 
         this.posts = sortedPosts;

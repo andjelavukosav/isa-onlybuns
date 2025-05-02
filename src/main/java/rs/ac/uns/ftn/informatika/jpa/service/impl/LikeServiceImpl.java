@@ -4,23 +4,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import rs.ac.uns.ftn.informatika.jpa.dto.LikeDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Like;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
+import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.repository.LikeRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
+import rs.ac.uns.ftn.informatika.jpa.service.PostService;
+import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class LikeServiceImpl implements LikeService {
+
     @Autowired
     private LikeRepository likeRepository;
 
-    private final Logger LOG = LoggerFactory.getLogger(PostServiceImpl.class);
 
     @Override
     public Like save(Like like) {
@@ -28,14 +33,8 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public LikeDTO findLikeByPostIdAndUserId(Integer postId,Integer userId){
-        Like like = this.likeRepository.findLikeByPostIdAndUserId(postId, userId);
-        LikeDTO likeDTO = new LikeDTO();
-        likeDTO.setId(like.getId());
-        likeDTO.setPostId(like.getPost().getId());
-        likeDTO.setUserId(like.getUser().getId());
-        likeDTO.setCreationDateTime(like.getCreationDateTime());
-        return likeDTO;
+    public Like findLikeByPostIdAndUserId(Integer postId,Integer userId){
+        return this.likeRepository.findByPostIdAndUserId(postId, userId);
     }
 
     @Override
@@ -52,6 +51,7 @@ public class LikeServiceImpl implements LikeService {
         }
         return likeDTOs;
     }
+
 
     @Override
     public long countLikesByPostId(int postId) {
@@ -74,17 +74,6 @@ public class LikeServiceImpl implements LikeService {
         return likeDTOs;
     }
 
-    @Override
-    public boolean delete(int postId, int userId){
-        // Provera da li postoji zapis u bazi
-        Optional<Like> like = likeRepository.findByPostIdAndUserId(postId, userId);
 
-        if (like.isPresent()) {
-            likeRepository.delete(like.get()); // Brisanje ako postoji
-            return true;
-        } else {
-            return false; // Like nije pronađen
-        }
-    }
 
 }

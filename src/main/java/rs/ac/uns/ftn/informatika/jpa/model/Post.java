@@ -8,6 +8,7 @@ import javax.xml.crypto.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Table(name="post")
@@ -30,7 +31,11 @@ public class Post implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime creationDateTime;
 
-    @Column(name= "LikeCount" )
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Like> likes;
+
+    @Column(name= "LikeCount", columnDefinition = "int default 0")
     private int likeCount;
 
     @Embedded
@@ -38,7 +43,7 @@ public class Post implements Serializable {
     private Location location;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "Id")
+    @JoinColumn(name = "user_id", referencedColumnName = "Id", nullable = false)
     @JsonIgnore
     private User user;
 
@@ -110,10 +115,26 @@ public class Post implements Serializable {
     }
 
     public int getLikeCount() {
-        return likeCount;
+        return this.likeCount;
     }
 
     public void setLikeCount(int likeCount) {
         this.likeCount = likeCount;
+    }
+
+    public Set<Like> getLikes() { return this.likes; }
+
+    public void setLikes(Set<Like> likes) { this.likes = likes; }
+
+    public void likePost(Like like){
+        this.likes.add(like);
+        this.likeCount++;
+        like.setPost(this);
+    }
+
+    public void unlikePost(Like like){
+        this.likes.remove(like);
+        this.likeCount--;
+        like.setPost(null);
     }
 }

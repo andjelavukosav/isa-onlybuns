@@ -25,7 +25,7 @@ import rs.ac.uns.ftn.informatika.jpa.model.Like;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
-import rs.ac.uns.ftn.informatika.jpa.pagedResult.PagedResults;
+import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
@@ -51,38 +51,20 @@ import java.util.stream.Collectors;
 public class PostController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
     private PostService postService;
-
-    @Autowired
-    private LikeService likeService;
-
 
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private UserRepository userRepository;
 
-    @Autowired
-    private UserDTOMapper userDTOMapper;
-    @Autowired
-    private PostDTOMapper postDTOMapper;
-    @Autowired
-    private PostRepository postRepository;
+    @Operation(description = "Get posts by user ID", method = "GET")
+    @GetMapping(value = "/user/{userId}",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    //@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<PagedResults<PostDTO>> getPostsByUser(@PathVariable int userId) {
+        PagedResults<PostDTO> userPosts = postService.findByUser(userId);
 
-
-
-    @GetMapping("/users/{userId}")
-    public ResponseEntity<List<PostDTO>> getPostsByUser(@PathVariable int userId) {
-        /*User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        List<Post> posts = new ArrayList<>(user.getPosts());*/
-        List<PostDTO> results = postService.findByUser(userId);
-        return new ResponseEntity<>(results, HttpStatus.OK);
+        return new ResponseEntity<>(userPosts, HttpStatus.OK);
     }
 
 
@@ -95,19 +77,10 @@ public class PostController {
     @Operation(description = "Get all posts", method = "GET")
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PagedResults<PostDTO>> getAllPosts() {
-        List<Post> posts = postService.findAll();
 
-        // Sort the posts by creationDateTime in descending order (newest first)
-        posts.sort((p1, p2) -> p2.getCreationDateTime().compareTo(p1.getCreationDateTime()));
+        PagedResults<PostDTO> postResults = postService.findAll();
 
-        List<PostDTO> postsDTO = posts.stream()
-                .map(PostDTO::new)
-                .collect(Collectors.toList());
-
-        PagedResults<PostDTO> pagedResults = new PagedResults<>();
-        pagedResults.setResults(postsDTO);
-        pagedResults.setTotalCount(posts.size());
-        return new ResponseEntity<>(pagedResults, HttpStatus.OK);
+        return new ResponseEntity<>(postResults, HttpStatus.OK);
     }
 
     @Operation(description = "Get all posts without sort", method = "GET")
@@ -220,50 +193,12 @@ public class PostController {
         return ResponseEntity.ok(postDTO);
     }
 
-    @Operation(description = "Get posts by user ID", method = "GET")
-    @GetMapping(value = "/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PagedResults<PostDTO>> getPostsByUserId(@PathVariable int userId) {
-        // Fetch all posts for the given user ID
-        List<Post> userPosts = postService.findByUserId(userId);
-
-        // Sort the posts by creationDateTime in descending order (newest first)
-        userPosts.sort((p1, p2) -> p2.getCreationDateTime().compareTo(p1.getCreationDateTime()));
-
-        // Map posts to PostDTO
-        List<PostDTO> postsDTO = userPosts.stream()
-                .map(PostDTO::new)
-                .collect(Collectors.toList());
-
-        // Create paged results
-        PagedResults<PostDTO> pagedResults = new PagedResults<>();
-        pagedResults.setResults(postsDTO);
-        pagedResults.setTotalCount(userPosts.size());
-
-        return new ResponseEntity<>(pagedResults, HttpStatus.OK);
-    }
-
 
     @GetMapping("/user/{userId}/count")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Long> getPostCountForUser(@PathVariable int userId) {
         Long count = postService.getPostCountForUser(userId);
         return ResponseEntity.ok(count);
-    }
-
-    @PostMapping("/{postId}/likes/{userId}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> likePost(@PathVariable int postId, @PathVariable int userId) {
-        try {
-
-            // Ažuriraj leaderboard (top 5 postova)
-            postService.likePost(postId, userId);  // Ova metoda ažurira leaderboard i keš
-
-            return ResponseEntity.ok().build();
-        } catch (ConfigDataResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while liking the post.");
-        }
     }
 
     @DeleteMapping("/{id}")

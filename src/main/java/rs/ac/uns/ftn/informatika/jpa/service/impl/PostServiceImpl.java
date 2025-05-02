@@ -1,5 +1,6 @@
 package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import rs.ac.uns.ftn.informatika.jpa.model.Like;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
+import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
@@ -52,10 +54,10 @@ public class PostServiceImpl implements PostService {
     private PostDTOMapper postDTOMapper;
 
     @Autowired
-    private LikeService likeService;
+    private UserService userService;
 
     @Autowired
-    private UserService userService;
+    private LikeService likeService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -64,16 +66,17 @@ public class PostServiceImpl implements PostService {
 
     // PriorityQueue za top 10 najlajkovanijih objava svih vremena
     private final PriorityQueue<Post> top10LikedPosts = new PriorityQueue<>(
-            Comparator.comparingLong(this::getLikeCount) // Sortira rastuće po broju lajkova
+            Comparator.comparingLong(Post::getLikeCount) // Sortira rastuće po broju lajkova
     );
 
 
     //PriorityQueue za održavanje TOP 5 postova u memoriji
-    private final PriorityQueue<Post> leaderboard = new PriorityQueue<>(
+    public final PriorityQueue<Post> leaderboard = new PriorityQueue<>(
             Comparator.comparingLong(this::getPostLikeCount) // Sortira po broju lajkova
     );
 
     @PostConstruct
+    @Transactional
     public void initializeTop10LikedPosts() {
         List<Post> topPosts = postRepository.findTop10ByMostLikedAllTime();
 
@@ -93,6 +96,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @PostConstruct
+    @Transactional
     public void initializeLeaderboard() {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         List<Post> topPosts = postRepository.findTop5ByLikesInLast7Days(sevenDaysAgo);
@@ -119,34 +123,22 @@ public class PostServiceImpl implements PostService {
 
     }
 
-    private long getLikeCount(Post post) {
+    /*private long getLikeCount(Post post) {
         return likeService.countLikesByPostId(post.getId());
-    }
+    }*/
 
 
     // ✅ Broj lajkova za post
-    private long getPostLikeCount(Post post) {
+    @Transactional
+    public long getPostLikeCount(Post post) {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        return likeService.findLikesByPostId(post.getId()).stream()
+        return post.getLikes().stream()
                 .filter(like -> like.getCreationDateTime().isAfter(sevenDaysAgo))
                 .count();
     }
 
     @Override
-    public void likePost(int postId, int userId) {
-        Post post = postRepository.findById(postId);
-
-        if (post == null) {
-            throw new RuntimeException("Post not found");
-        }
-
-        Like like = new Like();
-        like.setCreationDateTime(LocalDateTime.now());
-        like.setPost(post);
-        like.setUser(userRepository.findById(userId)
-                .orElseThrow(() -> new AccessDeniedException("User not found")));
-
-        likeService.save(like); // Spasi novi lajk
+    public void updateLeaderboard(Post post) {
 
         synchronized (leaderboard) {
             leaderboard.removeIf(p -> p.getId() == post.getId());
@@ -171,11 +163,14 @@ public class PostServiceImpl implements PostService {
         }
 
         LOG.info("Post {} updated in leaderboard and top 10 most liked posts.", post.getId());
+
     }
+
 
 
     // ✅ Dohvatanje top 5 postova iz keša
     @Override
+    @Transactional(readOnly = true)
     public List<Post> getAllPostsMostPopularLast7Days() {
         synchronized (leaderboard) {
             return new ArrayList<>(leaderboard);
@@ -183,8 +178,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> findAll() throws AccessDeniedException {
-        return postRepository.findAll();
+    @Transactional(readOnly = true)
+    public PagedResults<PostDTO> findAll() {
+        List<PostDTO> posts = postRepository.findAll().stream()
+                .sorted(Comparator.comparing(Post::getCreationDateTime).reversed())
+                .map(PostDTO::new)
+                .collect(Collectors.toList());
+
+        return new PagedResults<>(posts, posts.size());
     }
 
 
@@ -283,16 +284,23 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDTO> findByUser(int userId) {
-        return postRepository.findByUserId(userId)
+    @Transactional
+    public PagedResults<PostDTO> findByUser(int userId) {
+        List<PostDTO> posts =  postRepository.findByUserId(userId)
                 .stream()
-                .map(PostDTO::new)
+                .sorted(Comparator.comparing(Post::getCreationDateTime).reversed())
+                .map(post -> {
+                    boolean isLiked = likeService.findLikeByPostIdAndUserId(post.getId(), userId) != null ;
+
+                    PostDTO postDTO = new PostDTO(post);
+                    postDTO.isLikedByCurrentUser = isLiked;
+                    return postDTO;
+                })
                 .collect(Collectors.toList());
+
+        return new PagedResults<>(posts, posts.size());
     }
 
-    public List<Post> findByUserId(int userId) throws AccessDeniedException {
-        return this.postRepository.findByUserId(userId);
-    }
 
     public List<Post> getAllPostsLastMonth() {
         List<Post> posts = this.postRepository.findAll();
@@ -316,6 +324,7 @@ public class PostServiceImpl implements PostService {
         this.LOG.info("All posts and posts last month removed from cache!");
     }
 
+    @Transactional
     public List<Post> getTop10PostsMostPopular() {
         synchronized(this.top10LikedPosts) {
             return new ArrayList(this.top10LikedPosts);
@@ -325,5 +334,61 @@ public class PostServiceImpl implements PostService {
     public List<Post> findNearbyPosts(double latitude, double longitude, double radius) {
         return this.postRepository.findNearbyPosts(latitude, longitude, radius);
     }
+
+    @Override
+    @Transactional
+    public boolean likePost(int postId, int userId) {
+
+        if(likeService.findLikeByPostIdAndUserId(postId, userId) != null){
+            return false;
+        }
+
+        Post post = postRepository.findById(postId);
+        User user = userService.findById(userId);
+
+
+        Like like = new Like(user, post);
+        like.setCreationDateTime(LocalDateTime.now());
+
+        user.addLike(like);
+        post.likePost(like);
+
+        this.updateLeaderboard(post);
+        return true;
+
+    }
+
+    @Override
+    @Transactional
+    public boolean unlikePost(int postId, int userId){
+
+        Like like = likeService.findLikeByPostIdAndUserId(postId, userId);
+
+        if (like != null) {
+            Post post = like.getPost();
+            post.unlikePost(like);
+            like.getUser().removeLike(like);
+
+            this.updateLeaderboard(post);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional
+    public List<UserDTO> getLikesFromPost(int postId) {
+        Set<Like> likes = findById(postId).getLikes();
+
+        if(likes == null){
+            return Collections.emptyList();
+        }
+
+        List<User> users = likes.stream().map(Like::getUser).collect(Collectors.toList());
+
+        return userDTOMapper.toUserDTOList(users);
+
+    }
+
 
 }
