@@ -7,6 +7,28 @@
       <li><a [routerLink]="['/nearby-posts-map', userId]">Nearby posts map</a></li>
       <li><a [routerLink]="['/profile', userId]">Profil</a></li>
     </ul>
-  </nav>
+
+    <div class="search-container">
+      <input type="text"
+       [(ngModel)]="searchQuery"
+       (input)="searchUsers()"
+       placeholder="Search users" />
+
+      <ul *ngIf="searchResults.length">
+        <li *ngFor="let user of searchResults">
+          <a [routerLink]="['/profile', user.id]">{{ user.username }}</a>
+        </li>
+      </ul>
+    </div>
+    <div *ngIf="searchResults.length === 0 && !errorMessage && fleg" class="alert alert-info">
+      No results found.
+    </div>
+    
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+    
+
+</nav>
 <app-post></app-post>
 <app-create-post></app-create-post> 

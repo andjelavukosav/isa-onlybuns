@@ -1,0 +1,107 @@
+<div class="users-container">
+  <h2>Registered users</h2>
+
+  <div class="filter-container">
+  <!-- Pretraga korisnika -->
+  <div class="search-container inline-style">
+    <label>Search Users</label>
+    <div class="search-options-grid">
+      <div class="search-field">
+        <input type="text" placeholder="First Name" [(ngModel)]="search.firstName" />
+      </div>
+      <div class="search-field">
+        <input type="text" placeholder="Last Name" [(ngModel)]="search.lastName" />
+      </div>
+      <div class="search-field">
+        <input type="text" placeholder="Email" [(ngModel)]="search.email" />
+      </div>
+      <div class="search-row">
+        <div class="search-field">
+          <input type="number" placeholder="Min Posts" [(ngModel)]="search.minPostsCount" min="0" />
+        </div>
+        <div class="search-field">
+          <input type="number" placeholder="Max Posts" [(ngModel)]="search.maxPostsCount" min="0" />
+        </div>
+        <button class="search-btn" (click)="onSearchClick()">
+          <span class="material-icons">search</span>
+        </button>
+      </div>
+      
+    </div>    
+  </div>
+
+  <div class="sort-container inline-style">
+    <div class="sort-by">
+      <label>Sort by: </label>
+      <div class="sort-options">
+        <label>
+          <input type="radio" name="sortBy" value="email" [(ngModel)]="sortBy"  (change)="onSortChange()">
+          Email
+        </label>
+
+        <label>
+          <input type="radio" name="sortBy" value="followingCount" [(ngModel)]="sortBy"  (change)="onSortChange()">
+          Following
+        </label>
+      </div>
+    </div>
+
+    <div class="sort-direction">
+      <label>Sort direction: </label>
+      <div class="sort-options">
+        <label>
+          <input type="radio" name="sortDirection" value="asc" [(ngModel)]="sortDirection" (change)="onSortChange()">
+          Ascending
+        </label>
+
+        <label>
+          <input type="radio" name="sortDirection" value="desc" [(ngModel)]="sortDirection" (change)="onSortChange()">
+          Descending
+        </label>
+      </div>
+    </div>
+  </div>
+  </div>
+  
+  <div *ngIf="usersPage && usersPage.content.length > 0; else noUsers">
+    <div class="user-cards">
+      <div *ngFor="let user of usersPage?.content"
+       class="user-card"
+       [routerLink]="['/profile', user.id]">
+        <div class="user-info">
+          <h3>{{ user.firstname }} {{ user.lastname }}</h3>
+          <p><strong>Email:</strong> {{ user.email }}</p>
+        </div>
+        <div class="user-stats">
+          <p><strong>Posts:</strong> {{ user.postsCount }}</p>
+          <p><strong>Following:</strong> {{ user.followingCount }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ako nema korisnika, prikaži poruku -->
+  <ng-template #noUsers>
+    <p>No registered users.</p>
+  </ng-template>
+
+  <div class="pagination-wrapper">
+    <div class="page-numbers">
+      <button *ngFor="let page of visiblePages"
+       (click)="onManualPageChange(page)"
+       [class.active]="page === currentPage">
+        {{ page }}
+      </button>
+    </div>
+  </div>
+  
+
+  <!-- MatPaginator - Paginacija -->
+  <mat-paginator
+    class="custom-paginator"
+    [length]="totalElements"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[1, 2]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+</div>

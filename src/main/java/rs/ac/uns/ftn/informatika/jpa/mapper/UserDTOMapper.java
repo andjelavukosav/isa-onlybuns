@@ -12,22 +12,22 @@ import java.util.stream.Collectors;
 @Component
 public class UserDTOMapper {
 
-    private static ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public UserDTOMapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
 
-    public static User fromDTOtoUser(UserDTO dto) {
+    public User fromDTOtoUser(UserDTO dto) {
         return modelMapper.map(dto, User.class);
     }
 
-    public static UserDTO fromUsertoDTO(User dto) {
+    public UserDTO fromUsertoDTO(User dto) {
         return modelMapper.map(dto, UserDTO.class);
     }
 
-    public static List<UserDTO> toUserDTOList(List<User> users) {
+    public List<UserDTO> toUserDTOList(List<User> users) {
         return users.stream().map(UserDTO::new)
                 .collect(Collectors.toList());
     }

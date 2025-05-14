@@ -9,11 +9,9 @@ import java.util.List;
 
 public interface LikeService {
     Like save(Like like);
-    LikeDTO findLikeByPostIdAndUserId(Integer postId,Integer userId);
+    Like findLikeByPostIdAndUserId(Integer postId,Integer userId);
     List<LikeDTO> findLikesByPostId(Integer postId);
-    boolean delete(int postId, int userId);
     List<LikeDTO> findAll();
     long countLikesByPostId(int postId);
-
 
 }

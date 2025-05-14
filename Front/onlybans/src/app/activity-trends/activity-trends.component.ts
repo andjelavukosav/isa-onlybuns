@@ -16,7 +16,7 @@ import { UserDTO } from '../model/registered-user';
 export class ActivityTrendsComponent implements OnInit {
   allPosts: Post[] = [];
   postsLastMonth: Post[] = []; 
-  currentUser: any;
+  currentUser: UserDTO | null = null;
   whoamIResponse = {};
   postsMostPopularLast7Days: Post[] = [];
   postsMostPopularEver: Post[] = [];
@@ -64,7 +64,8 @@ export class ActivityTrendsComponent implements OnInit {
         // Obrada svakog posta
         this.postsMostPopularEver.forEach(post => {
           // Dohvatanje korisničkog imena autora posta
-          this.userService.getUserById(post.user?.id || 0).subscribe({
+          post.usernameDisplay = post.user?.username;
+          /*this.userService.getUserById(post.user?.id || 0).subscribe({
             next: (user) => {
               post.usernameDisplay = user.username;
   
@@ -75,19 +76,19 @@ export class ActivityTrendsComponent implements OnInit {
             error: () => {
               console.error(`Failed to load user for post ID ${post.id}`);
             }
-          });
+          });*/
   
-          this.postService.getLikesByPostId(post.id).subscribe({
+          /*this.postService.getLikesByPostId(post.id).subscribe({
             next: (likeCount: number) => {
               post.likeCount = likeCount; // Setovanje broja lajkova
             },
             error: () => {
               console.error(`Failed to check like count for post ID ${post.id}`);
             }
-          });
+          });*/
   
           // Provera da li je trenutni korisnik lajkovao post
-          if (this.currentUser) {
+         /* if (this.currentUser) {
             this.postService.getLikeByPostIdAndUserId(post.id, this.currentUser.id).subscribe({
               next: (isLiked: boolean) => {
                 console.log(`Post ${post.id} - Server like status: ${isLiked}`);
@@ -100,7 +101,7 @@ export class ActivityTrendsComponent implements OnInit {
           } else {
             // Ako korisnik nije prijavljen, postavite `isLikedByCurrentUser` na false
             post.isLikedByCurrentUser = false;
-          }
+          }*/
         });
       },
       error: () => {
@@ -118,30 +119,10 @@ export class ActivityTrendsComponent implements OnInit {
         // Obrada svakog posta
         this.postsMostPopularLast7Days.forEach(post => {
           // Dohvatanje korisničkog imena autora posta
-          this.userService.getUserById(post.user?.id || 0).subscribe({
-            next: (user) => {
-              post.usernameDisplay = user.username;
-  
-              if (post.imagePath) {
-                console.log('Image path: ', post.imagePath);
-              }
-            },
-            error: () => {
-              console.error(`Failed to load user for post ID ${post.id}`);
-            }
-          });
-  
-          this.postService.getLikesByPostId(post.id).subscribe({
-            next: (likeCount: number) => {
-              post.likeCount = likeCount; // Setovanje broja lajkova
-            },
-            error: () => {
-              console.error(`Failed to check like count for post ID ${post.id}`);
-            }
-          });
+          post.usernameDisplay = post.user?.username;
   
           // Provera da li je trenutni korisnik lajkovao post
-          if (this.currentUser) {
+          /*if (this.currentUser) {
             this.postService.getLikeByPostIdAndUserId(post.id, this.currentUser.id).subscribe({
               next: (isLiked: boolean) => {
                 console.log(`Post ${post.id} - Server like status: ${isLiked}`);
@@ -154,7 +135,7 @@ export class ActivityTrendsComponent implements OnInit {
           } else {
             // Ako korisnik nije prijavljen, postavite `isLikedByCurrentUser` na false
             post.isLikedByCurrentUser = false;
-          }
+          }*/
         });
       },
       error: () => {
@@ -172,30 +153,10 @@ export class ActivityTrendsComponent implements OnInit {
       // Obrada svakog posta
       this.allPosts.forEach(post => {
         // Dohvatanje korisničkog imena autora posta
-        this.userService.getUserById(post.user?.id || 0).subscribe({
-          next: (user) => {
-            post.usernameDisplay = user.username;
-
-            if (post.imagePath) {
-              console.log('Image path: ', post.imagePath);
-            }
-          },
-          error: () => {
-            console.error(`Failed to load user for post ID ${post.id}`);
-          }
-        });
-
-        this.postService.getLikesByPostId(post.id).subscribe({
-          next: (likeCount: number) => {
-            post.likeCount = likeCount; // Setovanje broja lajkova
-          },
-          error: () => {
-            console.error(`Failed to check like count for post ID ${post.id}`);
-          }
-        });
+        post.usernameDisplay = post.user?.username;
 
         // Provera da li je trenutni korisnik lajkovao post
-        if (this.currentUser) {
+        /*if (this.currentUser) {
           this.postService.getLikeByPostIdAndUserId(post.id, this.currentUser.id).subscribe({
             next: (isLiked: boolean) => {
               console.log(`Post ${post.id} - Server like status: ${isLiked}`);
@@ -208,7 +169,7 @@ export class ActivityTrendsComponent implements OnInit {
         } else {
           // Ako korisnik nije prijavljen, postavite `isLikedByCurrentUser` na false
           post.isLikedByCurrentUser = false;
-        }
+        }*/
       });
     },
     error: () => {
@@ -263,30 +224,10 @@ export class ActivityTrendsComponent implements OnInit {
         // Obrada svakog posta
         this.postsLastMonth.forEach(post => {
           // Dohvatanje korisničkog imena autora posta
-          this.userService.getUserById(post.user?.id || 0).subscribe({
-            next: (user) => {
-              post.usernameDisplay = user.username;
-  
-              if (post.imagePath) {
-                console.log('Image path: ', post.imagePath);
-              }
-            },
-            error: () => {
-              console.error(`Failed to load user for post ID ${post.id}`);
-            }
-          });
-  
-          this.postService.getLikesByPostId(post.id).subscribe({
-            next: (likeCount: number) => {
-              post.likeCount = likeCount; // Setovanje broja lajkova
-            },
-            error: () => {
-              console.error(`Failed to check like count for post ID ${post.id}`);
-            }
-          });
+          post.usernameDisplay = post.user?.username;
   
           // Provera da li je trenutni korisnik lajkovao post
-          if (this.currentUser) {
+          /*if (this.currentUser) {
             this.postService.getLikeByPostIdAndUserId(post.id, this.currentUser.id).subscribe({
               next: (isLiked: boolean) => {
                 console.log(`Post ${post.id} - Server like status: ${isLiked}`);
@@ -299,7 +240,7 @@ export class ActivityTrendsComponent implements OnInit {
           } else {
             // Ako korisnik nije prijavljen, postavite `isLikedByCurrentUser` na false
             post.isLikedByCurrentUser = false;
-          }
+          }*/
         });
       },
       error: () => {

@@ -1,5 +1,6 @@
 package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,33 +9,52 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.web.multipart.MultipartFile;
+import rs.ac.uns.ftn.informatika.jpa.dto.CreatePostDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.LikeDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
+import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
+import rs.ac.uns.ftn.informatika.jpa.mapper.PostDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.Like;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
+import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
+import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
 import javax.annotation.PostConstruct;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+
 public class PostServiceImpl implements PostService {
     @Autowired
     private PostRepository postRepository;
 
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private UserDTOMapper userDTOMapper;
+
+    @Autowired
+    private PostDTOMapper postDTOMapper;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private LikeService likeService;
@@ -46,16 +66,17 @@ public class PostServiceImpl implements PostService {
 
     // PriorityQueue za top 10 najlajkovanijih objava svih vremena
     private final PriorityQueue<Post> top10LikedPosts = new PriorityQueue<>(
-            Comparator.comparingLong(this::getLikeCount) // Sortira rastuće po broju lajkova
+            Comparator.comparingLong(Post::getLikeCount) // Sortira rastuće po broju lajkova
     );
 
 
     //PriorityQueue za održavanje TOP 5 postova u memoriji
-    private final PriorityQueue<Post> leaderboard = new PriorityQueue<>(
+    public final PriorityQueue<Post> leaderboard = new PriorityQueue<>(
             Comparator.comparingLong(this::getPostLikeCount) // Sortira po broju lajkova
     );
 
     @PostConstruct
+    @Transactional
     public void initializeTop10LikedPosts() {
         List<Post> topPosts = postRepository.findTop10ByMostLikedAllTime();
 
@@ -75,6 +96,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @PostConstruct
+    @Transactional
     public void initializeLeaderboard() {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         List<Post> topPosts = postRepository.findTop5ByLikesInLast7Days(sevenDaysAgo);
@@ -101,34 +123,22 @@ public class PostServiceImpl implements PostService {
 
     }
 
-    private long getLikeCount(Post post) {
+    /*private long getLikeCount(Post post) {
         return likeService.countLikesByPostId(post.getId());
-    }
+    }*/
 
 
     // ✅ Broj lajkova za post
-    private long getPostLikeCount(Post post) {
+    @Transactional
+    public long getPostLikeCount(Post post) {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        return likeService.findLikesByPostId(post.getId()).stream()
+        return post.getLikes().stream()
                 .filter(like -> like.getCreationDateTime().isAfter(sevenDaysAgo))
                 .count();
     }
 
     @Override
-    public void likePost(int postId, int userId) {
-        Post post = postRepository.findById(postId);
-
-        if (post == null) {
-            throw new RuntimeException("Post not found");
-        }
-
-        Like like = new Like();
-        like.setCreationDateTime(LocalDateTime.now());
-        like.setPost(post);
-        like.setUser(userRepository.findById(userId)
-                .orElseThrow(() -> new AccessDeniedException("User not found")));
-
-        likeService.save(like); // Spasi novi lajk
+    public void updateLeaderboard(Post post) {
 
         synchronized (leaderboard) {
             leaderboard.removeIf(p -> p.getId() == post.getId());
@@ -153,12 +163,14 @@ public class PostServiceImpl implements PostService {
         }
 
         LOG.info("Post {} updated in leaderboard and top 10 most liked posts.", post.getId());
+
     }
 
 
 
     // ✅ Dohvatanje top 5 postova iz keša
     @Override
+    @Transactional(readOnly = true)
     public List<Post> getAllPostsMostPopularLast7Days() {
         synchronized (leaderboard) {
             return new ArrayList<>(leaderboard);
@@ -166,21 +178,57 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> findAll() throws AccessDeniedException {
-        return postRepository.findAll();
+    @Transactional(readOnly = true)
+    public PagedResults<PostDTO> findAll() {
+        List<PostDTO> posts = postRepository.findAll().stream()
+                .sorted(Comparator.comparing(Post::getCreationDateTime).reversed())
+                .map(PostDTO::new)
+                .collect(Collectors.toList());
+
+        return new PagedResults<>(posts, posts.size());
     }
 
+
     @Override
-    public Post save(PostDTO postRequest) {
-        Post post = new Post();
-        post.setId(postRequest.id);
-        post.setDescription(postRequest.description);
-        post.setCreationDateTime(postRequest.creationDateTime);
-        post.setLocation(new Location(postRequest.location));
-        post.setImagePath(postRequest.imagePath);
-        post.setUser(UserDTOMapper.fromDTOtoUser(postRequest.getUser()));
-        return this.postRepository.save(post);
+    @Transactional
+    public PostDTO createPost(CreatePostDTO postRequest, int userId) {
+
+        String imagePath = this.saveImage(postRequest.getImage());
+
+        User user = userService.findById(userId);
+
+        Post newPost = new Post(postRequest.getDescription(), imagePath, LocalDateTime.now(), postRequest.getLatitude(), postRequest.getLongitude());
+
+        user.addPost(newPost);
+
+        return postDTOMapper.fromPostToDTO(newPost);
     }
+
+    public String saveImage(MultipartFile imageFile) {
+        try{
+            // Definišite folder za čuvanje slika unutar statičkog direktorijuma
+            String uploadDir = "uploads/images";
+            Path uploadPath = Paths.get(uploadDir);
+
+            // Kreirajte folder ako ne postoji
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Generišite jedinstveno ime za fajl
+            String fileName = UUID.randomUUID().toString() + "-" + imageFile.getOriginalFilename();
+            Path filePath = uploadPath.resolve(fileName);
+
+            // Sačuvajte fajl u folder
+            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Vratite ime fajla koje će se koristiti za pristup slici
+            return "/images/" + fileName;
+        }catch(IOException e){
+            throw new RuntimeException("An error occurred while saving the image, ", e);
+        }
+    }
+
 
     @Override
     public PostDTO getPostById(Integer postId) {
@@ -200,138 +248,147 @@ public class PostServiceImpl implements PostService {
         return this.postRepository.findById(id);
     }
 
-    public Post update(PostDTO postRequest) {
-        // Retrieve the post from the database
+    @Override
+    @Transactional
+    public PostDTO update(CreatePostDTO updatePostRequest, int postId) {
 
+        Post post = this.findById(postId);
 
-        Post post = this.postRepository.findById(postRequest.id);
-
-        // Update fields as per the request
-        post.setDescription(postRequest.description);
-        post.setLocation(new Location(postRequest.location));  // Ensure location is mapped properly
-        post.setImagePath(postRequest.imagePath);
-        post.setCreationDateTime(postRequest.creationDateTime);
-        // Only update the like count if explicitly specified (you may wish to exclude this for update consistency)
-
-        // Update the user if needed (optional, based on requirements)
-        if (postRequest.getUser() != null) {
-            post.setUser(UserDTOMapper.fromDTOtoUser(postRequest.getUser()));
+        if(updatePostRequest.getDescription() != null){
+            post.setDescription(updatePostRequest.getDescription());
+        }
+        if(updatePostRequest.getImage() != null){
+            String newImagePath = this.saveImage(updatePostRequest.getImage());
+            post.setImagePath(newImagePath);
+        }
+        if(updatePostRequest.getLatitude()!= null && updatePostRequest.getLongitude() != null){
+            post.setLocation(new Location(updatePostRequest.getLatitude(), updatePostRequest.getLongitude()));
         }
 
-        // Save the updated post to the repository
-        return postRepository.save(post);
+        post.setCreationDateTime(LocalDateTime.now());
+
+        return postDTOMapper.fromPostToDTO(post);
+
     }
 
     @Override
-    public boolean delete(int postId, int userId){
-        int rowAffected = this.postRepository.deleteByIdAndUserId(postId, userId);
-        return rowAffected > 0;
+    @Transactional
+    public boolean delete(int postId, int userId) {
+        User user = userService.findById(userId);
+        Post postToDelete = postRepository.findById(postId);
+        if(postToDelete != null){
+            user.removePost(postToDelete);
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public List<Post> findByUserId(int userId) throws AccessDeniedException {
-        return postRepository.findByUserId(userId);
+    @Transactional
+    public PagedResults<PostDTO> findByUser(int userId) {
+        List<PostDTO> posts =  postRepository.findByUserId(userId)
+                .stream()
+                .sorted(Comparator.comparing(Post::getCreationDateTime).reversed())
+                .map(post -> {
+                    boolean isLiked = likeService.findLikeByPostIdAndUserId(post.getId(), userId) != null ;
+
+                    PostDTO postDTO = new PostDTO(post);
+                    postDTO.isLikedByCurrentUser = isLiked;
+                    return postDTO;
+                })
+                .collect(Collectors.toList());
+
+        return new PagedResults<>(posts, posts.size());
     }
 
-    @Override
+
     public List<Post> getAllPostsLastMonth() {
-        List<Post> posts = postRepository.findAll();
-        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
-
-        LOG.info("Posts(last month) successfully cached!");
-        return posts.stream()
-                .filter(post -> post.getCreationDateTime().isAfter(oneMonthAgo))
-                .collect(Collectors.toList());
+        List<Post> posts = this.postRepository.findAll();
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1L);
+        this.LOG.info("Posts(last month) successfully cached!");
+        return (List)posts.stream().filter((post) -> {
+            return post.getCreationDateTime().isAfter(oneMonthAgo);
+        }).collect(Collectors.toList());
     }
 
-    @Override
-    public List<Post> findAllPosts(){
-        LOG.info("Posts(all posts) successfully cached!");
-        return postRepository.findAll();
+    public List<Post> findAllPosts() {
+        this.LOG.info("Posts(all posts) successfully cached!");
+        return this.postRepository.findAll();
     }
 
-   /* @Override
-    public Post findOne(int id) {
-        LOG.info("Post with id: " + id + " successfully cached!");
-        return this.postRepository.findById(id);
-    }*/
-
-    @Override
     public void removeFromCache() {
-        LOG.info("All posts(all, last month, top5, top10) removed from cache!");
+        this.LOG.info("All posts(all, last month, top5, top10) removed from cache!");
     }
 
-    @Override
-    public void clearCache(){
-        LOG.info("All posts and posts last month removed from cache!");
+    public void clearCache() {
+        this.LOG.info("All posts and posts last month removed from cache!");
     }
 
-    @Override
+    @Transactional
     public List<Post> getTop10PostsMostPopular() {
-        synchronized (top10LikedPosts) {
-            return new ArrayList<>(top10LikedPosts);
+        synchronized(this.top10LikedPosts) {
+            return new ArrayList(this.top10LikedPosts);
         }
     }
 
-    @Override
     public List<Post> findNearbyPosts(double latitude, double longitude, double radius) {
-        return postRepository.findNearbyPosts(latitude, longitude, radius);
+        return this.postRepository.findNearbyPosts(latitude, longitude, radius);
+    }
+
+    @Override
+    @Transactional
+    public boolean likePost(int postId, int userId) {
+
+        if(likeService.findLikeByPostIdAndUserId(postId, userId) != null){
+            return false;
+        }
+
+        Post post = postRepository.findById(postId);
+        User user = userService.findById(userId);
+
+
+        Like like = new Like(user, post);
+        like.setCreationDateTime(LocalDateTime.now());
+
+        user.addLike(like);
+        post.likePost(like);
+
+        this.updateLeaderboard(post);
+        return true;
+
+    }
+
+    @Override
+    @Transactional
+    public boolean unlikePost(int postId, int userId){
+
+        Like like = likeService.findLikeByPostIdAndUserId(postId, userId);
+
+        if (like != null) {
+            Post post = like.getPost();
+            post.unlikePost(like);
+            like.getUser().removeLike(like);
+
+            this.updateLeaderboard(post);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional
+    public List<UserDTO> getLikesFromPost(int postId) {
+        Set<Like> likes = findById(postId).getLikes();
+
+        if(likes == null){
+            return Collections.emptyList();
+        }
+
+        List<User> users = likes.stream().map(Like::getUser).collect(Collectors.toList());
+
+        return userDTOMapper.toUserDTOList(users);
+
     }
 
 
- /*   @Override
-    public List<Post> getTop10PostsMostPopular() {
-        List<Post> posts = postRepository.findAll();
-
-        // Mapiraćemo Post objekte na broj lajkova
-        Map<Post, Long> postLikeCountMap = new HashMap<>();
-
-        // Iteriraj kroz sve postove i broj lajkove
-        for (Post post : posts) {
-            // Dobavi lajkove za trenutni post
-            List<LikeDTO> likes = likeService.findLikesByPostId(post.getId());
-
-            // Dobavi ukupan broj lajkova za trenutni post
-            long likeCount = likes.size();  // Ukupan broj lajkova za post
-
-            // Dodaj broj lajkova u mapu
-            postLikeCountMap.put(post, likeCount);
-        }
-
-        LOG.info("Posts(top 10) successfully cached!");
-        // Sortiraj postove po broju lajkova (od najviše ka najmanje) i uzmi top 10
-        return postLikeCountMap.entrySet().stream()
-                .sorted((entry1, entry2) -> Long.compare(entry2.getValue(), entry1.getValue()))  // Sortiraj opadajuće
-                .map(Map.Entry::getKey)  // Uzmi samo postove
-                .limit(10)  // Top 10
-                .collect(Collectors.toList());
-    }*/
-
- /*   @Override
-    public List<Post> getAllPostsMostPopularLast7Days() {
-        List<Post> posts = postRepository.findAll();
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-
-        Map<Post, Long> postLikeCountMap = new HashMap<>();
-
-        for (Post post : posts) {
-            // Dobavi lajkove za trenutni post
-            List<LikeDTO> likes = likeService.findLikesByPostId(post.getId());
-
-            // Filtriraj lajkove koji su postavljeni u poslednjih 7 dana
-            long likeCountLast7Days = likes.stream()
-                    .filter(like -> like.getCreationDateTime().isAfter(sevenDaysAgo))
-                    .count();
-
-            postLikeCountMap.put(post, likeCountLast7Days);
-        }
-
-        LOG.info("Posts(top 5) successfully cached!");
-        // Sortiraj postove po broju lajkova i uzmi top 5
-        return postLikeCountMap.entrySet().stream()
-                .sorted((entry1, entry2) -> Long.compare(entry2.getValue(), entry1.getValue()))
-                .map(Map.Entry::getKey)
-                .limit(5)
-                .collect(Collectors.toList());
-    }*/
 }

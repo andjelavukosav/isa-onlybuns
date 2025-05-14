@@ -15,18 +15,14 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     List<Post> findAll();
     Post save(Post post);
 
+    void deleteById(int postId);
+
     @Query("SELECT COUNT(p) FROM Post p WHERE p.user.id = :userId")
     long countPostByUser(int userId);
 
     Post findById(int id);
 
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Post p WHERE p.id = :postId AND p.user.id = :userId")
-    int deleteByIdAndUserId(@Param("postId") int postId, @Param("userId") int userId);
-
-    @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
-    List<Post> findByUserId(@Param("userId") int userId);
+    List<Post> findByUserId(int userId);
 
     @Query("SELECT p FROM Post p WHERE p.id IN (SELECT l.post.id FROM Like l WHERE l.creationDateTime >= :sevenDaysAgo GROUP BY l.post.id ORDER BY COUNT(l.id) DESC)")
     List<Post> findTop5ByLikesInLast7Days(@Param("sevenDaysAgo") LocalDateTime sevenDaysAgo);
@@ -39,7 +35,12 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     @Query("SELECT p FROM Post p WHERE 6371000 * acos(cos(radians(:latitude)) * cos(radians(p.location.latitude)) * cos(radians(p.location.longitude) - radians(:longitude)) + sin(radians(:latitude)) * sin(radians(p.location.latitude))) <= :radius")
     List<Post> findNearbyPosts(@Param("latitude") double latitude,
-                                  @Param("longitude") double longitude,
-                                  @Param("radius") double radius);
+                               @Param("longitude") double longitude,
+                               @Param("radius") double radius);
+
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.likes WHERE p.id = :postId")
+    Post findPostWithLikes(@Param("postId") int postId);
+
 
 }
+
