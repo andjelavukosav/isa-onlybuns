@@ -84,12 +84,11 @@ export class UserService {
   getUserLocation(userId: number): Observable<{ latitude: number, longitude: number }> {
     return this.http.get<{ latitude: number, longitude: number }>(`${environment.apiHost}/users/location/${userId}`);
   }
-<<<<<<< HEAD
 
   getAllLocations(): Observable<any> {
     return this.http.get<any>(`${environment.apiHost}/users/asylums-veterinarians`);
   }
-=======
+  
   searchUsersByUsername(username: string): Observable<UserDTO[]>{
     return this.http.get<UserDTO[]>(environment.apiHost +  `/users/searchBy?username=${username}`);
   }
@@ -132,5 +131,4 @@ export class UserService {
 
   
 
->>>>>>> development
 }
