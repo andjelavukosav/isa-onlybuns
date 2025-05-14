@@ -1,0 +1,86 @@
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+    z-index: 1100;
+  }
+  
+  .search-container input {
+    padding: 8px;
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .search-container ul {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    z-index: 1000;
+  }
+  
+  .search-container ul li {
+    display: flex;
+    width: 100%;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-container ul li:hover {
+    background: #f0f0f0;
+  }
+
+  .search-container ul li a {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    color: #004D3B; /* Tvoja sekundarna boja */
+    font-weight: bold;
+    padding: 10px;
+  }
+  .search-container ul li a:hover {
+    color: #00291b;
+  }
+
+  /* Poruka o nedostatku rezultata */
+
+.alert-info {
+  background-color: #e7f3e7;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  z-index: 1001;  /* Dodaj z-index */
+}
+
+
+.alert-info p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Poruka o grešci */
+.alert-danger {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.alert-danger p {
+  margin: 0;
+  font-size: 14px;
+}

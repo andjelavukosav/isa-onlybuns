@@ -1,0 +1,110 @@
+/* Glavni kontejner */
+.profile-container {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Visina celog ekrana */
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Navigaciona linija (tabovi) */
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 2px solid #ddd;
+    margin: 0;
+    padding: 10px 0;
+    background-color: #f9f9f9;
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .tab:hover {
+    background-color: #f0f0f0;
+  }
+
+  .tab.active {
+    font-weight: bold;
+    border-bottom: 2px solid #007bff;
+    color: #007bff;
+  }
+
+  /* Sadržaj sekcija */
+  .tab-content {
+    flex: 1; /* Preuzima preostali prostor */
+    overflow-y: auto; /* Omogućava skrolovanje ako sadržaj premaši ekran */
+    padding: 20px;
+  }
+
+  .posts-section,
+  .info-section,
+  .friends-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Stil za postove */
+  .post-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .post-image img {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+
+  /* Stil za prijatelje */
+  .friend-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .friend-card img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  /* Header profila */
+  .profile-header {
+
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border-bottom: 2px solid #ddd;
+
+    display: flex;
+    align-items: center; /* Vertikalno centriranje */
+    justify-content: center; /* Horizontalno centriranje */
+    gap: 20px;
+    padding: 20px 0;
+  }
+
+
+  /* Opcioni stil za dugmad */
+  .follow-button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .follow-button:hover {
+    background-color: #0056b3;
+  }

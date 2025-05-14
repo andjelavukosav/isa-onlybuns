@@ -20,7 +20,7 @@ export class CreatePostComponent {
   // Mapa koordinata
   map: Map | undefined;
   marker: any;  // Marker na mapi
-  location: Location = { latitude: 0, longitude: 0 }; // Početne koordinate
+  location: Location | null = null; 
 
   // Opcije za mapu (centar i zoom nivo)
   options = {
@@ -37,9 +37,9 @@ export class CreatePostComponent {
 
   postForm = new FormGroup({
     description: new FormControl('', [Validators.required, Validators.maxLength(255)]),
-    createdAt: new FormControl(new Date().toISOString().slice(0, 16), Validators.required),
-    locationLatitude: new FormControl(''), 
-    locationLongitude: new FormControl(''), 
+    createdAt: new FormControl(new Date(), Validators.required),
+    locationLatitude: new FormControl<number | null>(null),
+    locationLongitude: new FormControl<number | null>(null),    
   });
   
   ngOnChanges(): void {
@@ -51,7 +51,10 @@ export class CreatePostComponent {
 
       // Postavljanje markera sa postojećim koordinatama
       this.location = this.post.location;
-      this.setMarker(this.location.latitude, this.location.longitude);
+      
+      if(this.location)
+        this.setMarker(this.location.latitude, this.location.longitude);
+      
     }
   }
 
@@ -64,13 +67,19 @@ export class CreatePostComponent {
       this.location = { latitude: latLng.lat, longitude: latLng.lng };
       
       this.postForm.patchValue({
-        locationLatitude: this.location.latitude.toString(),
-        locationLongitude: this.location.longitude.toString(),
+        locationLatitude: this.location.latitude,
+        locationLongitude: this.location.longitude,
       });
+      console.log('Location: ', this.location);
     });
   }
 
-  setMarker(lat: number, lng: number) {
+  setMarker(lat: number | null, lng: number | null) {
+    if (lat == null || lng == null) {
+      console.log('Invalid coordinates: lat or lng is null');
+      return; // Ne postavljaj marker ako su koordinate null
+    }
+    
     if (this.marker) {
       this.marker.setLatLng([lat, lng]);
     } else {
@@ -98,15 +107,16 @@ export class CreatePostComponent {
     console.log('Metoda createPost() je pozvana');
 
     if (this.postForm.valid && this.selectedImage) {
-      const formValues = this.postForm.value;
+      const formValues = this.postForm.getRawValue();
   
   
       const newPost: Post = {
         id: 0, // Backend će generisati ID
         description: formValues.description!,
-        imagePath: '', // Backend će popuniti putanju slike
+        imagePath: '', 
         creationDateTime: formValues.createdAt!,
-        location: this.location
+        location: this.location,
+        likeCount: 0
       };
 
       // Pozovi servis i proslijedi newPost i selectedImage

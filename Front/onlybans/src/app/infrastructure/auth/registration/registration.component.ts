@@ -100,30 +100,31 @@ export class RegistrationComponent implements OnInit {
     };
 
     this.authService.signup(formData).subscribe(
-        data => {
-            alert('Signup successful: You have been successfully registered! Please verify your account via email.');
-            this.router.navigate(['/login']);
-        },
-        error => {
-            let errorMessage = 'An error occurred';
-
-            if (error.status === 409) {
-                errorMessage = 'This email or username is already taken. Please use a different one.';
-            } else if (error.status === 400) {
-                errorMessage = 'Invalid password format. Please ensure your password meets the requirements.';
-            } else if (error.status === 500) {
-                errorMessage = 'Server error. Please try again later.';
-            } else {
-              errorMessage = 'Signup successful: You have been successfully registered! Please verify your account via email.';
-              this.router.navigate(['/login']);
-            }
-            
-
-            alert(errorMessage);
-            this.submitted = false;
-        }
+      data => {
+          alert('Signup successful: You have been successfully registered! Please verify your account via email.');
+          this.router.navigate(['/login']);
+      },
+      error => {
+          let errorMessage = 'An error occurred';
+          
+          if (error.status === 409) {
+              // Možda je potrebno proveriti telo odgovora
+              if (error.error === 'Username already exists' || error.error === 'Email already exists') {
+                  errorMessage = error.error;  // Korisničko ime ili email već postoji
+              }
+          } else if (error.status === 400) {
+              errorMessage = 'Invalid password format. Please ensure your password meets the requirements.';
+          } else if (error.status === 500) {
+              errorMessage = 'Server error. Please try again later.';
+          } else {
+              errorMessage = 'Error';
+          }
+          
+          alert(errorMessage);
+          this.submitted = false;
+      }
     );
-}
+  }
 
   
 }

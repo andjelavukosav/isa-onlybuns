@@ -1,35 +1,47 @@
-:host {
-  position: relative;
-  z-index: 10;
-  color: rgb(93, 117, 196);
-}
 
 .app-navbar {
-  width: 100%;
+  position: relative;
+  z-index: 10;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-.app-navbar span {
-  text-transform: uppercase !important;
+.greeting {
+  font-size: 20px;
+  color: rgb(150, 150, 150);
+  font-weight: bold;
+  display: block;
+  visibility: visible;
+  margin-bottom: 10px; /* Dodajte malo razmaka ispod teksta */
 }
 
-.right {
-  margin-left: auto;
-  float: right;
+::ng-deep .mat-menu {
+  top: 100% !important; /* Meni ispod dugmeta */
+  right: 0 !important; /* Poravnanje sa desnom ivicom */
+  z-index: 999;
 }
 
-.app-angular-logo {
-  margin: 0 4px 3px 0;
-  height: 26px;
+button.mat-icon-button {
+  z-index: 1000;
+  font-size: 24px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; 
 }
 
-.greeting-hamburger {
-  display: none;
-}
-button[mat-icon-button] {
-  color: gray; /* Boja ikone za kontrast sa pozadinom */
+.mat-menu-panel {
+  width: 200px;
+  background-color: #fff;
+  border: 1px solid #5e5c5c;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-
+.mat-menu-panel .mat-menu-item {
+  display: block;
+  padding: 10px 15px;
+  font-size: 14px;
+}
 

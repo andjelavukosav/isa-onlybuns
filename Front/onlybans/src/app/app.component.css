@@ -1,0 +1,50 @@
+:host {
+    position: relative;
+    z-index: 10;
+    color: rgb(0, 2, 6);
+  }
+  
+  .app-navbar {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background-color: #1976d2; 
+    padding: 0 16px;
+    z-index: 1000; 
+  }
+  
+  .app-navbar span {
+    text-transform: uppercase !important;
+  }
+  
+  .right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 200px; 
+  }
+  
+  button[mat-icon-button] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px; /* Povećava unutrašnji prostor */
+    min-width: 180px; /* Sprečava previše malo dugme */
+    max-width: 250px; /* Ograničava širinu */
+    white-space: nowrap; /* Sprečava prelamanje teksta u novi red */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Dodaje "..." ako nema dovoljno mesta */
+  }
+  
+  
+  .main-content {
+    padding-top: 64px; 
+  }
+
+
+
+  

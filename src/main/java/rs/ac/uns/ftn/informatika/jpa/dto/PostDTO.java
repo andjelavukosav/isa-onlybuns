@@ -3,18 +3,33 @@ package rs.ac.uns.ftn.informatika.jpa.dto;
 import org.springframework.web.multipart.MultipartFile;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 public class PostDTO {
     public int id;
+
+    @NotBlank(message = "Description is required.")
     public String description;
+
     public LocalDateTime creationDateTime;
+
+    @NotBlank
     public String imagePath;
+
     public LocationDTO location;
+
+    @NotNull
     public MultipartFile image;
-    public UserDTO user;
+
+    public boolean isLikedByCurrentUser = false;
+
     public int likeCount;
+
+    public UserDTO user;
 
     public PostDTO() {}
 
@@ -41,6 +56,14 @@ public class PostDTO {
 
     public UserDTO getUser() { return user; }
 
+    public void setUser(UserDTO user) { this.user = user; }
+
     public String getImagePath() { return imagePath; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+
+    public void setCreationDateTime(LocalDateTime creationDateTime) { this.creationDateTime = creationDateTime; }
+
+    public LocalDateTime getCreationDateTime() { return creationDateTime; }
+
+
 }

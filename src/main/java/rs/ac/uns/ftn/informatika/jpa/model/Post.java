@@ -1,13 +1,21 @@
 package rs.ac.uns.ftn.informatika.jpa.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import javax.xml.crypto.Data;
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Table(name="post")
-public class Post {
+public class Post implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     @Column(name = "Id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,16 +28,23 @@ public class Post {
     private String imagePath;
 
     @Column(name = "CreationDateTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime creationDateTime;
 
-    @Column(name= "LikeCount" )
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<Like> likes;
+
+    @Column(name= "LikeCount", columnDefinition = "int default 0")
     private int likeCount;
 
     @Embedded
+    @JsonIgnore
     private Location location;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "Id")
+    @JoinColumn(name = "user_id", referencedColumnName = "Id", nullable = false)
+    @JsonIgnore
     private User user;
 
 
@@ -45,6 +60,12 @@ public class Post {
         this.location = location;
     }
 
+    public Post(String description, String imagePath, LocalDateTime creationDateTime, Double latitude, Double longitude) {
+        this.description = description;
+        this.imagePath = imagePath;
+        this.creationDateTime = creationDateTime;
+        this.location = new Location(latitude, longitude);
+    }
     public int getId() {
         return id;
     }
@@ -94,10 +115,26 @@ public class Post {
     }
 
     public int getLikeCount() {
-        return likeCount;
+        return this.likeCount;
     }
 
     public void setLikeCount(int likeCount) {
         this.likeCount = likeCount;
+    }
+
+    public Set<Like> getLikes() { return this.likes; }
+
+    public void setLikes(Set<Like> likes) { this.likes = likes; }
+
+    public void likePost(Like like){
+        this.likes.add(like);
+        this.likeCount++;
+        like.setPost(this);
+    }
+
+    public void unlikePost(Like like){
+        this.likes.remove(like);
+        this.likeCount--;
+        like.setPost(null);
     }
 }

@@ -1,2 +1,48 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~leaflet/dist/leaflet.css";
+/* Stilovi za snack bar unutar cdk-overlay-container */
+.cdk-overlay-container {
+    position: fixed; /* Fiksirano pozicioniranje */
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Centriranje */
+    z-index: 1000; /* Osiguravanje da bude iznad ostalih elemenata */
+  }
+
+.cdk-overlay-container .mat-mdc-snack-bar-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+  }
+  
+ /* Stil za success (uspeh) snack bar */
+.mat-mdc-snack-bar-container.success .mdc-snackbar__surface {
+    background-color: #4caf50; /* Uspeh */
+    color: white;
+}
+
+/* Stil za warning (upozorenje) snack bar */
+.mat-mdc-snack-bar-container.warning .mdc-snackbar__surface {
+    background-color: #ff9800; /* Upozorenje - narandžasta */
+    color: white;
+}
+
+/* Stil za error (greška) snack bar */
+.mat-mdc-snack-bar-container.error .mdc-snackbar__surface {
+    background-color: #f44336; /* Greška - crvena */
+    color: white;
+}
+  
+::ng-deep .mat-paginator .mat-paginator-page-size,
+::ng-deep .mat-paginator .mat-paginator-range-label {
+  display: none !important;
+}
+
+.cdk-overlay-pane.mat-mdc-select-panel-above {
+  top: auto !important;
+  bottom: 0 !important;
+}
+
+  
