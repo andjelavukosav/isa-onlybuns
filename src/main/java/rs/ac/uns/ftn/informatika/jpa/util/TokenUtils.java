@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
 import java.util.stream.Collectors;
 
 @Component
@@ -240,11 +241,19 @@ public class TokenUtils {
         final String email = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
 
-        // Token je validan kada:
-        return (email != null // korisnicko ime nije null
-                && email.equals(((User) userDetails).getEmail()) // korisnicko ime iz tokena se podudara sa korisnickom imenom koje pise u bazi
-                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())); // nakon kreiranja tokena korisnik nije menjao svoju lozinku
+        System.out.println("Token email: " + email);
+        System.out.println("User email: " + user.getEmail());
+        System.out.println("Token created at: " + created);
+        System.out.println("User last password reset: " + user.getLastPasswordResetDate());
+
+        boolean valid = (email != null
+                && email.equals(user.getEmail())
+                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate()));
+
+        System.out.println("Token valid: " + valid);
+        return valid;
     }
+
 
     /**
      * Funkcija proverava da li je lozinka korisnika izmenjena nakon izdavanja tokena.
@@ -254,8 +263,12 @@ public class TokenUtils {
      * @return Informacija da li je token kreiran pre poslednje izmene lozinke ili ne.
      */
     private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
-        return (lastPasswordReset != null && created.before(lastPasswordReset));
+        // Token je star SAMO ako je STROGO pre vremena resetovanja lozinke
+        return lastPasswordReset != null && created.before(lastPasswordReset);
     }
+
+
+
 
     // =================================================================
 

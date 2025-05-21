@@ -2,6 +2,8 @@ package rs.ac.uns.ftn.informatika.jpa.dto;
 
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 
+import java.util.Date;
+
 public class UserDTO {
     private int id;
 
@@ -20,6 +22,8 @@ public class UserDTO {
     private int followingCount = 0;
 
     private int postsCount = 0;
+
+    private Date lastPasswordResetDate;
 
     public UserDTO() {
 
@@ -127,5 +131,13 @@ public class UserDTO {
     public int getPostsCount() { return this.postsCount; }
 
     public void setPostsCount(int postsCount) { this.postsCount = postsCount; }
+
+    public Date getLastPasswordResetDate() {
+        return lastPasswordResetDate;
+    }
+
+    public void setLastPasswordResetDate(Date lastPasswordResetDate) {
+        this.lastPasswordResetDate = lastPasswordResetDate;
+    }
 
 }

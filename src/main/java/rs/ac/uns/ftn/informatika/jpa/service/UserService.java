@@ -30,6 +30,6 @@ public interface UserService {
     PagedResults<UserDTO> getUserFollowing(int userId);
     PagedResults<UserDTO> getUserFollowers(int userId);
     PagedResults<PostDTO> getPostsByUser(int userId);
-    void updateUserPassword(int userId, String newPassword) throws Exception;
+    User updateUserPassword(int userId, String newPassword) throws Exception;
     boolean verifyPassword(int userId, String currentPassword);
 }

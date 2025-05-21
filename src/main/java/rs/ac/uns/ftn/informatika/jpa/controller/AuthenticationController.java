@@ -23,6 +23,8 @@ import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -121,6 +123,9 @@ public class AuthenticationController {
 
         // Nastavi sa čuvanjem korisnika ako email ne postoji
         userRequest.setEnabled(false);
+        Date now = new Date();
+        long timeWithoutMillis = (now.getTime() / 1000) * 1000;
+        userRequest.setLastPasswordResetDate(new Date(timeWithoutMillis));
         User user = this.userService.save(userRequest);
 
         String activationLink = "http://localhost:8080/auth/verify?email=" + user.getEmail();

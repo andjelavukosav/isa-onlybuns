@@ -7,6 +7,7 @@ import { Post } from '../model/post.model';
 import { PagedResults } from '../model/paged-result.model';
 import { AuthService } from '../service';
 import { BehaviorSubject } from 'rxjs';
+import { filter, take, switchMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-user-profile',
@@ -18,8 +19,6 @@ export class UserProfileComponent implements OnInit {
   user: UserDTO | null = null;
   posts: Post[] = [];
   friends: UserDTO[] = []; // Lista prijatelja
-  newPassword: string = '';
-  confirmPassword: string = '';
   currentUser: AuthUser | null = null;
   currentUserId: number | null = null;
   activeTab: string = 'posts'; // Kontrolni mehanizam za prikaz sadržaja (podrazumevano: Objave)
@@ -27,8 +26,15 @@ export class UserProfileComponent implements OnInit {
   editingLastName = false;
   editingAddress = false;
   currentPassword: string = ''; // Novo polje za trenutnu lozinku
-  oldPasswordVerified: boolean = false; // Praćenje da li je lozinka potvrđena
   invalidPassword: boolean = false; // Indikator za neispravnu lozinku
+
+  editing: boolean = false;
+  currentPasswordInput: string = ''; // Stara lozinka koju korisnik unosi
+  oldPasswordVerified: boolean = false; // Da li je stara lozinka potvrđena
+  newPassword: string = ''; // Nova lozinka
+  confirmPassword: string = ''; // Potvrda nove lozinke
+  passwordErrorMessage: string = ''; // Poruka o grešci kod lozinke
+
 
   editableUser: UserDTO = {
     id: 0,
@@ -65,7 +71,6 @@ export class UserProfileComponent implements OnInit {
           this.editableUser = { ...this.user };
         }
         this.getPosts();
-        this.getFriends();
       }
     });
 
@@ -82,6 +87,102 @@ export class UserProfileComponent implements OnInit {
     });
 
  }
+
+ startEditing() {
+    this.editing = true;
+    this.oldPasswordVerified = false;
+    this.currentPasswordInput = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.passwordErrorMessage = '';
+    // Napravi kopiju user podataka u editableUser da ne menjaš odmah original
+    if (this.user) {
+      this.editableUser = JSON.parse(JSON.stringify(this.user));
+    }
+  }
+
+  verifyOldPassword() {
+    if (!this.currentPasswordInput || !this.userId) {
+      this.passwordErrorMessage = 'Please enter your current password.';
+      return;
+    }
+    this.userService.verifyPassword(this.userId, this.currentPasswordInput).subscribe({
+      next: (isValid) => {
+        if (isValid) {
+          this.oldPasswordVerified = true;
+          this.passwordErrorMessage = '';
+        } else {
+          this.passwordErrorMessage = 'Current password is incorrect.';
+          this.oldPasswordVerified = false;
+        }
+      },
+      error: () => {
+        this.passwordErrorMessage = 'Error verifying password. Please try again.';
+        this.oldPasswordVerified = false;
+      }
+    });
+  }
+
+
+  saveChanges() {
+    if (!this.userId) return;
+
+    if (this.oldPasswordVerified) {
+      this.userService.updatePassword(this.userId, this.newPassword).pipe(
+        tap((response: any) => {
+          if (response.token) {
+            this.authService.setToken(response.token);
+          }
+        }),
+        // Sačekaj da tokenSubject emituje novi token koji smo upravo postavili
+        switchMap((response: any) => this.authService.tokenSubject.pipe(
+          filter(token => token === response.token), // čekaj da tokenSubject emituje novi token
+          take(1)
+        )),
+        // Kada se potvrdi da je token ažuriran, pošalji updateUserData
+        switchMap(() => this.userService.updateUserData(this.userId!, this.editableUser))
+      ).subscribe({
+        next: () => {
+          alert('User updated successfully!');
+          this.resetPasswordFields();
+          this.editing = false;
+          this.loadUser();
+        },
+        error: () => {
+          alert('Failed to update password or user data.');
+        }
+      });
+    } else {
+      this.saveUserDataAfterPasswordChange();
+    }
+  }
+
+
+
+  saveUserDataAfterPasswordChange() {
+    this.userService.updateUserData(this.userId!, this.editableUser).subscribe({
+      next: () => {
+        alert('User updated successfully!');
+        this.editing = false;
+        this.loadUser();
+      },
+      error: () => {
+        alert('Failed to update user data.');
+      }
+    });
+  }
+
+  cancelEditing() {
+    this.editing = false;
+    this.oldPasswordVerified = false;
+    this.currentPasswordInput = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.passwordErrorMessage = '';
+    if (this.user) {
+      this.editableUser = JSON.parse(JSON.stringify(this.user));
+    }
+  }
 
   // Učitavanje korisničkih podataka
   loadUser(): void {
@@ -124,16 +225,6 @@ export class UserProfileComponent implements OnInit {
     });
   }
 
-  // Učitavanje liste prijatelja
-  getFriends(): void {
-  /*  this.userService.getFriendsByUserId(this.userId || 0).subscribe({
-      next: (friends) => {
-        this.friends = friends;
-      },
-      error: (err) => console.error(`Failed to load friends for user ID ${this.userId}`, err)
-    });*/
-  }
-
   // Ažuriranje lozinke
   updatePassword(): void {
     if (!this.oldPasswordVerified) {
@@ -152,35 +243,18 @@ export class UserProfileComponent implements OnInit {
     }
 
     this.userService.updatePassword(this.userId, this.newPassword).subscribe({
-      next: () => {
+      next: (response) => {
+        if (response.token) {
+        // Sačuvaj novi token, npr. u localStorage
+        localStorage.setItem('token', response.token);
+        // Ažuriraj header Authorization za buduće zahteve, ako koristiš interceptor
+      }
         alert('Password updated successfully!');
         this.resetPasswordFields();
       },
       error: (error) => {
         console.error('Failed to update password:', error);
         alert('Failed to update password.');
-      }
-    });
-  }
-
-  verifyOldPassword(): void {
-    if (!this.currentPassword || !this.userId) {
-      alert('Current password is required.');
-      return;
-    }
-
-    this.userService.verifyPassword(this.userId, this.currentPassword).subscribe({
-      next: (isVerified) => {
-        if (isVerified) {
-          this.oldPasswordVerified = true;
-          this.invalidPassword = false;
-        } else {
-          this.invalidPassword = true;
-        }
-      },
-      error: (error) => {
-        console.error('Failed to verify password:', error);
-        alert('An error occurred while verifying the password.');
       }
     });
   }
@@ -194,70 +268,6 @@ export class UserProfileComponent implements OnInit {
 
   
 
-  // Postavljanje aktivnog taba
-  setActiveTab(tab: string): void {
-    this.activeTab = tab;
-
-    if (tab === 'posts') {
-      this.getPosts(); // Ponovo učitava objave kada je "Objave" tab aktivan
-    }
-  }
-
-  editField(field: string) {
-    if (field === 'firstname') this.editingName = true;
-    if (field === 'lastname') this.editingLastName = true;
-    if (field === 'address') this.editingAddress = true;
-  }
-
-  cancelEdit(field: string): void {
-    // Isključivanje edit moda za polje koje se otkazuje
-    if (field === 'firstname') this.editingName = false;
-    if (field === 'lastname') this.editingLastName = false;
-    if (field === 'address') this.editingAddress = false;
-
-    // Resetovanje editableUser na originalne vrednosti iz user objekta
-    this.editableUser = {
-      id: this.user?.id || 0,
-      username: this.user?.username || '',
-      email: this.user?.email || '',
-      followersCount: this.user?.followersCount || 0,
-      followingCount: this.user?.followingCount || 0,
-      postsCount: this.user?.postsCount || 0,
-      firstname: this.user?.firstname || '',
-      lastname: this.user?.lastname || '',
-      address: this.user?.address ? {
-        street: this.user.address.street || '',
-        streetNumber: this.user.address.streetNumber || '',
-        city: this.user.address.city || '',
-        country: this.user.address.country || ''
-      } : {
-        street: '',
-        streetNumber: '',
-        city: '',
-        country: ''
-      }
-    };
-    this.loadUser();
-  }
-
-
-
-  saveField(field: string) {
-    // Ažuriranje korisnika na serveru
-    this.userService.updateUserData(this.userId || 0, this.editableUser).subscribe({
-      next: (response: string) => {
-        console.log(response); // Očekivani tekstualni odgovor
-        alert('Updated successfully!');
-        this.cancelEdit(field); // Zatvaranje edit moda
-      },
-      error: (error) => {
-        console.error('Error saving user data', error);
-        alert('Greška pri čuvanju podataka');
-      }
-    });
-
-  }
-
-
+ 
 }
 

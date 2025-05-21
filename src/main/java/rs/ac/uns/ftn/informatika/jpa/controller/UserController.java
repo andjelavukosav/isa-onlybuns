@@ -13,17 +13,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import rs.ac.uns.ftn.informatika.jpa.dto.*;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.AsylumAndVeterinarian;
+import rs.ac.uns.ftn.informatika.jpa.model.Role;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.AsylumAndVeterinarianService;
 import rs.ac.uns.ftn.informatika.jpa.service.FollowService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
+import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
@@ -34,6 +37,8 @@ import java.util.*;
 @RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin
 public class UserController {
+    @Autowired
+    private TokenUtils tokenUtils;
 
     @Autowired
     private AsylumAndVeterinarianService asylumAndVeterinarianService;
@@ -140,11 +145,21 @@ public class UserController {
     }
 
     @PutMapping("/users/update/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<String> update(
             @PathVariable int userId,
             @RequestBody UserDTO updateUser,
             Principal principal) {
+
+        System.out.println(">>> Entered update() method");
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            System.out.println("Authenticated user: " + auth.getName());
+            System.out.println("Authorities: " + auth.getAuthorities());
+        } else {
+            System.out.println("No authentication present.");
+        }
 
         User authenticatedUser = userService.findByUsername(principal.getName());
 
@@ -153,15 +168,15 @@ public class UserController {
         }
 
         // Provera: korisnik može menjati samo svoju lozinku ili admin može menjati bilo čiju
-        if (authenticatedUser.getId() != userId && !authenticatedUser.getRoles().contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this password.");
-        }
+     //   if (authenticatedUser.getId() != userId && !authenticatedUser.getRoles().contains("ROLE_ADMIN")) {
+      //      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this password.");
+        //}
 
         try {
             userService.updateUser(userId, updateUser);
-            return ResponseEntity.ok("Password updated successfully.");
+            return ResponseEntity.ok("User updated successfully!");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update password.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user data.");
         }
 
     }
@@ -264,7 +279,7 @@ public class UserController {
     }
 
 
-    @PutMapping("/users/update-password/{userId}")
+    /*@PutMapping("/users/update-password/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<String> updatePassword(
             @PathVariable int userId,
@@ -292,10 +307,77 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update password.");
         }
+    }*/
+
+    /*@PutMapping("/users/update-password/{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<?> updatePassword(
+            @PathVariable int userId,
+            @RequestBody Map<String, String> passwordMap,
+            Principal principal) {
+
+        String newPassword = passwordMap.get("newPassword");
+
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Password cannot be empty.");
+        }
+
+        User authenticatedUser = userService.findByUsername(principal.getName());
+
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated.");
+        }
+
+        if (authenticatedUser.getId() != userId && !authenticatedUser.getRoles().contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this password.");
+        }
+
+        try {
+            userService.updateUserPassword(userId, newPassword);
+
+            return ResponseEntity.ok(Collections.singletonMap("message", "Password updated successfully."));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update password.");
+        }
+    }
+*/
+    @PutMapping("/users/update-password/{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<?> updatePassword(
+            @PathVariable int userId,
+            @RequestBody Map<String, String> passwordMap,
+            Principal principal) {
+
+        String newPassword = passwordMap.get("newPassword");
+
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Password cannot be empty.");
+        }
+
+        User authenticatedUser = userService.findByUsername(principal.getName());
+
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated.");
+        }
+
+        if (authenticatedUser.getId() != userId && !authenticatedUser.getRoles().contains("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this password.");
+        }
+
+        try {
+            User user = userService.updateUserPassword(userId, newPassword);
+
+            String newToken = tokenUtils.generateToken(user.getId(), user.getUsername(), user.getEmail(), user.getRoles());
+
+            return ResponseEntity.ok(Collections.singletonMap("token", newToken));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update password.");
+        }
     }
 
+
     @PostMapping("/users/verify-password")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<Boolean> verifyPassword(@RequestBody Map<String, String> request, Principal principal) {
         String currentPassword = request.get("currentPassword");
         int userId = Integer.parseInt(request.get("userId"));
@@ -316,7 +398,7 @@ public class UserController {
     }
 
     @GetMapping("/users/location/{userId}")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
     public ResponseEntity<Map<String, Double>> getUserLocation(@PathVariable int userId) {
         // Simulacija dohvaćanja koordinata iz baze
         User user = userService.findById(userId);
@@ -327,7 +409,7 @@ public class UserController {
     }
 
     @GetMapping("/users/asylums-veterinarians")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
     public ResponseEntity<List<AsylumAndVeterinarian>> getAllLocations() {
         List<AsylumAndVeterinarian> locations = asylumAndVeterinarianService.findAll();
         return ResponseEntity.ok(locations);

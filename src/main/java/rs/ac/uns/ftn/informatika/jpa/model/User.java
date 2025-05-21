@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.*;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -42,7 +41,7 @@ public class User implements UserDetails, Serializable {
     private boolean enabled;
 
     @Column(name = "last_password_reset_date")
-    private Timestamp lastPasswordResetDate;
+    private Date lastPasswordResetDate;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -143,10 +142,14 @@ public class User implements UserDetails, Serializable {
     }
 
     public void setPassword(String password) {
-        Timestamp now = new Timestamp(new Date().getTime());
-        this.setLastPasswordResetDate(now);
+      /*  Date now = new Date();
+        // Ukloni milisekunde
+        long timeInMillis = (now.getTime() / 1000) * 1000;
+        this.setLastPasswordResetDate(new Date(timeInMillis));*/
+
         this.password = password;
     }
+
 
     public String getFirstName() {
         return firstName;
@@ -195,11 +198,11 @@ public class User implements UserDetails, Serializable {
         this.enabled = enabled;
     }
 
-    public Timestamp getLastPasswordResetDate() {
+    public Date getLastPasswordResetDate() {
         return lastPasswordResetDate;
     }
 
-    public void setLastPasswordResetDate(Timestamp lastPasswordResetDate) {
+    public void setLastPasswordResetDate(Date lastPasswordResetDate) {
         this.lastPasswordResetDate = lastPasswordResetDate;
     }
 
