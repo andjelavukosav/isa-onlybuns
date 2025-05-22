@@ -52,14 +52,6 @@ export class PostComponent implements OnInit, OnChanges {
 
 
 
-  /*private updateLikedStatus(posts: Post[]): Post[] {
-  const likedSet = new Set(this.likedPostIds);
-  return posts.map(post => {
-    post.isLikedByCurrentUser = likedSet.has(post.id);
-    return post;
-  });
-}
-*/
 private updateLikedStatus(): void {
   if (!this.inputPosts || this.inputPosts.length === 0 || !this.likedPostIds) {
     return;
@@ -76,61 +68,17 @@ private updateLikedStatus(): void {
   }
   
   ngOnChanges(changes: SimpleChanges): void {
-  if (changes['inputPosts']) {
-    console.log('Primljeni postovi:', changes['inputPosts'].currentValue ? changes['inputPosts'].currentValue.length : 0);
-    this.posts = changes['inputPosts'].currentValue || [];
-    this.updateLikedStatus(); // Ažuriraj status lajkova kad se promene postovi
-    this.cdr.detectChanges();
-  }
-}
+    if (changes['inputPosts']) {
+      console.log('Primljeni postovi:', changes['inputPosts'].currentValue ? changes['inputPosts'].currentValue.length : 0);
+      this.posts = changes['inputPosts'].currentValue || [];
 
-
-
-  getPosts(): void {
-    this.inputPosts = [];
-    if(this.userId){
-      this.postService.getPostsByUser(this.userId).subscribe({
-        next: (result: PagedResults<Post>) => {
-          this.handlePosts(result);
-        },
-        error: () => {
-          console.error(`Failed to load posts for user ${this.userId}.`);
-        }
+      // Ponovo učitaj lajkovane postove i ažuriraj status
+      this.postService.getLikedPostIds().subscribe(ids => {
+        this.likedPostIds = ids;
+        this.updateLikedStatus(); // Nakon što se dobiju novi ID-jevi, ažuriraj prikaz
+        this.cdr.detectChanges(); // Ako koristiš ChangeDetectionStrategy.OnPush
       });
     }
-    else{
-
-      this.userService.getFollowingPosts().subscribe({
-        next: (result: PagedResults<Post>) => {
-          this.handlePosts(result);
-        },
-        error: () => {
-          console.error('Failed to load following posts.');
-        }
-      });
-    }
-  }
-
-  private handlePosts(result: PagedResults<Post>) {
-    if (!result || !result.results || result.results.length === 0) {
-      console.log('No posts to display.');
-      this.posts = [];
-      return;
-    }
-    
-    const sortedPosts = result.results.sort((a, b) => {
-      const dateA = new Date(a.creationDateTime);
-      const dateB = new Date(b.creationDateTime);
-      return dateB.getTime() - dateA.getTime();
-    });
-
-    // Obrada svakog posta, npr. dohvat korisničkog imena
-    sortedPosts.forEach(post => {
-      post.usernameDisplay = post.user?.username;
-    });
-
-    // Ažuriraj postove sa statusom lajka
-  //  this.posts = this.updateLikedStatus(sortedPosts);
   }
 
 
