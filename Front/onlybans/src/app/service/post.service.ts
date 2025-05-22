@@ -90,6 +90,9 @@ export class PostService {
     return this.http.delete<any>(`${environment.apiHost}/likes/unlike-post/${postId}`);
   }
 
+  getLikedPostIds(): Observable<number[]> {
+    return this.http.get<number[]>('http://localhost:8080/api/likes/liked-post-ids');
+  }
 
   deletePost(postId: number): Observable<any> {
     return this.http.delete(`${environment.apiHost}/posts/${postId}`, {

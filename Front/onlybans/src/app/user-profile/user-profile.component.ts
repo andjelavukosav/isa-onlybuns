@@ -21,13 +21,6 @@ export class UserProfileComponent implements OnInit {
   friends: UserDTO[] = []; // Lista prijatelja
   currentUser: AuthUser | null = null;
   currentUserId: number | null = null;
-  activeTab: string = 'posts'; // Kontrolni mehanizam za prikaz sadržaja (podrazumevano: Objave)
-  editingName = false;
-  editingLastName = false;
-  editingAddress = false;
-  currentPassword: string = ''; // Novo polje za trenutnu lozinku
-  invalidPassword: boolean = false; // Indikator za neispravnu lozinku
-
   editing: boolean = false;
   currentPasswordInput: string = ''; // Stara lozinka koju korisnik unosi
   oldPasswordVerified: boolean = false; // Da li je stara lozinka potvrđena
@@ -260,14 +253,10 @@ export class UserProfileComponent implements OnInit {
   }
 
   resetPasswordFields(): void {
-    this.currentPassword = '';
     this.newPassword = '';
     this.confirmPassword = '';
     this.oldPasswordVerified = false;
   }
-
-  
-
  
 }
 

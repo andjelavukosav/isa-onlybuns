@@ -27,10 +27,10 @@ export class TokenInterceptor implements HttpInterceptor {
       switchMap(token => {
         if (token) {
           // 🔍 Proveri da li je token istekao
-          if (this.jwtHelper.isTokenExpired(token)) {
+         /* if (this.jwtHelper.isTokenExpired(token)) {
             this.handleSessionExpired();
             return throwError(() => new Error('Session expired'));
-          }
+          }*/
 
           // 🔐 Ako nije istekao, dodaj ga u header
           request = request.clone({
@@ -42,9 +42,9 @@ export class TokenInterceptor implements HttpInterceptor {
 
         return next.handle(request).pipe(
           catchError((error: HttpErrorResponse) => {
-            if (error.status === 401) {
+          /*  if (error.status === 401) {
               this.handleSessionExpired();
-            }
+            }*/
             return throwError(() => error);
           })
         );

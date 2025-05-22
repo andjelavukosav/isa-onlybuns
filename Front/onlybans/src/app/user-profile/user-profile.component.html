@@ -81,12 +81,7 @@
     <div class="profile-right">
      <h2 class="profile-section-title">Posts</h2>
       <div class="posts-grid">
-        <div *ngFor="let post of posts" class="post-card" [routerLink]="['/post', post.id]">
-          <p><strong>{{ post.usernameDisplay }}</strong></p>
-          <p>{{ post.description }}</p>
-          <p>{{ post.creationDateTime | date: 'short' }}</p>
-          <img *ngIf="post.imagePath" [src]="post.imagePath" alt="Post Image" />
-        </div>
+        <app-post [inputPosts]="posts"></app-post>
       </div>
     </div>
   </div>

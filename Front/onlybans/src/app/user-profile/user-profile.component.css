@@ -39,7 +39,6 @@
   margin-top: 0;
 }
 
-
 .user-info {
   display: flex;
   flex-direction: column;
@@ -182,14 +181,14 @@ button:disabled {
   padding-bottom: 8px;
 }
 
-.posts-grid {
+/*.posts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
-}
+}*/
 
 /* Post kartice */
-.post-card {
+/*.post-card {
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
@@ -211,4 +210,4 @@ button:disabled {
   margin-top: 10px;
   display: block;
 }
-
+*/
