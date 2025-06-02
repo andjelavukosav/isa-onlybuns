@@ -5,19 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="307f7c0d-e48a-4283-9ceb-23d372f3b9c1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/interceptor/TokenInterceptor.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/interceptor/TokenInterceptor.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/service/api.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/service/api.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/service/auth.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/service/auth.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/service/user.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/service/user.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.css" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/rs/ac/uns/ftn/informatika/rabbitmq/manualWebSocket/ManualWebSocketClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSocketConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/webSocketHandler/LocationWebSocketHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/rs/ac/uns/ftn/informatika/rabbitmq/ProducerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/rs/ac/uns/ftn/informatika/rabbitmq/ProducerController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/rs/ac/uns/ftn/informatika/rabbitmq/ProducerController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/rs/ac/uns/ftn/informatika/rabbitmq/ProducerController.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/security/auth/TokenAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/security/auth/TokenAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/PostController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/PostController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/UserController.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +44,7 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="2uAJpjnQLOEXqvQ9W6y6QwGREHa" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -103,6 +103,15 @@
       <workItem from="1747218930289" duration="310000" />
       <workItem from="1747659627265" duration="823000" />
       <workItem from="1747721656062" duration="455000" />
+      <workItem from="1748860693674" duration="11000" />
+      <workItem from="1748861590394" duration="1505000" />
+      <workItem from="1748863335627" duration="98000" />
+      <workItem from="1748863442634" duration="74000" />
+      <workItem from="1748863532217" duration="46000" />
+      <workItem from="1748863639149" duration="101000" />
+      <workItem from="1748863748068" duration="51000" />
+      <workItem from="1748863806491" duration="303000" />
+      <workItem from="1748864122520" duration="2626000" />
     </task>
     <servers />
   </component>

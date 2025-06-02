@@ -239,14 +239,8 @@ public class PostController {
 
     }
 
-    @Operation(
-            description = "Get nearby posts based on user's location",
-            method = "GET"
-    )
-    @GetMapping(
-            value = {"/nearby"},
-            produces = {"application/json"}
-    )
+    @Operation(description = "Get nearby posts based on user's location", method = "GET")
+    @GetMapping(value = {"/nearby"}, produces = {"application/json"})
     public ResponseEntity<PagedResults<PostDTO>> getNearbyPosts(@RequestParam("latitude") double latitude, @RequestParam("longitude") double longitude, @RequestParam(value = "radius",defaultValue = "100000") double radius) {
         List<Post> nearbyPosts = this.postService.findNearbyPosts(latitude, longitude, radius);
         List<PostDTO> postsDTO = (List)nearbyPosts.stream().map(PostDTO::new).collect(Collectors.toList());

@@ -100,6 +100,7 @@ public class WebSecurityConfig {
                 .antMatchers("/api/likes/countLikes/{postId}").permitAll()
                 .antMatchers("/api/likes/{postId}/{userId}").permitAll()
                 .antMatchers("/images/**").permitAll()
+                .antMatchers("/ws/locations/**").permitAll() // dozvoli svima pristup WebSocket konekciji
                 .antMatchers("/api/posts/user/{userId}").permitAll() // Dodato: omogućava pristup /api/posts/user/{userId} bez autentifikacije
                 .anyRequest().authenticated().and()
                 .cors().and()
