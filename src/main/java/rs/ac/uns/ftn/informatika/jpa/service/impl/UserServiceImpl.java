@@ -28,12 +28,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import java.io.IOException;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,6 +62,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private LikeService likeService;
+
+    @PersistenceContext
+    private EntityManager entityManagerr;
 
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
@@ -105,6 +106,7 @@ public class UserServiceImpl implements UserService {
         u.setLastName(userRequest.getLastname());
         u.setEnabled(userRequest.isEnabled());
         u.setEmail(userRequest.getEmail());
+        u.setLastPasswordResetDate(userRequest.getLastPasswordResetDate());
 
         // Get the roles and assign to user
         List<Role> roles = roleService.findByName("ROLE_USER");
@@ -365,15 +367,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserPassword(int userId, String newPassword) throws Exception {
+    @Transactional
+    public User updateUserPassword(int userId, String newPassword) throws Exception {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new Exception("User not found."));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Hashujte novu lozinku
-        String hashedPassword = passwordEncoder.encode(newPassword);
-        user.setPassword(hashedPassword);
-
+        user.setPassword(passwordEncoder.encode(newPassword));
+        Date now = new Date();
+        long timeWithoutMillis = (now.getTime() / 1000) * 1000;
+        user.setLastPasswordResetDate(new Date(timeWithoutMillis));
         userRepository.save(user);
+        entityManagerr.flush(); // ⬅️ Forsira upis u bazu odmah
+
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found after update"));
     }
 
     @Override

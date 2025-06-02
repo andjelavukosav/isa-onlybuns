@@ -1,0 +1,110 @@
+/* === Sekcija trendova === */
+.trends-section {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+}
+
+/* === Naslov stranice === */
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 8px;
+}
+
+/* === Glavni sadržaj taba === */
+.tab-content {
+  width: 75%;
+  padding: 20px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+}
+
+.tab-content p {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.tab-container {
+  display: flex;
+  align-items: flex-start; /* važno: da visina leve strane ne raste */
+  gap: 20px;
+}
+
+.tab-sidebar {
+  flex: 0 0 25%;
+  background-color: #f5f7fa;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: flex-start; /* OVO je ključno za visinu po sadržaju */
+}
+
+/* === Dugmad tabova === */
+.tab-sidebar button {
+  padding: 10px 16px;
+  border: none;
+  background-color: transparent;
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: none; /* Nema senke u normalnom stanju */
+}
+
+/* === Hover efekat: tada se pojavi pozadina i obrub/senka === */
+.tab-sidebar button:hover {
+  background-color: #e9ecef;
+  box-shadow: 0 0 0 2px #007BFF33; /* suptilan plavi okvir */
+}
+
+/* === Aktivno dugme (selektovano) === */
+.tab-sidebar button.active {
+  background-color: #007BFF;
+  color: white;
+}
+
+.top-users-table-wrapper {
+  overflow-x: auto;
+}
+
+.top-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.top-users-table th,
+.top-users-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.top-users-table th {
+  background-color: #f1f1f1;
+  color: #333;
+  font-weight: 600;
+}
+
+.top-users-table tr:hover {
+  background-color: #f9f9f9;
+}

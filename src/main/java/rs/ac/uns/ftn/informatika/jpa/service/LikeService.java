@@ -13,5 +13,7 @@ public interface LikeService {
     List<LikeDTO> findLikesByPostId(Integer postId);
     List<LikeDTO> findAll();
     long countLikesByPostId(int postId);
+    List<Long> getLikedPostIdsByUser(int userId);
 
-}
+
+    }

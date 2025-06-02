@@ -22,11 +22,10 @@ import { UserService } from './service';
 import { ConfigService } from './service';
 import { PostService } from './service/post.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { TokenInterceptor } from './interceptor/TokenInterceptor';
 import { PostComponent } from './post/post.component';
 import { CreatePostComponent } from './create-post/create-post.component';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
-
+import { TokenInterceptor } from './interceptor/TokenInterceptor';
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { PostDetailsComponent } from './post-details/post-details.component';
 import { UserHomeComponent } from './user-home/user-home.component';

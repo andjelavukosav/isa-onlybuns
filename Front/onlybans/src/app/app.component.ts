@@ -9,7 +9,8 @@ import { AuthService } from './service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-
+  
+    title = 'onlybans';
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {

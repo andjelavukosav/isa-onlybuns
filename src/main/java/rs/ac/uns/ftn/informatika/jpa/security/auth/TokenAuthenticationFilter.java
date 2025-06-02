@@ -33,10 +33,13 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
+        System.out.println(">>> TokenAuthenticationFilter invoked for URI: " + request.getRequestURI());
 
-        String username;
-
+        String username = null;
         String authToken = tokenUtils.getToken(request);
+        System.out.println("Auth token: " + authToken);
+        System.out.println("Username from token: " + username);
+
 
         try {
 
@@ -46,12 +49,19 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
                 if (username != null) {
 
+                    System.out.println("Username from token: " + username);
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    System.out.println("Loaded user: " + userDetails.getUsername());
+
+                    System.out.println("Validating token...");
+                    boolean valid = tokenUtils.validateToken(authToken, userDetails);
+                    System.out.println("Token valid: " + valid);
                     if (tokenUtils.validateToken(authToken, userDetails)) {
 
                         TokenBasedAuthentication authentication = new TokenBasedAuthentication(userDetails);
                         authentication.setToken(authToken);
                         SecurityContextHolder.getContext().setAuthentication(authentication);
+                        System.out.println("Authentication set with roles: " + authentication.getAuthorities());
                     }
                 }
             }

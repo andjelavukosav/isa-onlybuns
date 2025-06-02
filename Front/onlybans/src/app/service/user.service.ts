@@ -65,13 +65,14 @@ export class UserService {
   getTopUsersMostLikes(): Observable<PagedResults<UserDTO>> {
     return this.http.get<PagedResults<UserDTO>>(environment.apiHost + '/likes/top10UsersMostLikes');
   }
-  updatePassword(userId: number, newPassword: string): Observable<any> {
-    return this.http.put(
-        `${environment.apiHost}/users/update-password/${userId}`,
-        newPassword,
-        { responseType: 'text' } // Jasno naznačite da očekujete plain text odgovor
+  updatePassword(userId: number, newPassword: string): Observable<{ token: string }> {
+    return this.http.put<{ token: string }>(
+      `${environment.apiHost}/users/update-password/${userId}`,
+      { newPassword }  // šalješ kao objekat, ne kao plain string
     );
   }
+
+
 
   verifyPassword(userId: number, currentPassword: string): Observable<boolean> {
     return this.http.post<boolean>(`${environment.apiHost}/users/verify-password`, {
@@ -84,6 +85,11 @@ export class UserService {
   getUserLocation(userId: number): Observable<{ latitude: number, longitude: number }> {
     return this.http.get<{ latitude: number, longitude: number }>(`${environment.apiHost}/users/location/${userId}`);
   }
+
+  getAllLocations(): Observable<any> {
+    return this.http.get<any>(`${environment.apiHost}/users/asylums-veterinarians`);
+  }
+  
   searchUsersByUsername(username: string): Observable<UserDTO[]>{
     return this.http.get<UserDTO[]>(environment.apiHost +  `/users/searchBy?username=${username}`);
   }

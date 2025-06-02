@@ -9,136 +9,82 @@
         ></app-user-profile-details>
   </div>
 
-  <!-- Navigaciona linija -->
-  <div class="tabs">
-    <button
-      class="tab"
-      [class.active]="activeTab === 'posts'"
-      (click)="setActiveTab('posts')">
-      Objave
-    </button>
-    <button
-      class="tab"
-      [class.active]="activeTab === 'info'"
-      (click)="setActiveTab('info')">
-      Informacije
-    </button>
-    <button
-      class="tab"
-      [class.active]="activeTab === 'friends'"
-      (click)="setActiveTab('friends')">
-      Prijatelji
-    </button>
-  </div>
+ 
+  <!-- Main Layout -->
+  <div class="profile-content">
+    <!-- Left Column: About User -->
+    <div class="profile-left">
+     <h2 class="profile-section-title">About user</h2>
 
-  <!-- Sadržaj sekcija -->
-  <div class="tab-content">
-    <!-- Sekcija: Objave -->
-    <div *ngIf="activeTab === 'posts'" class="posts-section">
-      <h2>Objave</h2>
-      <div *ngFor="let post of posts" class="post-card" [routerLink]="['/post', post.id]">
-        <p><strong>{{ post.usernameDisplay }}</strong></p>
-        <p>{{ post.description }}</p>
-        <p>{{ post.creationDateTime | date: 'short' }}</p>
-        <img *ngIf="post.imagePath" [src]="post.imagePath" alt="Post Image" />
-      </div>
-    </div>
-
-    <!-- Sekcija: Informacije -->
-      <div *ngIf="activeTab === 'info'" class="info-section">
-        <h2>Informacije</h2>
-        <div>
-          <p><strong>Name:</strong></p>
-          <ng-container *ngIf="editingName; else nameView">
-            <input type="text" [(ngModel)]="editableUser.firstname" />
-            <button (click)="saveField('firstname')">Sačuvaj</button>
-            <button (click)="cancelEdit('firstname')">Otkaži</button>
-          </ng-container>
-          <ng-template #nameView>
-            <span>{{ user.firstname }}</span>
-            <button *ngIf="userId === currentUserId" (click)="editField('firstname')">Izmeni</button>
-          </ng-template>
+      <div class="user-info">
+        <div class="info-item">
+          <label>First Name:</label>
+          <span *ngIf="!editing">{{ user.firstname }}</span>
+          <input *ngIf="editing" [(ngModel)]="editableUser.firstname" />
         </div>
-        <div>
-          <p><strong>Last Name:</strong></p>
-          <ng-container *ngIf="editingLastName; else lastNameView">
-            <input type="text" [(ngModel)]="editableUser.lastname" />
-            <button (click)="saveField('lastname')">Sačuvaj</button>
-            <button (click)="cancelEdit('lastname')">Otkaži</button>
-          </ng-container>
-          <ng-template #lastNameView>
-            <span>{{ user.lastname }}</span>
-            <button *ngIf="userId === currentUserId" (click)="editField('lastname')">Izmeni</button>
-          </ng-template>
+        <div class="info-item">
+          <label>Last Name:</label>
+          <span *ngIf="!editing">{{ user.lastname }}</span>
+          <input *ngIf="editing" [(ngModel)]="editableUser.lastname" />
         </div>
-        <div *ngIf="userId === currentUserId">
-          <p><strong>Email:</strong>{{ user.email }}</p>
+        <div class="info-item">
+          <label>Username:</label>
+          <span>{{ user.username }}</span>
         </div>
-        <div>
-          <p><strong>Adresa:</strong></p>
-          <ng-container *ngIf="editingAddress; else addressView">
-            <input type="text" [(ngModel)]="editableUser.address.street" placeholder="Ulica" />
-            <input type="text" [(ngModel)]="editableUser.address.streetNumber" placeholder="Broj" />
-            <input type="text" [(ngModel)]="editableUser.address.city" placeholder="Grad" />
-            <input type="text" [(ngModel)]="editableUser.address.country" placeholder="Država" />
-            <button (click)="saveField('address')">Sačuvaj</button>
-            <button (click)="cancelEdit('address')">Otkaži</button>
-          </ng-container>
-          <ng-template #addressView>
-            <span>
-              {{ user.address.street }} {{ user.address.streetNumber }},
-              {{ user.address.city }}, {{ user.address.country }}
-            </span>
-            <button *ngIf="userId === currentUserId" (click)="editField('address')">Izmeni</button>
-          </ng-template>
+        <div class="info-item">
+          <label>Email:</label>
+          <span>{{ user.email }}</span>
         </div>
-
-      <p><strong>Pratioci:</strong> {{ user.followersCount }}</p>
-      <div *ngIf="userId === currentUserId">
-        <strong>Promena lozinke:</strong>
-        <div *ngIf="!oldPasswordVerified">
-          <input
-            type="password"
-            [(ngModel)]="currentPassword"
-            placeholder="Trenutna lozinka"
-          />
-          <button (click)="verifyOldPassword()">Potvrdi</button>
-          <p *ngIf="invalidPassword" class="error-message">Unesena lozinka nije tačna.</p>
-        </div>
-        <div *ngIf="oldPasswordVerified">
-          <div>
-            <input
-              type="password"
-              [(ngModel)]="newPassword"
-              placeholder="Nova lozinka"
-            />
-            <input
-              type="password"
-              [(ngModel)]="confirmPassword"
-              placeholder="Potvrda lozinke"
-            />
+        <div class="info-item">
+          <label>Address:</label>
+          <span *ngIf="!editing">
+            {{ user.address.street }} {{ user.address.streetNumber }},
+            {{ user.address.city }}, {{ user.address.country }}
+          </span>
+          <div *ngIf="editing">
+            <input placeholder="Street" [(ngModel)]="editableUser.address.street" />
+            <input placeholder="Street Number" [(ngModel)]="editableUser.address.streetNumber" />
+            <input placeholder="City" [(ngModel)]="editableUser.address.city" />
+            <input placeholder="Country" [(ngModel)]="editableUser.address.country" />
           </div>
-          <button
-            (click)="updatePassword()"
-            [disabled]="newPassword !== confirmPassword || !newPassword"
-          >
-            Ažuriraj lozinku
-          </button>
         </div>
+        
+        <!-- Ovde ubaciš deo za promenu lozinke -->
+        <div *ngIf="editing" class="change-password-section">
+          <h3>Change Password</h3>
+
+          <!-- Polje za unos stare lozinke, prikazuje se samo ako još nije potvrđena -->
+          <div class="password-field-group" *ngIf="!oldPasswordVerified">
+            <input type="password" placeholder="Enter new password" [(ngModel)]="currentPasswordInput" />
+            <button (click)="verifyOldPassword()">Verify</button>
+            <div class="error" *ngIf="passwordErrorMessage">{{ passwordErrorMessage }}</div>
+          </div>
+
+          <!-- Ako je stara lozinka potvrđena, prikaži dva polja za novu lozinku -->
+          <div *ngIf="oldPasswordVerified">
+            <label>New Password:</label>
+            <input type="password" [(ngModel)]="newPassword" />
+            <label>Confirm New Password:</label>
+            <input type="password" [(ngModel)]="confirmPassword" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Dugme Edit samo ako je isti korisnik -->
+      <div *ngIf="currentUserId === userId">
+        <button *ngIf="!editing" (click)="startEditing()">Edit</button>
+        <button *ngIf="editing" (click)="saveChanges()">Save</button>
+        <button *ngIf="editing" (click)="cancelEditing()">Cancel</button>
       </div>
     </div>
 
-    <!-- Sekcija: Prijatelji -->
-    <div *ngIf="activeTab === 'friends'" class="friends-section">
-      <h2>Prijatelji</h2>
-      <div *ngFor="let friend of friends" class="friend-card">
-        <p>{{ friend.firstname }} {{ friend.lastname }}</p>
+    <div class="profile-right">
+     <h2 class="profile-section-title">Posts</h2>
+      <div class="posts-grid">
+        <app-post [inputPosts]="posts"></app-post>
       </div>
     </div>
   </div>
 </div>
-
-<!-- Kada podaci nisu dostupni -->
-<div *ngIf="!user">
-  <p>Učitavanje podataka o korisniku...</p>
-</div>
+    
+ 

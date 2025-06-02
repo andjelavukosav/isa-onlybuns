@@ -31,6 +31,7 @@ public class PostDTO {
 
     public UserDTO user;
 
+
     public PostDTO() {}
 
     public PostDTO(int id, String description, LocalDateTime creationDateTime, String imagePath, LocationDTO location) {

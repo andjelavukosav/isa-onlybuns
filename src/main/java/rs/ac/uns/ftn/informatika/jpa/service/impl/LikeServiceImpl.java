@@ -74,6 +74,11 @@ public class LikeServiceImpl implements LikeService {
         return likeDTOs;
     }
 
+    @Override
+    public List<Long> getLikedPostIdsByUser(int userId) {
+        return likeRepository.findPostIdsByUserId(userId);
+    }
+
 
 
 }

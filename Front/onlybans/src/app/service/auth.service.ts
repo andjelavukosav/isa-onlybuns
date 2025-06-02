@@ -12,6 +12,9 @@ import { AuthUser } from '../model/registered-user';
 import { JwtHelperService } from '@auth0/angular-jwt';
 @Injectable()
 export class AuthService {
+  private access_token: string | null = null;
+  user$ = new BehaviorSubject<AuthUser | null>(null);
+  tokenSubject = new BehaviorSubject<string | null>(this.getTokenFromStorage());
 
   constructor(
     private apiService: ApiService,
@@ -19,33 +22,58 @@ export class AuthService {
     private config: ConfigService,
     private router: Router
   ) {
+    const token = localStorage.getItem('jwt');
+    if (token) {
+      this.access_token = token;
+      this.setUser(token);
+    }
   }
 
-  private access_token : string | null = null;
-  user$ = new BehaviorSubject<AuthUser | null>(null);
+  login(user: any) {
+  const loginHeaders = new HttpHeaders({
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  });
 
-  login(user:any) {
-    const loginHeaders = new HttpHeaders({
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    });
-    // const body = `username=${user.username}&password=${user.password}`;
-    const body = {
-      'email': user.email,
-      'password': user.password
-    };
-    return this.apiService.post(this.config.login_url, JSON.stringify(body), loginHeaders)
-      .pipe(map((res) => {
-        const token = res.body?.accessToken;
-        if (!token) {
-          throw new Error('No access token received');
-        }
-        console.log('Login success');
-        this.access_token = token;
-        localStorage.setItem("jwt", token);
-        this.setUser(token);
-      }));
+  const body = {
+    'email': user.email,
+    'password': user.password
+  };
+
+  return this.apiService.post(this.config.login_url, JSON.stringify(body), loginHeaders)
+    .pipe(map((res: any) => {
+      // Ovde direktno pristupi accessToken jer tvoj ApiService već vraća telo odgovora
+      const token = res?.accessToken; 
+
+      if (!token) {
+        throw new Error('No access token received');
+      }
+
+      console.log('Login success, token:', token);
+      this.access_token = token;
+      this.setToken(token);
+      this.setUser(token);
+    }));
+}
+
+
+  setToken(token: string) {
+    console.log('Setting new token:', token);
+    this.access_token = token;
+    localStorage.setItem('jwt', token);
+    this.setUser(token);
+    this.tokenSubject.next(token);
   }
+
+
+  private getTokenFromStorage(): string | null {
+    return localStorage.getItem('jwt');
+  }
+
+  getTokenObservable(): Observable<string | null> {
+   return this.tokenSubject.asObservable();
+  }
+
 
   signup(user:any) {
     const signupHeaders = new HttpHeaders({
@@ -66,7 +94,7 @@ export class AuthService {
   }
 
   tokenIsPresent() {
-    return this.access_token != undefined && this.access_token != null;
+    return !!this.access_token;
   }
 
   getToken() {

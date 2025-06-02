@@ -1,68 +1,74 @@
-<mat-tab-group>
-    <mat-tab label="Sve objave">      
-      <!-- Unutrašnji mat-tab-group -->
-      <mat-tab-group>
-        <mat-tab label="Sve objave">
-            <p>Ukupan broj objava na mreži: {{ allPosts?.length }}</p>
-          <div>
-            <app-post [post]="allPosts" (refreshLists)="reloadData()"></app-post>
-        </div>
-          <ng-template #noPosts>
-            <p>Nema objava.</p>
-          </ng-template>
-        </mat-tab>
-        <mat-tab label="Objave zadnjih mjesec dana">
-            <p>Ukupan broj objava na mreži: {{ postsLastMonth?.length }}</p>
-            <div>
-                <app-post [post]="postsLastMonth" (refreshLists)="reloadData()"></app-post>
-            </div>
-          <ng-template #noRecentPosts>
-            <p>Nema objava iz zadnjeg mjeseca.</p>
-          </ng-template>
-        </mat-tab>
-      </mat-tab-group>
-    </mat-tab>
-    <mat-tab label="Najpopularnije">
-        <!-- Unutrašnji mat-tab-group za pod-tabove -->
-        <mat-tab-group>
-          <!-- Tab za 5 najlajkovanijih objava u poslednjih 7 dana -->
-          <mat-tab label="5 najlajkovanijih u poslednjih 7 dana">
-            <p>Ukupan broj objava: {{ postsMostPopularLast7Days?.length }}</p>
-            <div>
-              <app-post [post]="postsMostPopularLast7Days" (refreshLists)="reloadData()"></app-post>
-            </div>
-            <ng-template #noPostsLast7Days>
-              <p>Nema popularnih objava u poslednjih 7 dana.</p>
-            </ng-template>
-          </mat-tab>
-      
-          <!-- Tab za 10 najpopularnijih objava ikada -->
-          <mat-tab label="10 najpopularnijih ikada">
-            <p>Ukupan broj objava: {{ postsMostPopularEver?.length }}</p>
-            <div>
-              <app-post [post]="postsMostPopularEver" (refreshLists)="reloadData()"></app-post>
-            </div>
-            <ng-template #noPopularPostsEver>
-              <p>Nema popularnih objava ikada.</p>
-            </ng-template>
-          </mat-tab>
-        </mat-tab-group>
-      </mat-tab>
-      
-      <mat-tab label="Korisnički nalozi">
-        <p>Ukupan broj naloga: {{ usersMostPopular?.length }}</p>
-      
-        <div *ngIf="usersMostPopular?.length; else noUsers">
-          <ul>
-            <li *ngFor="let user of usersMostPopular">
-              <strong>{{ user.username }}</strong> - <span> {{ user.email}} </span>
-            </li>
-          </ul>
-        </div>
-      
-        <ng-template #noUsers>
-          <p>Nema korisničkih naloga.</p>
-        </ng-template>
-      </mat-tab>
-      
-  </mat-tab-group>
+<div class="trends-section">
+  <h2 class="page-title">Trends Overview: All, Popular and Recent Posts</h2>
+
+  <div class="tab-container">
+  <div class="tab-sidebar">
+    <button (click)="setActiveTab('all')" [class.active]="activeTab === 'all'">Feed</button>
+    <button (click)="setActiveTab('month')" [class.active]="activeTab === 'month'">Recent</button>
+    <button (click)="setActiveTab('popular7')" [class.active]="activeTab === 'popular7'">Trending</button>
+    <button (click)="setActiveTab('popularEver')" [class.active]="activeTab === 'popularEver'">Top Posts</button>
+    <button (click)="setActiveTab('topUsers')" [class.active]="activeTab === 'topUsers'">Top Users</button>
+  </div>
+
+
+    <div class="tab-content">
+      <div *ngIf="activeTab === 'all'">
+        <p>Ukupan broj objava: {{ allPosts?.length }}</p>
+        <app-post [inputPosts]="allPosts" (refreshLists)="reloadDataAllPosts()"></app-post>
+      </div>
+
+      <div *ngIf="activeTab === 'month'">
+        <p>Ukupan broj objava: {{ postsLastMonth?.length }}</p>
+        <app-post
+          *ngIf="postsLastMonth.length > 0"
+          [inputPosts]="postsLastMonth"
+          (refreshLists)="reloadDataLastMonthPosts()"
+        ></app-post>
+      </div>
+
+      <div *ngIf="activeTab === 'popular7'">
+        <p>Ukupan broj objava: {{ postsMostPopularLast7Days?.length }}</p>
+        <app-post [inputPosts]="postsMostPopularLast7Days" (refreshLists)="reloadData()"></app-post>
+      </div>
+
+      <div *ngIf="activeTab === 'popularEver'">
+        <p>Ukupan broj objava: {{ postsMostPopularEver?.length }}</p>
+        <app-post
+          *ngIf="postsMostPopularEver.length > 0"
+          [inputPosts]="postsMostPopularEver"
+          (refreshLists)="reloadData()"
+        ></app-post>
+    </div> 
+    <div *ngIf="activeTab === 'topUsers'">
+    <p>Top 10 korisnika koji su najviše delili lajkove u zadnjih 7 dana:</p>
+
+    <div class="top-users-table-wrapper">
+      <table class="top-users-table">
+        <thead>
+          <tr>
+            <th>Mesto</th>
+            <th>Korisničko ime</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of usersMostPopular; index as i">
+            <td>
+              <ng-container [ngSwitch]="i">
+                <span *ngSwitchCase="0">🥇 1.</span>
+                <span *ngSwitchCase="1">🥈 2.</span>
+                <span *ngSwitchCase="2">🥉 3.</span>
+                <span *ngSwitchDefault>{{ i + 1 }}.</span>
+              </ng-container>
+            </td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+   </div>
+</div>

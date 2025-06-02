@@ -84,6 +84,10 @@ public class PostServiceImpl implements PostService {
             top10LikedPosts.clear();
 
             for (Post post : topPosts) {
+                if (post.getLikeCount() == 0) {
+                    continue; // Preskoči postove bez lajkova
+                }
+
                 top10LikedPosts.offer(post);
 
                 if (top10LikedPosts.size() > 10) {
@@ -95,6 +99,7 @@ public class PostServiceImpl implements PostService {
         LOG.info("Top 10 most liked posts initialized. Size: {}", top10LikedPosts.size());
     }
 
+
     @PostConstruct
     @Transactional
     public void initializeLeaderboard() {
@@ -102,8 +107,8 @@ public class PostServiceImpl implements PostService {
         List<Post> topPosts = postRepository.findTop5ByLikesInLast7Days(sevenDaysAgo);
 
         if (topPosts.isEmpty()) {
-            List<Post> recentPosts = postRepository.findTop5ByDateLast7Days(sevenDaysAgo);
-            topPosts = recentPosts.stream().limit(5).collect(Collectors.toList()); // Ograniči na 5
+            LOG.info("No posts with likes in the last 7 days. Leaderboard remains empty.");
+            return;
         }
 
         synchronized (leaderboard) {
@@ -113,19 +118,14 @@ public class PostServiceImpl implements PostService {
                 leaderboard.offer(post);
 
                 if (leaderboard.size() > 5) {
-                    leaderboard.poll(); // Ukloni višak ako pređe 5 elemenata
+                    leaderboard.poll(); // Ukloni višak ako pređe 5
                 }
             }
 
-
-            LOG.info("Leaderboard initialized with {} posts.", topPosts.size());
+            LOG.info("Leaderboard initialized with {} posts.", leaderboard.size());
         }
-
     }
 
-    /*private long getLikeCount(Post post) {
-        return likeService.countLikesByPostId(post.getId());
-    }*/
 
 
     // ✅ Broj lajkova za post

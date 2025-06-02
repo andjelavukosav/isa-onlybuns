@@ -1,132 +1,112 @@
 #post-management {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center; /* Centers the posts horizontally */
-  }
-  
-  .post-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 16px;
-    width: calc(30% - 20px); /* Adjust width to fit about 3 posts per row */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 450px; /* Set a slightly taller height for each post card */
-    box-sizing: border-box;
-  }
-  
-  .post-header {
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .post-image {
-    text-align: center;
-    margin: 16px 0;
-    flex-grow: 1; /* Ensures image section grows if there's extra space */
-  }
-  
-  .post-image img {
-    max-width: 100%;
-    max-height: 200px; /* Sets a taller maximum height for images */
-    border-radius: 8px;
-    object-fit: cover; /* Ensures images retain their aspect ratio */
-  }
-  
-  .post-content {
-    font-size: 0.95em;
-    color: #555;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-height: 100px; /* Provides more space for content display */
-  }
-  
-  .post-footer {
-    color: #888;
-    font-size: 0.9em;
-    text-align: left;
-    padding-top: 8px;
-    border-top: 1px solid #eee;
-    margin-top: 8px;
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 300px);
+  gap: 20px;
+  padding: 20px;
+  margin: 0 auto;
+}
 
-  img {
-    max-height: 300px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
 
-  /* Stil kada post nije lajkovan */
-button {
-  background-color: transparent; /* Bez boje pozadine */
-  color: #007bff; /* Plava boja za tekst */
-  border: 1px solid #007bff; /* Plava ivica */
+
+.post-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  color: #333;
+}
+
+.username-link {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.post-date {
+  float: right;
+  color: #888;
+}
+
+.post-image {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.post-image img {
+  max-width: 100%;
+  border-radius: 8px;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+.post-content {
+  font-size: 0.95em;
+  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 100px;
+}
+
+.post-footer {
+  color: #888;
+  font-size: 0.9em;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+  margin-top: 8px;
+}
+
+.like-section {
+  margin-top: 10px;
+}
+
+.like-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
 }
 
-button.liked {
-  background-color: #007bff; /* Plava pozadina kada je lajkovano */
-  color: white; /* Bele boje teksta */
+.like-button.liked {
+  background-color: #28a745;
   font-weight: bold;
-  border: 1px solid #0056b3; /* Tamnija plava ivica */
 }
 
-/* Stil za hover efekat */
-button:hover {
-  background-color: #e6f0ff; /* Svetlo plava pozadina pri hoveru */
-  border-color: #0056b3; /* Tamnija plava ivica pri hoveru */
-}
-.liked {
-  background-color: #28a745; /* Zelena boja za "Liked" */
-  color: white;
+.likes-link {
+  margin-left: 8px;
+  color: #004D3B;
+  cursor: pointer;
+  font-size: 14px;
 }
 
- /* Zatamnjena pozadina */
- .overlay {
+.likes-link:hover {
+  text-decoration: underline;
+}
+
+.overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* providna crna */
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
 }
 
-.overlay ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.overlay li {
-  padding: 8px;
-  cursor: pointer;
-}
-
-.overlay li:hover {
-  background: #f0f0f0;
-}
-
-.overlay li a {
-  display: block;
-  width: 100%;
-  text-decoration: none;
-  color: #004D3B; /* Tvoja sekundarna boja */
-  font-weight: bold;
-  padding: 10px;
-}
-
-/* Modal prozor */
 .modal {
   background: white;
   border-radius: 10px;
@@ -149,18 +129,31 @@ button:hover {
   }
 }
 
+.comment-section {
+  margin-top: 15px;
+}
 
-.likes-link {
-  color: #004D3B;
+.comment-section textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.comment-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  margin-top: 8px;
 }
 
-.likes-link:hover {
-  text-decoration: underline;
+.no-posts-message {
+  text-align: center;
+  width: 100%;
+  padding: 20px;
+  color: #888;
 }
 
-
-  
-  
-  

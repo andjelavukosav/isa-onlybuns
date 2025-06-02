@@ -54,18 +54,6 @@ public class LikeController {
     }
 
 
-    /*@GetMapping("/countLikes/{postId}")
-    public ResponseEntity<Integer> getAll(@PathVariable int postId) {
-        try {
-            List<LikeDTO> likeDTOS = this.likeService.findLikesByPostId(postId);
-            // Vraćamo broj lajkova, ako je lista prazna, broj je 0
-            return ResponseEntity.ok(likeDTOS != null ? likeDTOS.size() : 0);
-        } catch (Exception e) {
-            // Ako se desi greška, vraćamo 0, a ne 500
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(0);
-        }
-    }*/
-
 
     @Operation(description = "Get the top 10 users who liked the most posts in the last 7 days", method = "GET")
     @GetMapping(value = "/top10UsersMostLikes", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -138,6 +126,12 @@ public class LikeController {
         List<UserDTO> likesList = postService.getLikesFromPost(postId);
 
         return ResponseEntity.ok(likesList);
+    }
+
+    @GetMapping("/liked-post-ids")
+    public List<Long> getLikedPostIds(Principal currentUser) {
+        User authenticatedUser = userService.findByUsername(currentUser.getName());
+        return likeService.getLikedPostIdsByUser(authenticatedUser.getId());
     }
 
 
