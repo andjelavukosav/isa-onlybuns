@@ -9,6 +9,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,6 +36,7 @@ public class JpaExampleApplicationTests {
 					userDTO1.setEmail("duplicateEmail1@example.com");
 					userDTO1.setPassword("password123");
 					userDTO1.setEnabled(true);
+					userDTO1.setLastPasswordResetDate(new Date());
 					userDTO1.setFirstname("Duplicate User1");
 					userDTO1.setLastname("Duplicate User1");
 					userService.save(userDTO1);  // Prvi thread pokreće registraciju
@@ -60,6 +62,7 @@ public class JpaExampleApplicationTests {
 						userDTO2.setEmail("duplicateEmail2@example.com");
 						userDTO2.setPassword("password456");
 						userDTO2.setEnabled(true);
+						userDTO2.setLastPasswordResetDate(new Date());
 						userDTO2.setFirstname("Duplicate User2");
 						userDTO2.setLastname("Duplicate User2");
 						userService.save(userDTO2);  // Drugi thread pokušava da registruje korisnika sa istim korisničkim imenom

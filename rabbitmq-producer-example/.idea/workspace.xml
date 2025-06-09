@@ -5,19 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="307f7c0d-e48a-4283-9ceb-23d372f3b9c1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/interceptor/TokenInterceptor.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/interceptor/TokenInterceptor.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/service/api.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/service/api.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/service/auth.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/service/auth.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/service/user.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/service/user.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.css" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSocketConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/ManualQueueController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/queue/ManualMessageQueue.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/queue/ManualQueueProcessor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Front/onlybans/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Front/onlybans/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/nearby-posts-map/nearby-posts-map.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/nearby-posts-map/nearby-posts-map.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/main.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/main.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/rs/ac/uns/ftn/informatika/rabbitmq/ProducerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/rs/ac/uns/ftn/informatika/rabbitmq/ProducerController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/rs/ac/uns/ftn/informatika/rabbitmq/ProducerController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/rs/ac/uns/ftn/informatika/rabbitmq/ProducerController.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/security/auth/TokenAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/security/auth/TokenAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/consumer/Consumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/consumer/Consumer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/UserController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/consumer/Consumer.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/consumer/Consumer.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,31 +51,32 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="2uAJpjnQLOEXqvQ9W6y6QwGREHa" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;Spring Boot.RabbitmqProducerExampleApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Transaction__Conflict__Situation&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Andjela Vukosav/Desktop/Isa-nas projekat/isa-onlybans/rabbitmq-producer-example&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.RabbitmqProducerExampleApplication.executor": "Run",
+    "git-widget-placeholder": "FinishBranch",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Andjela Vukosav/Desktop/Isa-nas projekat/isa-onlybans/rabbitmq-producer-example",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="RabbitmqProducerExampleApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="rabbitmq-producer-example" />

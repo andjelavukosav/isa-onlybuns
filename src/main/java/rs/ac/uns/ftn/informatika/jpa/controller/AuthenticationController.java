@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import rs.ac.uns.ftn.informatika.jpa.dto.JwtAuthenticationRequestDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserTokenStateDTO;
+import rs.ac.uns.ftn.informatika.jpa.exception.DuplicateResourceException;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.service.EmailSenderService;
@@ -28,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
@@ -104,44 +106,27 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    @Transactional
-    public ResponseEntity<Map<String, String>> addUser(@RequestBody UserDTO userRequest) {
-        User existUser = this.userService.findByEmail(userRequest.getUsername());
-
-        if (existUser != null) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Username already exists");
-            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-        }
-
-        User existEmailUser = this.userService.findByEmail(userRequest.getEmail());
+    public ResponseEntity<Map<String, String>> addUser(@RequestBody UserDTO userRequest) throws MessagingException, InterruptedException {
+       /* User existEmailUser = this.userService.findByEmail(userRequest.getEmail());
         if (existEmailUser != null) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Email already exists");
             return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-        }
+        }*/
+            // Nastavi sa čuvanjem korisnika ako email ne postoji
+            userRequest.setEnabled(false);
+            Date now = new Date();
+            long timeWithoutMillis = (now.getTime() / 1000) * 1000;
+            userRequest.setLastPasswordResetDate(new Date(timeWithoutMillis));
+            User user = this.userService.save(userRequest);
 
-        // Nastavi sa čuvanjem korisnika ako email ne postoji
-        userRequest.setEnabled(false);
-        Date now = new Date();
-        long timeWithoutMillis = (now.getTime() / 1000) * 1000;
-        userRequest.setLastPasswordResetDate(new Date(timeWithoutMillis));
-        User user = this.userService.save(userRequest);
-
-        String activationLink = "http://localhost:8080/auth/verify?email=" + user.getEmail();
-        try {
+            String activationLink = "http://localhost:8080/auth/verify?email=" + user.getEmail();
             emailService.sendVerificationEmail(userRequest, activationLink);
-        } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Failed to send verification email");
-            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+            Map<String, String> successResponse = new HashMap<>();
+            successResponse.put("message", "User created successfully");
+            return new ResponseEntity<>(successResponse, HttpStatus.CREATED);
 
-        Map<String, String> successResponse = new HashMap<>();
-        successResponse.put("message", "User created successfully");
-        return new ResponseEntity<>(successResponse, HttpStatus.CREATED);
     }
-
 
 
     @GetMapping(value = "/verify")

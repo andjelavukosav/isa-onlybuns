@@ -1,7 +1,8 @@
 package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
-
+import com.google.common.hash.BloomFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rs.ac.uns.ftn.informatika.jpa.dto.*;
+import rs.ac.uns.ftn.informatika.jpa.exception.DuplicateResourceException;
 import rs.ac.uns.ftn.informatika.jpa.mapper.PostDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.*;
@@ -36,6 +38,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    @Autowired
+    private BloomFilter<String> usernameBloomFilter;
 
     @Autowired
     private UserRepository userRepository;
@@ -87,87 +92,106 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User save(UserDTO userRequest) {
+        try {
 
-        // Proverite da li korisničko ime već postoji uz zaključavanje
-        entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username")
-                .setParameter("username", userRequest.getUsername())
-                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
-                .getResultList();
+            Optional<User> existingUserByEmail = userRepository.findUserByEmailOptional(userRequest.getEmail());
+            if (existingUserByEmail.isPresent()) {
+                throw new DuplicateResourceException("Email address already exists.");
+            }
 
-        // Create a new User entity
-        User u = new User();
-        u.setUsername(userRequest.getUsername());
+            if (usernameBloomFilter.mightContain(userRequest.getUsername())) {
+                Optional<User> existingUserByUsername = userRepository.findByUsernameOptional(userRequest.getUsername());
+                if (existingUserByUsername.isPresent()) {
+                    throw new DuplicateResourceException("Username already exists.");
+                }
+            }
 
-        // Encrypt password
-        u.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+            // Create new user entity
+            User u = new User();
+            u.setUsername(userRequest.getUsername());
+            u.setPassword(passwordEncoder.encode(userRequest.getPassword())); // Encrypt password
+            u.setFirstName(userRequest.getFirstname());
+            u.setLastName(userRequest.getLastname());
+            u.setEnabled(userRequest.isEnabled());
+            u.setEmail(userRequest.getEmail());
+            u.setLastPasswordResetDate(userRequest.getLastPasswordResetDate());
 
-        // Set user details
-        u.setFirstName(userRequest.getFirstname());
-        u.setLastName(userRequest.getLastname());
-        u.setEnabled(userRequest.isEnabled());
-        u.setEmail(userRequest.getEmail());
-        u.setLastPasswordResetDate(userRequest.getLastPasswordResetDate());
+            // Assign default role
+            List<Role> roles = roleService.findByName("ROLE_USER");
+            u.setRoles(roles);
 
-        // Get the roles and assign to user
-        List<Role> roles = roleService.findByName("ROLE_USER");
-        u.setRoles(roles);
+            // Handle address if present
+            if (userRequest.getAddress() != null) {
+                AddressDTO addressDTO = userRequest.getAddress();
+                Address address;
 
-        // Handle address
+                if (addressDTO.getId() > 0) {
+                    // Try to find address in database
+                    address = addressRepository.findById(addressDTO.getId()).orElse(null);
 
-        // If address data exists in the UserDTO, set it
-        if (userRequest.getAddress() != null) {
-            AddressDTO addressDTO = userRequest.getAddress();
-            Address address = new Address();
-
-            if (addressDTO.getId() > 0) {
-                // Pokušaj pronalaska adrese u bazi
-                address = addressRepository.findById(addressDTO.getId()).orElse(null);
-
-                // Ako postoji, ažuriraj podatke
-                if (address != null) {
-                    address.setCountry(addressDTO.getCountry());
-                    address.setCity(addressDTO.getCity());
-                    address.setStreet(addressDTO.getStreet());
-                    address.setStreetNumber(addressDTO.getStreetNumber());
+                    if (address != null) {
+                        // Update existing address
+                        address.setCountry(addressDTO.getCountry());
+                        address.setCity(addressDTO.getCity());
+                        address.setStreet(addressDTO.getStreet());
+                        address.setStreetNumber(addressDTO.getStreetNumber());
+                    } else {
+                        // Create new address
+                        address = new Address();
+                        address.setCountry(addressDTO.getCountry());
+                        address.setCity(addressDTO.getCity());
+                        address.setStreet(addressDTO.getStreet());
+                        address.setStreetNumber(addressDTO.getStreetNumber());
+                    }
                 } else {
-                    // Ako ne postoji, kreiraj novu
+                    // ID not set, create new address
                     address = new Address();
                     address.setCountry(addressDTO.getCountry());
                     address.setCity(addressDTO.getCity());
                     address.setStreet(addressDTO.getStreet());
                     address.setStreetNumber(addressDTO.getStreetNumber());
                 }
-            } else {
-                // Ako ID nije postavljen ili je 0, kreiraj novu adresu
-                address = new Address();
-                address.setCountry(addressDTO.getCountry());
-                address.setCity(addressDTO.getCity());
-                address.setStreet(addressDTO.getStreet());
-                address.setStreetNumber(addressDTO.getStreetNumber());
+
+                String fullAddress = address.getStreet() + " " + address.getStreetNumber() + ", "
+                        + address.getCity() + ", "
+                        + address.getCountry();
+
+                try {
+                    Location location = geocodingService.getCoordinates(fullAddress);
+                    address.setLocation(location);
+                } catch (IOException e) {
+                    System.err.println("Error during address geocoding: " + fullAddress + ". Details: " + e.getMessage());
+                }
+
+                // Save address in database
+                address = addressRepository.save(address);
+
+                // Assign address to user
+                u.setAddress(address);
             }
-            String fullAddress = address.getStreet() + " " + address.getStreetNumber() + ", "
-                    + address.getCity() + ", "
-                    + address.getCountry();
 
-            try {
-                Location location = geocodingService.getCoordinates(fullAddress);
-                address.setLocation(location);
-            } catch (IOException e) {
-                e.printStackTrace(); // Bolja obrada greške može uključivati logovanje
+            // Attempt to save the user — if uniqueness constraint fails, it will throw an exception
+            User savedUser = this.userRepository.save(u);
+
+            // Add the username to the Bloom filter
+            usernameBloomFilter.put(savedUser.getUsername());
+
+            return savedUser;
+
+        } catch (DataIntegrityViolationException e) {
+            String errorMessage = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+
+            if (errorMessage.contains("uk_user_email") || errorMessage.contains("email")) {
+                throw new DuplicateResourceException("Email address already exists.", e);
+            } else if (errorMessage.contains("uk_user_username") || errorMessage.contains("username")) {
+                throw new DuplicateResourceException("Username already exists.", e);
             }
 
-
-            // Sačuvaj adresu u bazi (novu ili ažuriranu)
-            address = addressRepository.save(address);
-
-            // Postavi adresu korisniku
-            u.setAddress(address);
+            throw e; // Re-throw other unhandled integrity issues
         }
 
-
-        // Save the user and return the saved entity
-        return this.userRepository.save(u);
     }
+
 
     public User updateUser(int id, UserDTO userRequest) throws AccessDeniedException {
         // Find the user by ID

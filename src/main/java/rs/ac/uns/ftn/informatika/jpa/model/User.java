@@ -11,7 +11,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 
 @Entity
-@Table(name = "Users")
+@Table(name = "Users", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_user_username", columnNames = "username"),
+        @UniqueConstraint(name = "uk_user_email", columnNames = "email")
+})
 public class User implements UserDetails, Serializable {
 
     private static final long serialVersionUID = 1L; // Preporučeno dodati serialVersionUID

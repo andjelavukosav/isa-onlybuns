@@ -75,16 +75,15 @@ export class AuthService {
   }
 
 
-  signup(user:any) {
-    const signupHeaders = new HttpHeaders({
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    });
-    return this.apiService.post(this.config.signup_url, JSON.stringify(user), signupHeaders)
-      .pipe(map(() => {
-        console.log('Sign up success');
-      }));
-  }
+  signup(user: any) {
+  const signupHeaders = new HttpHeaders({
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  });
+  // vrati Observable bez mapiranja, da frontend može da koristi kompletan response/error
+  return this.apiService.post(this.config.signup_url, user, signupHeaders);
+}
+
 
   logout() {
     localStorage.removeItem("jwt");
