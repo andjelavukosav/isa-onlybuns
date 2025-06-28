@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="307f7c0d-e48a-4283-9ceb-23d372f3b9c1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/interceptor/TokenInterceptor.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/interceptor/TokenInterceptor.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/service/api.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/service/api.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/service/auth.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/service/auth.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/service/user.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/service/user.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.css" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../Front/onlybans/src/app/user-profile/user-profile.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/security/auth/TokenAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/security/auth/TokenAuthenticationFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/UserController.class" afterDir="false" />
-    </list>
+    <list default="true" id="307f7c0d-e48a-4283-9ceb-23d372f3b9c1" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -45,6 +31,7 @@
   &quot;associatedIndex&quot;: 5
 }</component>
   <component name="ProjectId" id="2uAJpjnQLOEXqvQ9W6y6QwGREHa" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -57,7 +44,7 @@
     &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;Spring Boot.RabbitmqProducerExampleApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Transaction__Conflict__Situation&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;FinishBranch&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/Andjela Vukosav/Desktop/Isa-nas projekat/isa-onlybans/rabbitmq-producer-example&quot;,
@@ -103,6 +90,7 @@
       <workItem from="1747218930289" duration="310000" />
       <workItem from="1747659627265" duration="823000" />
       <workItem from="1747721656062" duration="455000" />
+      <workItem from="1750932876168" duration="797000" />
     </task>
     <servers />
   </component>

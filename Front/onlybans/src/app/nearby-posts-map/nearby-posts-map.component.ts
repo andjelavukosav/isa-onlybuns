@@ -3,6 +3,7 @@ import { UserService } from '../service';
 import * as L from 'leaflet';
 import { ActivatedRoute } from '@angular/router';
 import { PostService } from '../service/post.service';
+import { WebSocketService } from '../service/websocket.service';
 
 @Component({
   selector: 'app-nearby-posts-map',
@@ -48,7 +49,9 @@ export class NearbyPostsMapComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private userService: UserService,
-    private postService: PostService
+    private postService: PostService,
+    private webSocketService: WebSocketService // Dodato
+
   ) {}
 
   ngOnInit(): void {
@@ -73,6 +76,21 @@ export class NearbyPostsMapComponent implements OnInit, OnDestroy {
       this.loadNearbyPosts();
     });
     this.loadAsylumsAndVeterinarians();
+
+     // ✅ Pretplata na nove azile/veterinare
+    this.webSocketService.messages$.subscribe(location => {
+      const lat = location.address?.location?.latitude;
+      const lng = location.address?.location?.longitude;
+      const name = location.name;
+
+      if (lat && lng) {
+        L.marker([lat, lng], { icon: this.greenIcon })
+          .addTo(this.map)
+          .bindPopup(`<b>${name}</b><br>${location.address.street} ${location.address.number}, ${location.address.city}, ${location.address.country}`);
+      } else {
+        console.warn('Primljen entitet bez validne lokacije:', location);
+      }
+    });
   }
 
   private loadAsylumsAndVeterinarians(): void {

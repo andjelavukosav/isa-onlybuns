@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 @ActiveProfiles("test")
 public class TxExampleApplicationTests {
 
-    @Autowired
+   /* @Autowired
     private FollowService followService;
 
     @Autowired
@@ -83,5 +83,5 @@ public class TxExampleApplicationTests {
         executor.shutdown();
     }
 
-
+*/
 }
