@@ -15,6 +15,10 @@ export class ConfigService {
     return this._login_url;
   }
 
+  get logout_url() {
+    return this._auth_url + '/logout';
+  }
+
   private _whoami_url = this._api_url + '/whoami';
 
   get whoami_url(): string {

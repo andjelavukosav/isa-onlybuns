@@ -54,7 +54,6 @@ public class UserDTO {
         this.email = email;
     }
 
-
     private boolean enabled;
 
     private AddressDTO address;  // Add this field to represent the address

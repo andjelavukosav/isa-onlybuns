@@ -86,9 +86,16 @@ public class User implements UserDetails, Serializable {
     @Column(name="posts_count", nullable = false, columnDefinition = "int default 0")
     private int postsCount = 0;
 
+    @Column(name = "likes_count", nullable = false, columnDefinition = "int default 0")
+    private int likesCount = 0;
+
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonIgnore
     private Set<Like> likes = new HashSet<>();
+
+    @Column(name = "last_login_date")
+    private Date lastLoginDate;
 
     @Version
     private Integer version;
@@ -123,6 +130,8 @@ public class User implements UserDetails, Serializable {
         this.followersCount = followersCount;
         this.postsCount = postsCount;
     }
+
+
 
     public int getId() {
         return id;
@@ -245,14 +254,21 @@ public class User implements UserDetails, Serializable {
 
     public void setLikes(Set<Like> likes) { this.likes = likes; }
 
+    public int getLikesCount() { return likesCount; }
+
+    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
+
+
     public void addLike(Like like) {
         this.likes.add(like);
         like.setUser(this);
+        this.likesCount++;
     }
 
     public void removeLike(Like like) {
         this.likes.remove(like);
         like.setUser(null);
+        if (this.likesCount > 0) this.likesCount--;
     }
 
     public Integer getVersion() { return version; }
@@ -331,5 +347,12 @@ public class User implements UserDetails, Serializable {
         }
     }
 
+    public Date getLastLoginDate() {
+        return lastLoginDate;
+    }
+
+    public void setLastLoginDate(Date lastLoginDate) {
+        this.lastLoginDate = lastLoginDate;
+    }
 
 }

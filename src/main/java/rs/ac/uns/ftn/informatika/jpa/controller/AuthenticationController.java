@@ -18,9 +18,11 @@ import rs.ac.uns.ftn.informatika.jpa.dto.UserTokenStateDTO;
 import rs.ac.uns.ftn.informatika.jpa.exception.DuplicateResourceException;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
+import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.EmailSenderService;
 import rs.ac.uns.ftn.informatika.jpa.service.RateLimiterService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
+import rs.ac.uns.ftn.informatika.jpa.util.LoggedUserTracker;
 import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,12 @@ public class AuthenticationController {
     @Autowired
     private RateLimiterService rateLimiterService;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private LoggedUserTracker loggedUserTracker;
+
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationController.class);
 
 
@@ -85,9 +93,16 @@ public class AuthenticationController {
                             .body(new UserTokenStateDTO("Account not verified. Please check your email for activation link.", 0));
                 }
 
+                Date now = new Date();
+                long timeWithoutMillis = (now.getTime() / 1000) * 1000;
+                user.setLastLoginDate(new Date(timeWithoutMillis));
+                userRepository.save(user);
+
                 //String jwt = tokenUtils.generateToken(user.getEmail());
                 String jwt = tokenUtils.generateToken(user.getId(), user.getEmail(), user.getUsername(), user.getRoles());
                 int expiresIn = tokenUtils.getExpiredIn();
+
+                loggedUserTracker.userLoggedIn(user.getEmail());
 
                 return ResponseEntity.ok(new UserTokenStateDTO(jwt, expiresIn));
             }).apply(); // Koristimo apply() za rukovanje CheckedSupplier
@@ -151,6 +166,23 @@ public class AuthenticationController {
 
         // Return a failure response if the user is not found
         return new ResponseEntity<>("Unsuccessful Activation", HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            String email = tokenUtils.getUsernameFromToken(token); // Preuzmi email iz tokena
+
+            loggedUserTracker.userLoggedOut(email);
+            System.out.println(">> KORISNIK SE ODJAVIO: " + email);
+
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.badRequest().body("Missing or invalid Authorization header");
     }
 
 }
