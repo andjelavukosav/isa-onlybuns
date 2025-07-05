@@ -462,8 +462,7 @@ public class UserServiceImpl implements UserService {
                 + "📣 New followers: " + user.getFollowersCount() + "\n"
                 + "📝 Posts: " + user.getPostsCount() + "\n"
                 + "❤️ Likes: " + user.getLikesCount() + "\n\n"
-                + "Come back to Onlybuns and see what you've missed! 🍩";
+                + "Come back to Onlybuns and see what you've missed!";
     }
-
 
 }

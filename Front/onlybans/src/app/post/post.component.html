@@ -1,7 +1,7 @@
 <ng-container *ngIf="displayedPosts && displayedPosts.length > 0">
-<div id="post-management">
-    <div *ngFor="let p of displayedPosts trackBy: trackByPostId" class="post-card">
-    
+  <div id="post-management">
+    <div *ngFor="let p of displayedPosts; trackBy: trackByPostId" class="post-card">
+      
       <div class="post-header">
         <strong>
           <a [routerLink]="['/profile', p.user?.id]" (click)="$event.stopPropagation()" class="username-link">
@@ -31,6 +31,7 @@
           <span class="likes-link" (click)="toggleLikesList(p.id)"> {{ p.likeCount || 0 }} Likes</span>
         </div>
 
+        <!-- Modal sa korisnicima koji su lajkovali -->
         <div *ngIf="isLikesListOpened" class="overlay" (click)="closeLikesList()">
           <div class="modal" (click)="$event.stopPropagation()">
             <h3>Likes</h3>
@@ -42,19 +43,35 @@
           </div>
         </div>
 
+        <!-- SEKCIJA ZA KOMENTARE -->
         <div class="comment-section">
-          <textarea [(ngModel)]="commentText[p.id]" (click)="$event.stopPropagation()" placeholder="Add a comment..."></textarea>
-          <button (click)="addComment(p)" (click)="$event.stopPropagation()" class="comment-button">
-            Add Comment
-          </button>
+          <textarea [(ngModel)]="commentText[p.id]" placeholder="Add a comment..." rows="1"></textarea>
+          <button mat-button color="primary" (click)="submitComment(p.id)">Post</button>
         </div>
+
+        <div class="comments" *ngIf="commentsMap[p.id]?.length">
+          <div class="comment" *ngFor="let comment of commentsMap[p.id]">
+            <div class="comment-content">
+              <div class="comment-line">
+                <strong class="username">{{ comment.username || 'Korisnik ' + comment.userId }}</strong>
+                <span class="comment-text">{{ comment.text }}</span>
+              </div>
+              <div class="comment-footer">
+                <span class="timestamp">{{ toDate(comment.creationDateTime) | date:'d. MMMM y.' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+
+        <hr>
       </div>
     </div>
+  </div>
 
   <ng-template #noPosts>
     <div class="no-posts-message">
       No posts yet.
     </div>
   </ng-template>
-</div>
 </ng-container>
