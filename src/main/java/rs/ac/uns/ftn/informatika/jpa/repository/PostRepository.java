@@ -1,12 +1,14 @@
 package rs.ac.uns.ftn.informatika.jpa.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 
+import javax.persistence.LockModeType;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,6 +42,10 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     @Query("SELECT p FROM Post p LEFT JOIN FETCH p.likes WHERE p.id = :postId")
     Post findPostWithLikes(@Param("postId") int postId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Post p WHERE p.id = :id")
+    Post findByIdForUpdate(@Param("id") int id);
 
 
 }

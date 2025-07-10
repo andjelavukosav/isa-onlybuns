@@ -44,7 +44,7 @@ public class CommentServiceImpl implements CommentService {
 
         boolean follows = followRepository.existsByFollowerAndFollowed(user, postOwner);
         if (!follows) {
-          //  throw new IllegalStateException("You cannot comment on a post from a user you do not follow.");
+            throw new IllegalStateException("You cannot comment on a post from a user you do not follow.");
         }
 
         int commentsInLastHour = countCommentsInLastHour(userId);

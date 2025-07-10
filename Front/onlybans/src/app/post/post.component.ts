@@ -197,6 +197,9 @@ submitComment(postId: number): void {
       console.error('Error submitting comment:', error);
       if (error.status === 404) {
         this.snackBar.open('The allowed number of comments is 60 per hour.', 'Close', { duration: 3000 });
+      }
+      else if (error.status === 403) {
+        this.snackBar.open('You cannot comment on a post from a user you do not follow!', 'Close', { duration: 3000 });
       } else {
         this.snackBar.open('Error submitting comment.', 'Close', { duration: 3000 });
       }

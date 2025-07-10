@@ -79,4 +79,18 @@
         </resources>
     </cache>
 
+    <!-- Cache za lokaciju objave, osvjezava se na svakih 24 sata -->
+    <cache alias="postLocations" uses-template="default">
+        <key-type>java.lang.Integer</key-type>
+        <value-type>rs.ac.uns.ftn.informatika.jpa.dto.LocationDTO</value-type>
+        <expiry>
+            <ttl unit="hours">24</ttl>
+        </expiry>
+        <resources>
+            <heap>1000</heap>
+            <offheap unit="MB">10</offheap>
+        </resources>
+    </cache>
+
+
 </config>
