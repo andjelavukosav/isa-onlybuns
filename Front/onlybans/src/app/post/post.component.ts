@@ -8,6 +8,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { AuthUser, UserDTO } from '../model/registered-user';
 import { AuthService } from '../service';
 import { ChangeDetectorRef } from '@angular/core';
+import { CommentService } from '../service/comment.service';
+import { CommentDTO } from '../model/commentDto';
 
 @Component({
   selector: 'app-post',
@@ -25,10 +27,14 @@ export class PostComponent implements OnInit, OnChanges {
   isLikesListOpened: boolean = false;
   likes$: BehaviorSubject<UserDTO[]> = new BehaviorSubject<UserDTO[]>([]);
   likedPostIds: number[] = [];
+  commentsMap: { [postId: number]: CommentDTO[] } = {};
+
+
 
   constructor(
     private postService: PostService,
     private userService: UserService,
+    private commentService: CommentService,
     private snackBar: MatSnackBar, // Inject MatSnackBar
     private authService: AuthService,
     private cdr: ChangeDetectorRef
@@ -72,6 +78,8 @@ private updateLikedStatus(): void {
       console.log('Primljeni postovi:', changes['inputPosts'].currentValue ? changes['inputPosts'].currentValue.length : 0);
       this.posts = changes['inputPosts'].currentValue || [];
 
+      this.posts.forEach(post => this.loadComments(post.id));
+
       // Ponovo učitaj lajkovane postove i ažuriraj status
       this.postService.getLikedPostIds().subscribe(ids => {
         this.likedPostIds = ids;
@@ -80,8 +88,6 @@ private updateLikedStatus(): void {
       });
     }
   }
-
-
 
   likePost(post: Post): void {
     if (!this.currentUser) {
@@ -122,8 +128,6 @@ private updateLikedStatus(): void {
     }
   }
 
-
-
   getCurrentUser(path: any): void {
     this.userService.getMyInfo()
       .subscribe(res => {
@@ -151,14 +155,6 @@ private updateLikedStatus(): void {
     }
   }
 
-  addComment(post: any): void{
-    if(!this.currentUser){
-      alert('Please, login first.')
-      this.commentText[post.id] = '';
-      return;
-    }
-  }
-
   toggleLikesList(postId: number): void{
     this.isLikesListOpened = !this.isLikesListOpened;
 
@@ -180,5 +176,60 @@ trackByPostId(index: number, post: Post): number {
   return post.id;
 }
 
+submitComment(postId: number): void {
+  const trimmedText = this.commentText[postId]?.trim();
+  if (!trimmedText) {
+    this.snackBar.open('Komentar ne može biti prazan.', 'Zatvori', { duration: 3000 });
+    return;
+  }
+
+  const commentDTO = {
+    text: trimmedText
+  };
+
+  this.commentService.addComment(postId, commentDTO).subscribe({
+    next: (response) => {
+      this.snackBar.open('Comment added!', 'Close', { duration: 3000 });
+      this.commentText[postId] = ''; 
+      this.posts.forEach(post => this.loadComments(post.id));
+    },
+    error: (error) => {
+      console.error('Error submitting comment:', error);
+      if (error.status === 404) {
+        this.snackBar.open('The allowed number of comments is 60 per hour.', 'Close', { duration: 3000 });
+      }
+      else if (error.status === 403) {
+        this.snackBar.open('You cannot comment on a post from a user you do not follow!', 'Close', { duration: 3000 });
+      } else {
+        this.snackBar.open('Error submitting comment.', 'Close', { duration: 3000 });
+      }
+    }
+  });
+  
+}
+
+loadComments(postId: number): void {
+  this.commentService.getCommentsByPost(postId).subscribe({
+    next: (comments) => {
+      // sortiraj po datumu DESC
+      this.commentsMap[postId] = comments.sort((a, b) => {
+        const dateA = a.creationDateTime ? new Date(a.creationDateTime).getTime() : 0;
+        const dateB = b.creationDateTime ? new Date(b.creationDateTime).getTime() : 0;
+        return dateB - dateA;
+      });
+      
+    },
+    error: (err) => {
+      console.error('Greška pri učitavanju komentara:', err);
+    }
+  });
+}
+
+toDate(array: any): Date {
+  if (Array.isArray(array)) {
+    return new Date(array[0], array[1] - 1, array[2], array[3] || 0, array[4] || 0, array[5] || 0, array[6] ? array[6] / 1000000 : 0);
+  }
+  return new Date(array);
+}
 
 }

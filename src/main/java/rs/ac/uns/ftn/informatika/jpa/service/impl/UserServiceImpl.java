@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +26,7 @@ import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.*;
 import rs.ac.uns.ftn.informatika.jpa.specification.UserSpecification;
+import rs.ac.uns.ftn.informatika.jpa.util.LoggedUserTracker;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
@@ -70,6 +72,13 @@ public class UserServiceImpl implements UserService {
 
     @PersistenceContext
     private EntityManager entityManagerr;
+
+    @Autowired
+    private EmailSenderService emailSenderService;
+
+    @Autowired
+    private LoggedUserTracker loggedUserTracker;
+
 
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
@@ -418,6 +427,42 @@ public class UserServiceImpl implements UserService {
         return passwordEncoder.matches(currentPassword, user.getPassword());
     }
 
+    @Override
+    //@Scheduled(fixedRate = 60000) // svakog minuta
+    @Scheduled(cron = "0 0 10 * * *") // svaki dan u 10h
+    public void sendInactivityNotificationsToUsers() {
+        try {
+            System.out.println("Running scheduled task...");
+            // 7 dana u milisekundama = 7 * 24 * 60 * 60 * 1000 = 604800000
+            long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L;
+            Set<String> inactiveEmails = loggedUserTracker.getUsersLoggedOutLongerThan(sevenDaysInMillis);
+            // Pronađi sve korisnike koji su izlogovani duže od 1 minut
+            //Set<String> inactiveEmails = loggedUserTracker.getUsersLoggedOutLongerThan(60000);
 
+            for (String email : inactiveEmails) {
+                User user = userRepository.findByEmail(email);
+                System.out.println("Usao...");
+
+                if (user != null) {
+                    String content = generateSummary(user);
+                    emailSenderService.sendSummaryEmail(user.getEmail(), content); // asinhrono slanje
+                    System.out.println("Sent inactivity notification to: " + user.getEmail());
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("Exception in scheduled task: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private String generateSummary(User user) {
+        return "Hello " + user.getUsername() + ",\n\n"
+                + "Here's your weekly activity summary on Onlybuns:\n"
+                + "📣 New followers: " + user.getFollowersCount() + "\n"
+                + "📝 Posts: " + user.getPostsCount() + "\n"
+                + "❤️ Likes: " + user.getLikesCount() + "\n\n"
+                + "Come back to Onlybuns and see what you've missed!";
+    }
 
 }

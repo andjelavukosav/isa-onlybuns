@@ -129,26 +129,82 @@
   }
 }
 
+.comments {
+  max-height: 200px; 
+  overflow-y: auto;
+  padding-right: 5px; 
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #aaa transparent;
+}
+
+
+.comment {
+  display: flex;
+  flex-direction: column;
+  font-family: 'Arial', sans-serif;
+}
+
+.comment-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.username {
+  font-weight: bold;
+  color: #111111d1; /* tamnija za tekst */
+}
+
+.comment-text {
+  color: #333;
+  margin-left: 30px;
+}
+
+.comment-footer {
+  font-size: 12px;
+  color: #999;
+  margin-top: 5px;
+}
+
+
 .comment-section {
-  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  align-items: center;
 }
 
 .comment-section textarea {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  flex: 1;
+  resize: none;
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  min-height: 30px;
+  line-height: 1.2;
 }
 
-.comment-button {
-  background-color: #007bff;
+
+.comment-section button {
+  white-space: nowrap;
+  height: 30px;
+  background-color: #1565c0;
   color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
   cursor: pointer;
-  margin-top: 8px;
+  font-weight: 550;
 }
+
 
 .no-posts-message {
   text-align: center;

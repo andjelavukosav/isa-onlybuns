@@ -85,12 +85,46 @@ export class AuthService {
 }
 
 
-  logout() {
+  /*logout() {
     localStorage.removeItem("jwt");
     this.access_token = null;
     this.user$.next(null);
     this.router.navigate(['/login']);
-  }
+  }*/
+
+    logout() {
+      const token = this.getToken();
+    
+      if (token) {
+        const headers = new HttpHeaders({
+          'Authorization': `Bearer ${token}`
+        });
+    
+        // Pošalji zahtev ka backendu
+        this.apiService.post(this.config.logout_url, {}, headers)
+          .pipe(
+            catchError(err => {
+              console.error('Logout error:', err);
+              return of(null); // ignorisi grešku, nastavi logout
+            })
+          )
+          .subscribe(() => {
+            console.log('Logout successful on server');
+            // I nakon toga izbriši token lokalno i preusmeri korisnika
+            localStorage.removeItem("jwt");
+            this.access_token = null;
+            this.user$.next(null);
+            this.router.navigate(['/login']);
+          });
+      } else {
+        // Ako nema tokena, samo očisti lokalno stanje
+        localStorage.removeItem("jwt");
+        this.access_token = null;
+        this.user$.next(null);
+        this.router.navigate(['/login']);
+      }
+    }
+    
 
   tokenIsPresent() {
     return !!this.access_token;
