@@ -19,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rs.ac.uns.ftn.informatika.jpa.security.auth.RestAuthenticationEntryPoint;
 import rs.ac.uns.ftn.informatika.jpa.security.auth.TokenAuthenticationFilter;
+import rs.ac.uns.ftn.informatika.jpa.service.UserActivityTracker;
 import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -68,6 +69,10 @@ public class WebSecurityConfig {
     @Autowired
     private TokenUtils tokenUtils;
 
+    @Autowired
+    private UserActivityTracker userActivityTracker;
+
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         List<String> allowedOrigins = Arrays.asList("http://localhost:4200");
@@ -103,10 +108,11 @@ public class WebSecurityConfig {
                 .antMatchers("/ws/**").permitAll()
                 .antMatchers("/api/queue/manual").permitAll()
                 .antMatchers("/api/posts/user/{userId}").permitAll() // Dodato: omogućava pristup /api/posts/user/{userId} bez autentifikacije
+                .antMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated().and()
                 .cors().and()
 
-                .addFilterBefore(new TokenAuthenticationFilter(tokenUtils,  userDetailsService()), BasicAuthenticationFilter.class);
+                .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, userDetailsService(), userActivityTracker), BasicAuthenticationFilter.class);
 
         http.csrf().disable();
 

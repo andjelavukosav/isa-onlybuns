@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
+import rs.ac.uns.ftn.informatika.jpa.service.UserActivityTracker;
 import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
 
 import javax.servlet.FilterChain;
@@ -24,9 +25,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     protected final Log LOGGER = LogFactory.getLog(getClass());
 
-    public TokenAuthenticationFilter(TokenUtils tokenHelper, UserDetailsService userDetailsService) {
+    private final UserActivityTracker userActivityTracker;
+
+    public TokenAuthenticationFilter(TokenUtils tokenHelper, UserDetailsService userDetailsService, UserActivityTracker userActivityTracker) {
         this.tokenUtils = tokenHelper;
         this.userDetailsService = userDetailsService;
+        this.userActivityTracker = userActivityTracker;
     }
 
     @Override
@@ -48,6 +52,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 username = tokenUtils.getUsernameFromToken(authToken);
 
                 if (username != null) {
+                    userActivityTracker.updateActivity(username);
 
                     System.out.println("Username from token: " + username);
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
