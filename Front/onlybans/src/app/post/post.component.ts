@@ -200,6 +200,9 @@ submitComment(postId: number): void {
       }
       else if (error.status === 403) {
         this.snackBar.open('You cannot comment on a post from a user you do not follow!', 'Close', { duration: 3000 });
+      } 
+      else if (error.status === 429) {
+        this.snackBar.open('Too many comments in a short period. Please wait a moment and try again!', 'Close', { duration: 3000 });
       } else {
         this.snackBar.open('Error submitting comment.', 'Close', { duration: 3000 });
       }

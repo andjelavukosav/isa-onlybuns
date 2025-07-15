@@ -1,5 +1,6 @@
 package rs.ac.uns.ftn.informatika.jpa.controller;
 
+import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import rs.ac.uns.ftn.informatika.jpa.dto.CommentDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Comment;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.service.CommentService;
+import rs.ac.uns.ftn.informatika.jpa.service.RateLimiterService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
 
 import java.security.Principal;
@@ -26,6 +28,9 @@ public class CommentController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RateLimiterService rateLimiterService;
 
 
     /**
@@ -49,6 +54,14 @@ public class CommentController {
             Principal principal) {
 
         System.out.println("⬅️ Pozvan addComment endpoint za postId = " + postId);
+
+        RateLimiter limiter = rateLimiterService.getRateLimiter(principal.getName());
+        boolean allowed = limiter.acquirePermission();
+        if (!allowed) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body("Prekoračili ste maksimalan broj komentara u minuti");
+        }
+
         if (commentDTO.getText() == null || commentDTO.getText().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Comment text cannot be empty.");
         }
