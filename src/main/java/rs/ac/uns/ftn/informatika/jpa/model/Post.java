@@ -47,6 +47,9 @@ public class Post implements Serializable {
     @JsonIgnore
     private User user;
 
+    @Column(name = "MarkedForAd", nullable = false)
+    private Boolean markedForAd = false;
+
 
     public Post() {
         super();
@@ -58,6 +61,7 @@ public class Post implements Serializable {
         this.imagePath = imagePath;
         this.creationDateTime = creationDateTime;
         this.location = location;
+        this.markedForAd = false;
     }
 
     public Post(String description, String imagePath, LocalDateTime creationDateTime, Double latitude, Double longitude) {
@@ -65,6 +69,7 @@ public class Post implements Serializable {
         this.imagePath = imagePath;
         this.creationDateTime = creationDateTime;
         this.location = new Location(latitude, longitude);
+        this.markedForAd = false;
     }
     public int getId() {
         return id;
@@ -137,4 +142,10 @@ public class Post implements Serializable {
         this.likeCount--;
         like.setPost(null);
     }
+
+    public boolean isMarkedForAd() {
+        return Boolean.TRUE.equals(markedForAd);
+    }
+
+    public void setMarkedForAd(boolean markedForAd) { this.markedForAd = markedForAd; }
 }

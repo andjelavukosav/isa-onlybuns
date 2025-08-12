@@ -15,10 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import rs.ac.uns.ftn.informatika.jpa.dto.CreatePostDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.LikeDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
+import rs.ac.uns.ftn.informatika.jpa.dto.*;
 import rs.ac.uns.ftn.informatika.jpa.mapper.PostDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.Like;
@@ -29,6 +26,7 @@ import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
+import rs.ac.uns.ftn.informatika.jpa.service.AdMessageSender;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
@@ -56,6 +54,8 @@ public class PostController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private AdMessageSender adMessageSender;
 
     @Operation(description = "Get posts by user ID", method = "GET")
     @GetMapping(value = "/user/{userId}",
@@ -254,6 +254,39 @@ public class PostController {
         pagedResults.setResults(postsDTO);
         pagedResults.setTotalCount(postsDTO.size());
         return new ResponseEntity(pagedResults, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/mark-for-ad")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, String>> markPostForAd(@PathVariable int id) {
+        Post post = postService.findById(id);
+
+        Map<String, String> response = new HashMap<>();
+
+        if (post == null) {
+            response.put("message", "Post not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        if (post.isMarkedForAd()) {
+            response.put("message", "Post is already marked for ad");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        post.setMarkedForAd(true);
+        postService.save(post);
+
+        // Priprema poruke
+        AdPostMessageDTO message = new AdPostMessageDTO(
+                post.getDescription(),
+                post.getCreationDateTime().toString(),
+                post.getUser().getUsername()
+        );
+
+        adMessageSender.sendAdPost(message);
+
+        response.put("message", "Post marked for advertisement and message sent");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

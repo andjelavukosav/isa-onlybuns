@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface CommentService {
     Comment addComment(String text, Integer userId, Integer postId);
-    public List<CommentDTO> findCommentsByPostId(Integer postId);
-    public int countCommentsInLastHour(int userId);
+    List<CommentDTO> findCommentsByPostId(Integer postId);
+    int countCommentsInLastHour(int userId);
 }

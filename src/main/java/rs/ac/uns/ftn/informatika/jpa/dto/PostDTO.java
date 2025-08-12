@@ -29,6 +29,8 @@ public class PostDTO {
 
     public int likeCount;
 
+    public boolean markedForAd = false;
+
     public UserDTO user;
 
 
@@ -53,6 +55,7 @@ public class PostDTO {
         this.user = new UserDTO(post.getUser());
         this.creationDateTime = post.getCreationDateTime();
         this.likeCount = post.getLikeCount();
+        this.markedForAd = post.isMarkedForAd();
     }
 
     public UserDTO getUser() { return user; }

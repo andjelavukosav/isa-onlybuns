@@ -63,4 +63,6 @@ public interface PostService {
     @Cacheable(value = "postLocations", key = "#postId")
     LocationDTO getCachedLocation(Integer postId);
 
+    void save(Post post);
+
 }
