@@ -54,6 +54,7 @@ export class PostComponent implements OnInit, OnChanges {
     this.likedPostIds = ids;
     this.updateLikedStatus(); // Pozovi nakon što su postavljeni ID-jevi
   });
+  
 }
 
 
@@ -234,5 +235,22 @@ toDate(array: any): Date {
   }
   return new Date(array);
 }
+
+approvePost(postId: number): void {
+  this.postService.approvePost(postId).subscribe({
+    next: () => {
+      const post = this.posts.find(p => p.id === postId);
+      if (post) {
+        post.markedForAd = true;
+        this.snackBar.open('Objava je odobrena za reklamu!', 'Zatvori', { duration: 3000 });
+      }
+    },
+    error: (err) => {
+      console.error('Greška pri odobravanju objave:', err);
+      this.snackBar.open('Došlo je do greške.', 'Zatvori', { duration: 3000 });
+    }
+  });
+}
+
 
 }

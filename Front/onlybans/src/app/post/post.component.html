@@ -64,8 +64,21 @@
         </div>
         
 
+        <!-- DUGME ZA ODOBRAVANJE, samo za admina -->
+        <div *ngIf="currentUser?.roles?.includes('ROLE_ADMIN') && !p.markedForAd" class="admin-approve-section">
+          <button mat-raised-button color="accent" (click)="approvePost(p.id)">
+            ✅ Odobri za reklamu
+          </button>
+        </div>
+
+        <div *ngIf="currentUser?.roles?.includes('ROLE_ADMIN') && p.markedForAd" class="admin-approve-section">
+          <span class="approved-label">✔ Ova objava je odobrena za reklamu</span>
+        </div>
+
+
+
         <hr>
-      </div>
+      </div>   
     </div>
   </div>
 

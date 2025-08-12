@@ -213,3 +213,11 @@
   color: #888;
 }
 
+.admin-approve-section {
+  margin-top: 10px;
+}
+
+.approved-label {
+  font-weight: bold;
+  color: green;
+}

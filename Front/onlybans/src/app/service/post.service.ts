@@ -146,6 +146,8 @@ export class PostService {
     return post;
   }
   
-
+  approvePost(postId: number): Observable<void> {
+    return this.http.put<void>(`http://localhost:8080/api/posts/${postId}/mark-for-ad`, {});
+  }
 
 }
