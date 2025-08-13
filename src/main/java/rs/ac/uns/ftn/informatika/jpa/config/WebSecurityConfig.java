@@ -109,6 +109,7 @@ public class WebSecurityConfig {
                 .antMatchers("/api/queue/manual").permitAll()
                 .antMatchers("/api/posts/user/{userId}").permitAll() // Dodato: omogućava pristup /api/posts/user/{userId} bez autentifikacije
                 .antMatchers("/actuator/**").permitAll()
+                .antMatchers("/api/ads/queue").permitAll()
                 .anyRequest().authenticated().and()
                 .cors().and()
 

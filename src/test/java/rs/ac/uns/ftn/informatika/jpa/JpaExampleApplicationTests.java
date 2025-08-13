@@ -46,14 +46,12 @@ public class JpaExampleApplicationTests {
 			}
 		});
 
-		// Registracija drugog korisnika sa istim korisničkim imenom
 		Future<?> future2 = executor.submit(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					Thread.sleep(100); // Čeka da se prvi thread pokrene, ali se registracija ne završava
+					Thread.sleep(300); // Čeka da se prvi thread pokrene, ali se registracija ne završava
 
-					// Pre-Check if username exists
 					if (userService.findByUsername("duplicateUser") != null) {
 						System.out.println("Username 'duplicateUser' already exists, skipping second registration.");
 					} else {
@@ -65,7 +63,7 @@ public class JpaExampleApplicationTests {
 						userDTO2.setLastPasswordResetDate(new Date());
 						userDTO2.setFirstname("Duplicate User2");
 						userDTO2.setLastname("Duplicate User2");
-						userService.save(userDTO2);  // Drugi thread pokušava da registruje korisnika sa istim korisničkim imenom
+						userService.save(userDTO2);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -73,18 +71,17 @@ public class JpaExampleApplicationTests {
 			}
 		});
 
-		// Wait for both threads to finish execution
 		try {
-			future1.get();  // Wait for the first thread to finish
-			future2.get();  // Wait for the second thread to finish
+			future1.get();
+			future2.get();
 		} catch (ExecutionException e) {
 			System.out.println("Exception from thread: " + e.getCause().getClass());
-			throw e.getCause();  // Re-throw original exception
+			throw e.getCause();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
-		executor.shutdown();  // Shut down executor after completion
+		executor.shutdown();
 	}
 
 }

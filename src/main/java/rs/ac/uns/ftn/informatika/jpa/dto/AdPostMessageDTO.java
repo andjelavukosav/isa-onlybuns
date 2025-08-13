@@ -5,6 +5,9 @@ public class AdPostMessageDTO {
     private String createdAt;
     private String username;
 
+    public AdPostMessageDTO() {
+    }
+
     public AdPostMessageDTO(String description, String createdAt, String username) {
         this.description = description;
         this.createdAt = createdAt;

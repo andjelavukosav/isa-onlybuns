@@ -34,8 +34,6 @@ public interface PostService {
 
     @Cacheable(value = "top5LikedPosts", key = "'top5LikedPosts'")
     List<Post> getAllPostsMostPopularLast7Days();
-    //void likePost(int postId, int userId);
-
 
     @CacheEvict(value = {"allPostsLastMonth", "allPosts", "top5LikedPosts", "top10PopularPosts"}, allEntries = true)
     void removeFromCache();

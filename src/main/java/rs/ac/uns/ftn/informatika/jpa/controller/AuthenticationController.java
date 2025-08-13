@@ -98,7 +98,6 @@ public class AuthenticationController {
                 user.setLastLoginDate(new Date(timeWithoutMillis));
                 userRepository.save(user);
 
-                //String jwt = tokenUtils.generateToken(user.getEmail());
                 String jwt = tokenUtils.generateToken(user.getId(), user.getEmail(), user.getUsername(), user.getRoles());
                 int expiresIn = tokenUtils.getExpiredIn();
 
@@ -122,12 +121,7 @@ public class AuthenticationController {
 
     @PostMapping("/signup")
     public ResponseEntity<Map<String, String>> addUser(@RequestBody UserDTO userRequest) throws MessagingException, InterruptedException {
-       /* User existEmailUser = this.userService.findByEmail(userRequest.getEmail());
-        if (existEmailUser != null) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Email already exists");
-            return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-        }*/
+
             // Nastavi sa čuvanjem korisnika ako email ne postoji
             userRequest.setEnabled(false);
             Date now = new Date();

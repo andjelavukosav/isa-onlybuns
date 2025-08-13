@@ -24,6 +24,8 @@ import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 
+import rs.ac.uns.ftn.informatika.jpa.queue.AdPostMessageQueue;
+import rs.ac.uns.ftn.informatika.jpa.queue.ManualMessageQueue;
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.AdMessageSender;
@@ -67,12 +69,6 @@ public class PostController {
         return new ResponseEntity<>(userPosts, HttpStatus.OK);
     }
 
-
-    /*@GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
-        List<Post> posts = postService.findAll();
-        return new ResponseEntity<>(posts, HttpStatus.OK);
-    }*/
 
     @Operation(description = "Get all posts", method = "GET")
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -139,9 +135,6 @@ public class PostController {
     @GetMapping(value = "/allPostsLastMonth", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PagedResults<PostDTO>> getAllPostsLastMonth() {
 
-        postService.removeFromCache();
-
-
         List<Post> posts = postService.getAllPostsLastMonth();
         // Konverzija u DTO u kontroleru
         List<PostDTO> postsDTO = posts.stream()
@@ -172,8 +165,6 @@ public class PostController {
         if(!postRequest.isValid()){
             return new ResponseEntity<>("Missing input data.",HttpStatus.BAD_REQUEST);
         }
-
-        postService.removeFromCache();
 
         System.out.println("REQUEST: description: " + description + ", longitude: " + longitude + ", latitude: " + latitude + ", imageFile: " + imageFile);
 
@@ -234,7 +225,6 @@ public class PostController {
         PostDTO updatedPost = postService.update(postRequest, id);
 
         this.postService.removeFromCache();
-
         return ResponseEntity.ok(updatedPost);
 
     }
@@ -282,6 +272,10 @@ public class PostController {
                 post.getCreationDateTime().toString(),
                 post.getUser().getUsername()
         );
+
+
+        // ⚡ 1️⃣ Stavljanje poruke u manualni red
+        AdPostMessageQueue.addMessage(message); // pretpostavljam da je ManualMessageQueue generički, prilagodi tip
 
         adMessageSender.sendAdPost(message);
 

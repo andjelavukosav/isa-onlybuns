@@ -167,11 +167,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated.");
         }
 
-        // Provera: korisnik može menjati samo svoju lozinku ili admin može menjati bilo čiju
-     //   if (authenticatedUser.getId() != userId && !authenticatedUser.getRoles().contains("ROLE_ADMIN")) {
-      //      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this password.");
-        //}
-
         try {
             userService.updateUser(userId, updateUser);
             return ResponseEntity.ok("User updated successfully!");
@@ -278,69 +273,6 @@ public class UserController {
         return ResponseEntity.ok().body(posts);
     }
 
-
-    /*@PutMapping("/users/update-password/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<String> updatePassword(
-            @PathVariable int userId,
-            @RequestBody String newPassword,
-            Principal principal) {
-
-        if (newPassword == null || newPassword.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Password cannot be empty.");
-        }
-
-        User authenticatedUser = userService.findByUsername(principal.getName());
-
-        if (authenticatedUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated.");
-        }
-
-        // Provera: korisnik može menjati samo svoju lozinku ili admin može menjati bilo čiju
-        if (authenticatedUser.getId() != userId && !authenticatedUser.getRoles().contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this password.");
-        }
-
-        try {
-            userService.updateUserPassword(userId, newPassword);
-            return ResponseEntity.ok("Password updated successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update password.");
-        }
-    }*/
-
-    /*@PutMapping("/users/update-password/{userId}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<?> updatePassword(
-            @PathVariable int userId,
-            @RequestBody Map<String, String> passwordMap,
-            Principal principal) {
-
-        String newPassword = passwordMap.get("newPassword");
-
-        if (newPassword == null || newPassword.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("Password cannot be empty.");
-        }
-
-        User authenticatedUser = userService.findByUsername(principal.getName());
-
-        if (authenticatedUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated.");
-        }
-
-        if (authenticatedUser.getId() != userId && !authenticatedUser.getRoles().contains("ROLE_ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to update this password.");
-        }
-
-        try {
-            userService.updateUserPassword(userId, newPassword);
-
-            return ResponseEntity.ok(Collections.singletonMap("message", "Password updated successfully."));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update password.");
-        }
-    }
-*/
     @PutMapping("/users/update-password/{userId}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<?> updatePassword(
