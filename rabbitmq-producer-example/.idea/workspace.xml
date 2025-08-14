@@ -4,45 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="307f7c0d-e48a-4283-9ceb-23d372f3b9c1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../agency-app1/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../agency-app1/src/main/java/com/example/agency/ManualQueueController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/queue/AdPostMessageQueue.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/queue/AdPostMessageQueueProcessor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../agency-app1/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../agency-app1/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../agency-app1/src/main/java/com/example/agency/AdMessageListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/../agency-app1/src/main/java/com/example/agency/AdMessageListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../agency-app1/target/classes/com/example/agency/AdMessageListener.class" beforeDir="false" afterPath="$PROJECT_DIR$/../agency-app1/target/classes/com/example/agency/AdMessageListener.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/rs/ac/uns/ftn/informatika/rabbitmq/config/RabbitConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/rs/ac/uns/ftn/informatika/rabbitmq/config/RabbitConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/rs/ac/uns/ftn/informatika/rabbitmq/config/RabbitConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/rs/ac/uns/ftn/informatika/rabbitmq/config/RabbitConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/AuthenticationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/AuthenticationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/ManualQueueController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/ManualQueueController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/PostController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/PostController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/dto/AdPostMessageDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/dto/AdPostMessageDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/service/PostService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/rs/ac/uns/ftn/informatika/jpa/service/PostService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/resources/ehcache.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/resources/ehcache.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/test/java/rs/ac/uns/ftn/informatika/jpa/JpaExampleApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/test/java/rs/ac/uns/ftn/informatika/jpa/JpaExampleApplicationTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/ehcache.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/ehcache.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/config/WebSecurityConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/AuthenticationController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/AuthenticationController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/ManualQueueController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/ManualQueueController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/PostController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/PostController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/controller/UserController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/dto/AdPostMessageDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/classes/rs/ac/uns/ftn/informatika/jpa/dto/AdPostMessageDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/test-classes/rs/ac/uns/ftn/informatika/jpa/JpaExampleApplicationTests$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/test-classes/rs/ac/uns/ftn/informatika/jpa/JpaExampleApplicationTests$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../target/test-classes/rs/ac/uns/ftn/informatika/jpa/JpaExampleApplicationTests.class" beforeDir="false" afterPath="$PROJECT_DIR$/../target/test-classes/rs/ac/uns/ftn/informatika/jpa/JpaExampleApplicationTests.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../uploads/images/3452c358-1dce-4a38-9676-7ef57ce3e8e1-zec.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../uploads/images/3a00a9ef-c7e8-4cd6-af82-184a62fc7c37-patuljasti-ovnoliki-zec-dostava-bgslanjeoprem-5425641984463-71800262163.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../uploads/images/685c6a13-866a-40e3-a417-20aeced5e8a0-zec-6.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../uploads/images/7f3ac6d5-f758-4d0b-b31c-8663707df4bf-what-distinguishes-a-hare-from_1.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../uploads/images/8b74edf4-dbab-465f-9ca4-fcef67e964a6-zec.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../uploads/images/ce2eee16-5ac0-4eaa-9881-6f4615ff9ed0-patuljasti-ovnoliki-zec-dostava-bgslanjeoprem-5425641984463-71800262163.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../uploads/images/e7c8ee99-0d78-4924-aa8f-2ef2349f88fd-what-distinguishes-a-hare-from_1.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../uploads/images/ee173c4e-b87f-4230-897a-b5dd156c6884-zec-6.jpg" beforeDir="false" />
-    </list>
+    <list default="true" id="307f7c0d-e48a-4283-9ceb-23d372f3b9c1" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -129,7 +91,7 @@
       <workItem from="1747659627265" duration="823000" />
       <workItem from="1747721656062" duration="455000" />
       <workItem from="1750932876168" duration="797000" />
-      <workItem from="1755100391897" duration="6713000" />
+      <workItem from="1755100391897" duration="7325000" />
     </task>
     <servers />
   </component>
