@@ -1,0 +1,10 @@
+<div class="group-chat-list">
+  <h3>Group Chats</h3>
+  <ul class="group-list">
+    <li *ngFor="let group of groupChatsList" (click)="selectGroupChat(group)">
+      <i class="fas fa-users group-icon"></i>
+      <span class="group-name">{{ group.name }}</span>
+      <small class="group-date">{{ group.createdAt | date:'short' }}</small>
+    </li>
+  </ul>
+</div>

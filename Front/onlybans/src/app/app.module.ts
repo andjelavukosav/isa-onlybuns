@@ -41,6 +41,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { UserProfileDetailsComponent } from './user-profile-details/user-profile-details.component';
+import { ChatListComponent } from './chat-list/chat-list.component';
+import { CreateGroupChatComponent } from './create-group-chat/create-group-chat.component';
+import { GroupChatListComponent } from './group-chat-list/group-chat-list.component';
+import { GroupChatSettingsComponent } from './group-chat-settings/group-chat-settings.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +64,12 @@ import { UserProfileDetailsComponent } from './user-profile-details/user-profile
     NearbyPostsMapComponent,
     ChatComponent,
     RegisteredUsersComponent,
-    UserProfileDetailsComponent
+    UserProfileDetailsComponent,
+    ChatComponent,
+    ChatListComponent,
+    CreateGroupChatComponent,
+    GroupChatListComponent,
+    GroupChatSettingsComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,126 @@
+/* Pozadina koja zatamnjuje pozadinu */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5); /* tamna providna pozadina */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Sadržaj modala - bela kutija */
+.modal-content {
+  background: white;
+  border-radius: 10px;
+  padding: 25px 30px;
+  width: 350px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+/* Naslov */
+.modal-content h2 {
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Input za naziv grupe */
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  border: 2px solid #0084ff; /* plava boja da se uklopi sa ikonama */
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  border-color: #005bb5;
+}
+
+/* Lista korisnika */
+.user-list {
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+/* Svaki label sa checkboxom */
+.user-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 15px;
+  cursor: pointer;
+  user-select: none;
+  color: #222;
+}
+
+/* Checkbox */
+.user-checkbox input[type="checkbox"] {
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #0084ff; /* boja checkboxa u modernim browserima */
+}
+
+/* Dugmad u modalu */
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Dugme - cancel */
+.modal-actions button:first-child {
+  background: transparent;
+  border: 2px solid #999;
+  color: #666;
+  padding: 8px 22px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-actions button:first-child:hover {
+  background-color: #eee;
+  border-color: #666;
+  color: #333;
+}
+
+/* Dugme - create */
+.modal-actions button:last-child {
+  background-color: #0084ff;
+  border: none;
+  color: white;
+  padding: 8px 22px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Hover efekat na create dugme */
+.modal-actions button:last-child:hover {
+  background-color: #005bb5;
+}
+
+/* Ikonica pored teksta na Create dugmetu */
+.modal-actions button:last-child i {
+  font-size: 18px;
+}

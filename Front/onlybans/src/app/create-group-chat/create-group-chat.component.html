@@ -1,0 +1,21 @@
+<div class="modal-overlay">
+  <div class="modal-content">
+    <h2>Create Group Chat</h2>
+
+    <input [(ngModel)]="groupName" placeholder="Group name" class="input" />
+
+    <div class="user-list">
+        <ng-container *ngFor="let user of following">
+            <label class="user-checkbox">
+                <input type="checkbox" (change)="toggleUserSelection(user.id)" />
+                {{ user.username }}
+            </label>
+        </ng-container>
+    </div>
+
+    <div class="modal-actions">
+      <button (click)="cancel()">Cancel</button>
+      <button (click)="confirm()">Create</button>
+    </div>
+  </div>
+</div>

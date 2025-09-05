@@ -7,6 +7,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import rs.ac.uns.ftn.informatika.jpa.dto.ChatMessageDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.AsylumAndVeterinarian;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
 import rs.ac.uns.ftn.informatika.jpa.service.AsylumAndVeterinarianService;

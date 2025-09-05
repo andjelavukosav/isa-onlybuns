@@ -10,6 +10,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { AuthUser } from '../model/registered-user';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { ChatService } from './chat.service';
 @Injectable()
 export class AuthService {
   private access_token: string | null = null;
@@ -20,9 +21,12 @@ export class AuthService {
     private apiService: ApiService,
     private userService: UserService,
     private config: ConfigService,
-    private router: Router
+    private router: Router,
+    private chatService: ChatService
   ) {
-    const token = localStorage.getItem('jwt');
+    //const token = localStorage.getItem('jwt');
+    localStorage.removeItem('jwt');
+    const token = sessionStorage.getItem('jwt');
     if (token) {
       this.access_token = token;
       this.setUser(token);
@@ -43,7 +47,7 @@ export class AuthService {
   return this.apiService.post(this.config.login_url, JSON.stringify(body), loginHeaders)
     .pipe(map((res: any) => {
       // Ovde direktno pristupi accessToken jer tvoj ApiService već vraća telo odgovora
-      const token = res?.accessToken; 
+      const token = res?.accessToken;
 
       if (!token) {
         throw new Error('No access token received');
@@ -60,14 +64,16 @@ export class AuthService {
   setToken(token: string) {
     console.log('Setting new token:', token);
     this.access_token = token;
-    localStorage.setItem('jwt', token);
+    //localStorage.setItem('jwt', token);
+    sessionStorage.setItem('jwt', token);
     this.setUser(token);
     this.tokenSubject.next(token);
   }
 
 
   private getTokenFromStorage(): string | null {
-    return localStorage.getItem('jwt');
+    //return localStorage.getItem('jwt');
+    return sessionStorage.getItem('jwt'); //localStorage.getItem('jwt');
   }
 
   getTokenObservable(): Observable<string | null> {
@@ -94,12 +100,12 @@ export class AuthService {
 
     logout() {
       const token = this.getToken();
-    
+
       if (token) {
         const headers = new HttpHeaders({
           'Authorization': `Bearer ${token}`
         });
-    
+
         // Pošalji zahtev ka backendu
         this.apiService.post(this.config.logout_url, {}, headers)
           .pipe(
@@ -110,10 +116,14 @@ export class AuthService {
           )
           .subscribe(() => {
             console.log('Logout successful on server');
+            this.chatService.disconnect();         // zatvori WebSocket
             // I nakon toga izbriši token lokalno i preusmeri korisnika
-            localStorage.removeItem("jwt");
+            //localStorage.removeItem("jwt");
+            sessionStorage.removeItem('jwt');
             this.access_token = null;
-            this.user$.next(null);
+            // očisti token
+            this.user$.next(null);                 // očisti korisnika
+            this.tokenSubject.next(null);          // očisti token observable
             this.router.navigate(['/login']);
           });
       } else {
@@ -124,7 +134,7 @@ export class AuthService {
         this.router.navigate(['/login']);
       }
     }
-    
+
 
   tokenIsPresent() {
     return !!this.access_token;
@@ -138,12 +148,12 @@ export class AuthService {
     const token = this.getToken();
     if (token) {
       const decodedToken = jwtDecode(token);
-      return decodedToken; 
+      return decodedToken;
     }
     return null;
   }
 
-  
+
   private decodeToken(token: string): AuthUser | null{
     try{
       const jwtHelperService = new JwtHelperService();

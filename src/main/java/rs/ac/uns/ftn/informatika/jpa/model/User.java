@@ -86,8 +86,8 @@ public class User implements UserDetails, Serializable {
     @Column(name="posts_count", nullable = false, columnDefinition = "int default 0")
     private int postsCount = 0;
 
-    @Column(name = "likes_count", nullable = false, columnDefinition = "int default 0")
-    private int likesCount = 0;
+    /*@Column(name = "likes_count", nullable = false, columnDefinition = "int default 0")
+    private int likesCount = 0;*/
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -105,6 +105,18 @@ public class User implements UserDetails, Serializable {
             version = 0; // Postavljanje verzije na 0 pre nego što se entitet sačuva
         }
     }
+
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<ChatMessage> sentMessages = new HashSet<>();
+
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<ChatRoom> ownedRooms = new HashSet<>();
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<ChatRoomMember> roomMemberships = new HashSet<>();
 
     public User() {super();}
 
@@ -254,21 +266,21 @@ public class User implements UserDetails, Serializable {
 
     public void setLikes(Set<Like> likes) { this.likes = likes; }
 
-    public int getLikesCount() { return likesCount; }
+    //public int getLikesCount() { return likesCount; }
 
-    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
+    //public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
 
 
     public void addLike(Like like) {
         this.likes.add(like);
         like.setUser(this);
-        this.likesCount++;
+        //this.likesCount++;
     }
 
     public void removeLike(Like like) {
         this.likes.remove(like);
         like.setUser(null);
-        if (this.likesCount > 0) this.likesCount--;
+        //if (this.likesCount > 0) this.likesCount--;
     }
 
     public Integer getVersion() { return version; }
@@ -354,5 +366,33 @@ public class User implements UserDetails, Serializable {
     public void setLastLoginDate(Date lastLoginDate) {
         this.lastLoginDate = lastLoginDate;
     }
+    public void setOwnedRoom(ChatRoom chatRoom){
+        this.ownedRooms.add(chatRoom);
+        chatRoom.setOwner(this);
+    }
 
+    public void removeOwnedRoom(ChatRoom chatRoom){
+        this.ownedRooms.remove(chatRoom);
+        chatRoom.setOwner(null);
+    }
+
+    public void setRoomMembership(ChatRoomMember roomMembership){
+        this.roomMemberships.add(roomMembership);
+        roomMembership.setMember(this);
+    }
+
+    public void removeRoomMembership(ChatRoomMember roomMembership){
+        this.roomMemberships.remove(roomMembership);
+        roomMembership.setMember(null);
+    }
+
+    public void addSentMessage(ChatMessage message) {
+        this.sentMessages.add(message);
+        message.setSender(this);
+    }
+
+    public void removeSentMessage(ChatMessage message) {
+        this.sentMessages.remove(message);
+        message.setSender(null);
+    }
 }

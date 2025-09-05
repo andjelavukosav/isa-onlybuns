@@ -28,6 +28,7 @@
         <!-- Padajući meni -->
         <mat-menu #userMenu="matMenu" >
           <button mat-menu-item *ngIf="isAdmin()" routerLink="/registered-users">Registered Users</button>
+          <button mat-menu-item *ngIf="!isAdmin()" routerLink="/user-home">Home Page</button>
           <button mat-menu-item (click)="logout()">Sign out</button>
         </mat-menu> 
       </ng-template>
