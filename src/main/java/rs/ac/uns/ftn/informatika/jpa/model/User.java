@@ -99,6 +99,18 @@ public class User implements UserDetails, Serializable {
         }
     }
 
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<ChatMessage> sentMessages = new HashSet<>();
+
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<ChatRoom> ownedRooms = new HashSet<>();
+
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<ChatRoomMember> roomMemberships = new HashSet<>();
+
     public User() {super();}
 
     public User(int id, String username, String password, String firstName, String lastName, String email) {
@@ -279,11 +291,7 @@ public class User implements UserDetails, Serializable {
 
     public Set<Follow> getFollowers() { return followers; }
 
-    public void setFollowers(Set<Follow> followers) { this.followers = followers; }
-
     public Set<Follow> getFollowing() { return following; }
-
-    public void setFollowing(Set<Follow> following) { this.following = following; }
 
     public void addFollowing(Follow follow) {
         this.following.add(follow);
@@ -331,5 +339,33 @@ public class User implements UserDetails, Serializable {
         }
     }
 
+    public void setOwnedRoom(ChatRoom chatRoom){
+        this.ownedRooms.add(chatRoom);
+        chatRoom.setOwner(this);
+    }
 
+    public void removeOwnedRoom(ChatRoom chatRoom){
+        this.ownedRooms.remove(chatRoom);
+        chatRoom.setOwner(null);
+    }
+
+    public void setRoomMembership(ChatRoomMember roomMembership){
+        this.roomMemberships.add(roomMembership);
+        roomMembership.setMember(this);
+    }
+
+    public void removeRoomMembership(ChatRoomMember roomMembership){
+        this.roomMemberships.remove(roomMembership);
+        roomMembership.setMember(null);
+    }
+
+    public void addSentMessage(ChatMessage message) {
+        this.sentMessages.add(message);
+        message.setSender(this);
+    }
+
+    public void removeSentMessage(ChatMessage message) {
+        this.sentMessages.remove(message);
+        message.setSender(null);
+    }
 }

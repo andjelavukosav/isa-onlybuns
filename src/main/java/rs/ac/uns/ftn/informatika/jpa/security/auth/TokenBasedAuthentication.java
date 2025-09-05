@@ -3,6 +3,8 @@ package rs.ac.uns.ftn.informatika.jpa.security.auth;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.security.Principal;
+
 public class TokenBasedAuthentication extends AbstractAuthenticationToken {
 
     private static final long serialVersionUID = 1L;

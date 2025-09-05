@@ -1,0 +1,141 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* zatamnjeno */
+  z-index: 1000;
+}
+
+.modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1001;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.card-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: stretch;
+}
+
+.card-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #f3f3f3;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.card-option:hover {
+  background-color: #e1f5fe;
+}
+
+.card-option .icon {
+  font-size: 18px;
+  color: #007bff;
+}
+
+.checkbox-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:not(:disabled):hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.cancel-btn {
+  align-self: flex-end;  /* ovo je za desno poravnanje */
+  background-color: #007bff;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background-color: #0056b3; /* tamnija plava na hover */
+}
+
+
+.member-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.member-list li {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #007bff; /* plava boja kao link */
+  text-decoration: underline;
+}
+
+.member-list li:last-child {
+  border-bottom: none;
+}
+
+.member-list li:hover {
+  background-color: #e1f5fe;
+  color: #004a99;
+}
+
+.non-owner-actions {
+  display: flex;
+  justify-content: flex-end; /* dugme ide desno */
+  margin-top: 20px;          /* malo prostora iznad dugmeta */
+}

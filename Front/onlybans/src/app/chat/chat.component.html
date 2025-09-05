@@ -1,1 +1,81 @@
-<p>Welcome to chat page!</p>
+<div class="chat-container">
+  <!-- Kreiraj grupni chat -->
+  <!-- Dugme za otvaranje -->
+  <button class="fab" (click)="openGroupModal()" title="Create Group Chat">
+      <i class="fas fa-users"></i> <!-- fa-users za grupni chat -->
+
+  </button>
+
+  <!-- Prikaz modala -->
+  <app-create-group-chat
+    *ngIf="isGroupModalOpen"
+    [following]="following"
+    [currentUser]="currentUser"
+    (groupCreated)="handleGroupCreated($event)"
+    (closeModal)="closeGroupModal()">
+  </app-create-group-chat>
+
+  <div class="chat-sidebar">
+
+
+    <!-- Chat lista sa korisnicima -->
+    <app-chat-list 
+      [currentUser]="currentUser" 
+      (userSelected)="onUserSelected($event)"
+      (followingLoaded)="onFollowingLoaded($event)">
+    </app-chat-list>
+
+    <app-group-chat-list
+      [currentUser]="currentUser"
+      (groupChats)="onGroupChatsLoaded($event)"
+      (groupChatSelected)="onGroupChatSelected($event)">
+    </app-group-chat-list>
+  </div>
+  
+  <app-group-chat-settings
+    *ngIf="isGroupSettingsModalOpen && groupChatSelected"
+    [currentUser] = "currentUser"
+    [groupChat] = "groupChatSelected"
+    [following] = "following"
+    (membersUpdated)="handleGroupMembersUpdated($event)"
+    (closeModal)="closeGroupSettingsModal()">
+  </app-group-chat-settings>
+
+  <!-- Prozor za chat -->
+  <div class="chat-box" *ngIf="recipient || groupChatSelected">
+    <h3 *ngIf="recipient">Chat with {{ recipient.username }}</h3>
+    <div *ngIf="groupChatSelected" class="group-header">
+      <h3>Group: {{ groupChatSelected.name }}</h3>
+      <button class="group-settings-btn" (click)="openGroupSettingsModal()">
+        <i class="fas fa-cog"></i>Settings
+      </button>
+    </div>
+    
+    <div class="chat-window">
+      <button (click)="loadMessageHistory()" *ngIf="hasMoreMessages">Load more</button>
+
+    <div 
+      *ngFor="let msg of messages" 
+      [ngClass]="{'message': true, 'me': msg.senderId === currentUser?.username, 'them': msg.senderId !== currentUser?.username}">
+      
+      <div class="message-content">
+        {{ msg.message }}
+      </div>
+      <div class="message-meta">
+        <span class="message-sender">{{ msg.senderId }}</span>
+        <span class="message-time">
+          {{ msg.timestamp ? (msg.timestamp | date:'shortTime') : '' }}
+        </span> 
+      </div>
+    </div>
+
+  </div>
+
+
+    <div class="chat-input">
+      <input #messageInput [(ngModel)]="newMessageText" placeholder="Type a message..." (keydown.enter)="send(messageInput)" />
+      <button (click)="send()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+

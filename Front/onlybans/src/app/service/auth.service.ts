@@ -10,6 +10,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { AuthUser } from '../model/registered-user';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { ChatService } from './chat.service';
 @Injectable()
 export class AuthService {
   private access_token: string | null = null;
@@ -20,9 +21,12 @@ export class AuthService {
     private apiService: ApiService,
     private userService: UserService,
     private config: ConfigService,
-    private router: Router
+    private router: Router,
+    private chatService: ChatService
   ) {
-    const token = localStorage.getItem('jwt');
+    //const token = localStorage.getItem('jwt');
+    localStorage.removeItem('jwt');
+    const token = sessionStorage.getItem('jwt');
     if (token) {
       this.access_token = token;
       this.setUser(token);
@@ -60,14 +64,15 @@ export class AuthService {
   setToken(token: string) {
     console.log('Setting new token:', token);
     this.access_token = token;
-    localStorage.setItem('jwt', token);
+    //localStorage.setItem('jwt', token);
+    sessionStorage.setItem('jwt', token);
     this.setUser(token);
     this.tokenSubject.next(token);
   }
 
 
   private getTokenFromStorage(): string | null {
-    return localStorage.getItem('jwt');
+    return sessionStorage.getItem('jwt'); //localStorage.getItem('jwt');
   }
 
   getTokenObservable(): Observable<string | null> {
@@ -85,12 +90,18 @@ export class AuthService {
 }
 
 
-  logout() {
-    localStorage.removeItem("jwt");
-    this.access_token = null;
-    this.user$.next(null);
-    this.router.navigate(['/login']);
-  }
+
+  logout(): void {
+  this.chatService.disconnect();         // zatvori WebSocket
+  //localStorage.removeItem("jwt"); 
+  sessionStorage.removeItem('jwt');
+      this.access_token = null;
+       // očisti token
+  this.user$.next(null);                 // očisti korisnika
+  this.tokenSubject.next(null);          // očisti token observable
+  this.router.navigate(['/login']);      // idi na login
+}
+
 
   tokenIsPresent() {
     return !!this.access_token;

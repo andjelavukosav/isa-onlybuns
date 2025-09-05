@@ -38,6 +38,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     List<User> findByUsernameContainingIgnoreCase(String username);
 
+    List<User> findAllByIdIn(List<Integer> ids);
+
 }
 
 
