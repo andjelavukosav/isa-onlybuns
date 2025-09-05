@@ -4,17 +4,16 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.web.multipart.MultipartFile;
-import rs.ac.uns.ftn.informatika.jpa.dto.CreatePostDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.LikeDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
+import rs.ac.uns.ftn.informatika.jpa.dto.*;
 import rs.ac.uns.ftn.informatika.jpa.mapper.PostDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.Like;
@@ -201,6 +200,12 @@ public class PostServiceImpl implements PostService {
 
         user.addPost(newPost);
 
+        postRepository.save(newPost);
+
+        // Keširanje lokacije
+        this.cacheLocation(newPost.getId(), newPost.getLocation().getLatitude(), newPost.getLocation().getLongitude());
+
+        printCacheContents();
         return postDTOMapper.fromPostToDTO(newPost);
     }
 
@@ -292,6 +297,12 @@ public class PostServiceImpl implements PostService {
                 .map(post -> {
                     boolean isLiked = likeService.findLikeByPostIdAndUserId(post.getId(), userId) != null ;
 
+                    LocationDTO location = getCachedLocation(post.getId());
+                    if (location == null) {
+                        location = new LocationDTO(post.getLocation().getLatitude(), post.getLocation().getLongitude());
+                        cacheLocation(post.getId(), location.getLatitude(), location.getLongitude());
+                        this.LOG.info("Lokacija nije kesovana za postID={}", post.getId());
+                    }
                     PostDTO postDTO = new PostDTO(post);
                     postDTO.isLikedByCurrentUser = isLiked;
                     return postDTO;
@@ -343,9 +354,8 @@ public class PostServiceImpl implements PostService {
             return false;
         }
 
-        Post post = postRepository.findById(postId);
+        Post post = postRepository.findByIdForUpdate(postId);
         User user = userService.findById(userId);
-
 
         Like like = new Like(user, post);
         like.setCreationDateTime(LocalDateTime.now());
@@ -365,7 +375,7 @@ public class PostServiceImpl implements PostService {
         Like like = likeService.findLikeByPostIdAndUserId(postId, userId);
 
         if (like != null) {
-            Post post = like.getPost();
+            Post post = postRepository.findByIdForUpdate(postId);
             post.unlikePost(like);
             like.getUser().removeLike(like);
 
@@ -390,5 +400,31 @@ public class PostServiceImpl implements PostService {
 
     }
 
+    @CachePut(value = "postLocations", key = "#postId")
+    public LocationDTO cacheLocation(int postId, double latitude, double longitude) {
+        return new LocationDTO(latitude, longitude);
+    }
+
+    @Cacheable(value = "postLocations", key = "#postId")
+    public LocationDTO getCachedLocation(Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        return new LocationDTO(post.getLocation().getLatitude(), post.getLocation().getLongitude());
+    }
+
+    public void printCacheContents() {
+        Cache cache = cacheManager.getCache("postLocations");
+        if (cache != null) {
+            System.out.println(">>> postLocations keš postoji.");
+        } else {
+            System.out.println(">>> postLocations keš NE postoji.");
+        }
+    }
+
+    @Override
+    public void save(Post post) {
+        postRepository.save(post);
+    }
 
 }

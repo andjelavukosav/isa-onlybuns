@@ -15,10 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import rs.ac.uns.ftn.informatika.jpa.dto.CreatePostDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.LikeDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.PostDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
+import rs.ac.uns.ftn.informatika.jpa.dto.*;
 import rs.ac.uns.ftn.informatika.jpa.mapper.PostDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.Like;
@@ -27,8 +24,11 @@ import rs.ac.uns.ftn.informatika.jpa.model.Post;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 
+import rs.ac.uns.ftn.informatika.jpa.queue.AdPostMessageQueue;
+import rs.ac.uns.ftn.informatika.jpa.queue.ManualMessageQueue;
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
+import rs.ac.uns.ftn.informatika.jpa.service.AdMessageSender;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
@@ -56,6 +56,8 @@ public class PostController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private AdMessageSender adMessageSender;
 
     @Operation(description = "Get posts by user ID", method = "GET")
     @GetMapping(value = "/user/{userId}",
@@ -67,12 +69,6 @@ public class PostController {
         return new ResponseEntity<>(userPosts, HttpStatus.OK);
     }
 
-
-    /*@GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
-        List<Post> posts = postService.findAll();
-        return new ResponseEntity<>(posts, HttpStatus.OK);
-    }*/
 
     @Operation(description = "Get all posts", method = "GET")
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -139,9 +135,6 @@ public class PostController {
     @GetMapping(value = "/allPostsLastMonth", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PagedResults<PostDTO>> getAllPostsLastMonth() {
 
-        postService.removeFromCache();
-
-
         List<Post> posts = postService.getAllPostsLastMonth();
         // Konverzija u DTO u kontroleru
         List<PostDTO> postsDTO = posts.stream()
@@ -172,8 +165,6 @@ public class PostController {
         if(!postRequest.isValid()){
             return new ResponseEntity<>("Missing input data.",HttpStatus.BAD_REQUEST);
         }
-
-        postService.removeFromCache();
 
         System.out.println("REQUEST: description: " + description + ", longitude: " + longitude + ", latitude: " + latitude + ", imageFile: " + imageFile);
 
@@ -234,7 +225,6 @@ public class PostController {
         PostDTO updatedPost = postService.update(postRequest, id);
 
         this.postService.removeFromCache();
-
         return ResponseEntity.ok(updatedPost);
 
     }
@@ -254,6 +244,43 @@ public class PostController {
         pagedResults.setResults(postsDTO);
         pagedResults.setTotalCount(postsDTO.size());
         return new ResponseEntity(pagedResults, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/mark-for-ad")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, String>> markPostForAd(@PathVariable int id) {
+        Post post = postService.findById(id);
+
+        Map<String, String> response = new HashMap<>();
+
+        if (post == null) {
+            response.put("message", "Post not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        if (post.isMarkedForAd()) {
+            response.put("message", "Post is already marked for ad");
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        post.setMarkedForAd(true);
+        postService.save(post);
+
+        // Priprema poruke
+        AdPostMessageDTO message = new AdPostMessageDTO(
+                post.getDescription(),
+                post.getCreationDateTime().toString(),
+                post.getUser().getUsername()
+        );
+
+
+        // ⚡ 1️⃣ Stavljanje poruke u manualni red
+        AdPostMessageQueue.addMessage(message); // pretpostavljam da je ManualMessageQueue generički, prilagodi tip
+
+        adMessageSender.sendAdPost(message);
+
+        response.put("message", "Post marked for advertisement and message sent");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

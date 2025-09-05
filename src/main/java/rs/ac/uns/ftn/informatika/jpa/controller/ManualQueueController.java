@@ -5,8 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import rs.ac.uns.ftn.informatika.jpa.dto.AdPostMessageDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.AsylumAndVeterinarian;
 import rs.ac.uns.ftn.informatika.jpa.model.Location;
+import rs.ac.uns.ftn.informatika.jpa.queue.AdPostMessageQueue;
 import rs.ac.uns.ftn.informatika.jpa.service.AsylumAndVeterinarianService;
 import rs.ac.uns.ftn.informatika.jpa.service.GeocodingService;
 
@@ -52,6 +54,12 @@ public class ManualQueueController {
         } catch (IOException e) {
             logger.error("❌ Greška prilikom geokodiranja: {}", e.getMessage());
         }
+    }
+
+    @PostMapping("/ads/queue")
+    public void sendAdToQueue(@RequestBody AdPostMessageDTO message) {
+        System.out.println("📥 Primljena reklama: " + message.getDescription());
+        AdPostMessageQueue.addMessage(message);
     }
 }
 

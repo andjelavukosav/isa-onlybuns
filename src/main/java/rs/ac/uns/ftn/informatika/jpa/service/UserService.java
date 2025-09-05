@@ -32,5 +32,6 @@ public interface UserService {
     PagedResults<PostDTO> getPostsByUser(int userId);
     User updateUserPassword(int userId, String newPassword) throws Exception;
     boolean verifyPassword(int userId, String currentPassword);
+    void sendInactivityNotificationsToUsers();
     List<User> findAllByIds(List<Integer> ids);
 }

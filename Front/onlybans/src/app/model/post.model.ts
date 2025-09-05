@@ -11,6 +11,7 @@ export interface Post {
     user?: UserDTO;
     likeCount: number;
     isLikedByCurrentUser?: boolean; 
+    markedForAd?: boolean;
   }
 
 

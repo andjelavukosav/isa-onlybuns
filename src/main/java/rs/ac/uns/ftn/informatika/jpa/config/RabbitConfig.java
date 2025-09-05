@@ -8,13 +8,18 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import rs.ac.uns.ftn.informatika.jpa.consumer.ChatManualAckListener;
+import org.springframework.amqp.core.FanoutExchange;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
+@EnableRabbit
 public class RabbitConfig {
 
     public static final String CHAT_EXCHANGE = "chat.exchange";
@@ -36,6 +41,17 @@ public class RabbitConfig {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // formatiranje datuma kao string
         return new Jackson2JsonMessageConverter(mapper);
     }
+
+    @Bean
+    public FanoutExchange adsExchange(@Value("${rabbitmq.exchange}") String exchangeName) {
+        return new FanoutExchange(exchangeName);
+    }
+
+    @Bean
+    public Queue myQueue() {
+        return new Queue("spring-boot1", true); // true = durable
+    }
+
 
     @Bean
     public ObjectMapper objectMapper() {
