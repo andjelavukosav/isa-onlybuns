@@ -461,7 +461,7 @@ public class UserServiceImpl implements UserService {
                 + "Here's your weekly activity summary on Onlybuns:\n"
                 + "📣 New followers: " + user.getFollowersCount() + "\n"
                 + "📝 Posts: " + user.getPostsCount() + "\n"
-                + "❤️ Likes: " + user.getLikesCount() + "\n\n"
+                //+ "❤️ Likes: " + user.getLikesCount() + "\n\n"
                 + "Come back to Onlybuns and see what you've missed!";
     }
     @Override

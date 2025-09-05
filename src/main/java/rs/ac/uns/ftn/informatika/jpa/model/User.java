@@ -86,8 +86,8 @@ public class User implements UserDetails, Serializable {
     @Column(name="posts_count", nullable = false, columnDefinition = "int default 0")
     private int postsCount = 0;
 
-    @Column(name = "likes_count", nullable = false, columnDefinition = "int default 0")
-    private int likesCount = 0;
+    /*@Column(name = "likes_count", nullable = false, columnDefinition = "int default 0")
+    private int likesCount = 0;*/
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -266,9 +266,9 @@ public class User implements UserDetails, Serializable {
 
     public void setLikes(Set<Like> likes) { this.likes = likes; }
 
-    public int getLikesCount() { return likesCount; }
+    //public int getLikesCount() { return likesCount; }
 
-    public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
+    //public void setLikesCount(int likesCount) { this.likesCount = likesCount; }
 
 
     public void addLike(Like like) {
