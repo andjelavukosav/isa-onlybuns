@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
-import { AuthService, UserService } from '../service';
-import { AuthUser, UserDTO, UserSearchCriteria } from '../model/registered-user';
-import { Page } from '../model/pagination.model';
+import { AuthService, UserService } from '../../../service';
+import { AuthUser, UserDTO, UserSearchCriteria } from '../../../model/registered-user';
+import { Page } from '../../../model/pagination.model';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 

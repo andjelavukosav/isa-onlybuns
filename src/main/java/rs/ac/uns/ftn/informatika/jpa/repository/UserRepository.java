@@ -40,6 +40,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     List<User> findAllByIdIn(List<Integer> ids);
 
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name <> 'ROLE_ADMIN'")
+    List<User> findAllNonAdminUsers();
+
 }
 
 

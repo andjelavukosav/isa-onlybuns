@@ -34,7 +34,6 @@ import { ActivityTrendsComponent } from './activity-trends/activity-trends.compo
 import { NearbyPostsMapComponent } from './nearby-posts-map/nearby-posts-map.component';
 import { ChatComponent } from './chat/chat.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { RegisteredUsersComponent } from './registered-users/registered-users.component';
 import { AuthModule } from './infrastructure/auth/auth.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -63,7 +62,6 @@ import { GroupChatSettingsComponent } from './group-chat-settings/group-chat-set
     ActivityTrendsComponent,
     NearbyPostsMapComponent,
     ChatComponent,
-    RegisteredUsersComponent,
     UserProfileDetailsComponent,
     ChatComponent,
     ChatListComponent,
@@ -98,7 +96,9 @@ import { GroupChatSettingsComponent } from './group-chat-settings/group-chat-set
     ApiService,
     UserService,
     ConfigService,
-    PostService
+    PostService,
+    
+    
   ],
   bootstrap: [AppComponent],
   schemas: [NO_ERRORS_SCHEMA]

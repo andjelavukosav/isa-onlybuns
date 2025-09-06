@@ -118,6 +118,12 @@ public class User implements UserDetails, Serializable {
     @JsonIgnore
     private Set<ChatRoomMember> roomMemberships = new HashSet<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Comment> comments = new HashSet<>();
+
+    private int commentsCount = 0;
+
     public User() {super();}
 
     public User(int id, String username, String password, String firstName, String lastName, String email) {
@@ -313,6 +319,10 @@ public class User implements UserDetails, Serializable {
 
     public void setFollowing(Set<Follow> following) { this.following = following; }
 
+    public Set<Comment> getComments() { return comments; }
+
+    public int getCommentsCount() { return  commentsCount; }
+
     public void addFollowing(Follow follow) {
         this.following.add(follow);
         follow.setFollower(this);
@@ -394,5 +404,17 @@ public class User implements UserDetails, Serializable {
     public void removeSentMessage(ChatMessage message) {
         this.sentMessages.remove(message);
         message.setSender(null);
+    }
+
+    public void addComment(Comment comment){
+        comments.add(comment);
+        comment.setUser(this);
+        commentsCount++;
+    }
+
+    public void removeComment(Comment comment){
+        comments.remove(comment);
+        comment.setUser(null);
+        commentsCount--;
     }
 }

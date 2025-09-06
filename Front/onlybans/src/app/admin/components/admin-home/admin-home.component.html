@@ -1,0 +1,16 @@
+<div class="admin-home-section">
+  <h2 class="page-title">Admin Dashboard</h2>
+
+  <div class="tab-container">
+    <!-- Sidebar sa linkovima ka child stranicama -->
+    <div class="tab-sidebar">
+      <a routerLink="analytics" routerLinkActive="active">Analytics</a>
+      <a routerLink="registered-users" routerLinkActive="active">Registered Users</a>
+    </div>
+
+    <!-- Glavni sadržaj: ovde se učitavaju child komponente -->
+    <div class="tab-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>
