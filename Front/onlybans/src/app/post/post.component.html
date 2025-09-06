@@ -21,7 +21,7 @@
 
       <div class="post-footer">
         <div class="like-section">
-          <button 
+          <button *ngIf="!currentUser?.roles?.includes('ROLE_ADMIN')"
             (click)="likePost(p);  $event.stopPropagation()" 
             [ngClass]="{'liked': p.isLikedByCurrentUser}"
             class="like-button">
@@ -44,7 +44,7 @@
         </div>
 
         <!-- SEKCIJA ZA KOMENTARE -->
-        <div class="comment-section">
+        <div class="comment-section" *ngIf="!currentUser?.roles?.includes('ROLE_ADMIN')">
           <textarea [(ngModel)]="commentText[p.id]" placeholder="Add a comment..." rows="1"></textarea>
           <button mat-button color="primary" (click)="submitComment(p.id)">Post</button>
         </div>

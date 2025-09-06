@@ -44,6 +44,7 @@ import { ChatListComponent } from './chat-list/chat-list.component';
 import { CreateGroupChatComponent } from './create-group-chat/create-group-chat.component';
 import { GroupChatListComponent } from './group-chat-list/group-chat-list.component';
 import { GroupChatSettingsComponent } from './group-chat-settings/group-chat-settings.component';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,7 @@ import { GroupChatSettingsComponent } from './group-chat-settings/group-chat-set
     NavbarComponent,
     HomeComponent,
     CardComponent,
-    PostComponent,
+    //PostComponent,
     CreatePostComponent,
     //RegistrationComponent,
     UserProfileComponent,
@@ -70,6 +71,7 @@ import { GroupChatSettingsComponent } from './group-chat-settings/group-chat-set
     GroupChatSettingsComponent,
   ],
   imports: [
+    SharedModule,
     BrowserModule,
     AppRoutingModule,
     MaterialModule,

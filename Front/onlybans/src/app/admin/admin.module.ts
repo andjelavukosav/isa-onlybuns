@@ -9,13 +9,17 @@ import { MatPaginatorModule } from "@angular/material/paginator";
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { MatCardModule } from "@angular/material/card";
 import { BaseChartDirective } from "ng2-charts";
+import { UsersPostsComponent } from './components/users-posts/users-posts.component';
+import { SharedModule } from "../shared/shared.module";
 
 @NgModule({
     declarations: [
         AdminHomeComponent,
         RegisteredUsersComponent,
+        UsersPostsComponent,
     ],
     imports: [
+        SharedModule,
         CommonModule,
         AdminRoutingModule,
         FormsModule,
