@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-@EnableScheduling
+@EnableScheduling //za izvrsavanje periodicnih zadataka
 @EnableAsync
 @EnableRetry
 @EnableTransactionManagement

@@ -12,6 +12,7 @@ import rs.ac.uns.ftn.informatika.jpa.model.Role;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface UserService {
@@ -34,4 +35,6 @@ public interface UserService {
     boolean verifyPassword(int userId, String currentPassword);
     void sendInactivityNotificationsToUsers();
     List<User> findAllByIds(List<Integer> ids);
+
+    void deleteInactiveUsersOlderThan(LocalDateTime dateTime);
 }

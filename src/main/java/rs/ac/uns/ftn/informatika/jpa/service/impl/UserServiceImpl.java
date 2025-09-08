@@ -1,6 +1,8 @@
 package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
 import com.google.common.hash.BloomFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -40,6 +42,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private BloomFilter<String> usernameBloomFilter;
@@ -467,6 +471,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAllByIds(List<Integer> ids){
         return this.userRepository.findAllByIdIn(ids);
+    }
+
+    @Override
+    @Transactional
+    public void deleteInactiveUsersOlderThan(LocalDateTime dateTime) {
+        List<User> inactiveUsers = userRepository.findByEnabledFalseAndCreatedAtBefore(dateTime);
+        userRepository.deleteAll(inactiveUsers);
+        log.debug("Deleted {} inactive users older than 7 day.", inactiveUsers.size());
     }
 
 

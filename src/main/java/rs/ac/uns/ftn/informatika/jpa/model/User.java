@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -42,6 +43,9 @@ public class User implements UserDetails, Serializable {
 
     @Column(name = "enabled")
     private boolean enabled;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "last_password_reset_date")
     private Date lastPasswordResetDate;
@@ -99,8 +103,10 @@ public class User implements UserDetails, Serializable {
 
     @Version
     private Integer version;
+
     @PrePersist
-    public void setVersionToZeroIfNull() {
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
         if (version == null) {
             version = 0; // Postavljanje verzije na 0 pre nego što se entitet sačuva
         }
@@ -227,6 +233,9 @@ public class User implements UserDetails, Serializable {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+
 
     public Date getLastPasswordResetDate() {
         return lastPasswordResetDate;

@@ -69,7 +69,7 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<UserTokenStateDTO> createAuthenticationToken(
             @RequestBody JwtAuthenticationRequestDTO authenticationRequest,
-            HttpServletRequest request) {
+            HttpServletRequest request) throws Throwable {
 
         String ipAddress = request.getRemoteAddr();
         RateLimiter rateLimiter = rateLimiterService.getRateLimiter(ipAddress);
@@ -88,10 +88,6 @@ public class AuthenticationController {
 
                 User user = (User) authentication.getPrincipal();
 
-                if (!user.isEnabled()) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body(new UserTokenStateDTO("Account not verified. Please check your email for activation link.", 0));
-                }
 
                 Date now = new Date();
                 long timeWithoutMillis = (now.getTime() / 1000) * 1000;
@@ -105,7 +101,16 @@ public class AuthenticationController {
 
                 return ResponseEntity.ok(new UserTokenStateDTO(jwt, expiresIn));
             }).apply(); // Koristimo apply() za rukovanje CheckedSupplier
-        } catch (Throwable throwable) {
+        }
+        catch(RequestNotPermitted e){
+            LOG.warn("Too many login attempts from IP: {}", ipAddress);
+            System.out.println("Too many login attempts from IP: " + ipAddress); // Ispis u konzolu
+
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(new UserTokenStateDTO("Too many login attempts. Please try again later.", 0));
+
+        }
+        /*catch (Throwable throwable) {
             // Rukovanje izuzetkom
             if (throwable instanceof RequestNotPermitted) {
                 // Logovanje kada je premašeno ograničenje
@@ -116,7 +121,7 @@ public class AuthenticationController {
                         .body(new UserTokenStateDTO("Too many login attempts. Please try again later.", 0));
             }
             throw new RuntimeException(throwable); // Ili prilagodite rukovanje
-        }
+        }*/
     }
 
     @PostMapping("/signup")
