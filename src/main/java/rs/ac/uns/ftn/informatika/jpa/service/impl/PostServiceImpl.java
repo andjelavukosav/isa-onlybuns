@@ -23,6 +23,7 @@ import rs.ac.uns.ftn.informatika.jpa.model.User;
 import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
+import rs.ac.uns.ftn.informatika.jpa.service.ImageService;
 import rs.ac.uns.ftn.informatika.jpa.service.LikeService;
 import rs.ac.uns.ftn.informatika.jpa.service.PostService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
@@ -57,6 +58,9 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private ImageService imageService;
 
     @Autowired
     private CacheManager cacheManager;
@@ -181,7 +185,22 @@ public class PostServiceImpl implements PostService {
     public PagedResults<PostDTO> findAll() {
         List<PostDTO> posts = postRepository.findAll().stream()
                 .sorted(Comparator.comparing(Post::getCreationDateTime).reversed())
-                .map(PostDTO::new)
+                .map(post -> {
+                    PostDTO dto = new PostDTO(post);
+
+                    // --- test kako radi kesiranje slika
+                    try {
+                        byte[] imageBytes = imageService.getImage(post.getImagePath());
+                        LOG.info("[TEST CACHE] PostId={} | imagePath={} | size={} bytes",
+                                post.getId(), post.getImagePath(), imageBytes.length);
+                    } catch (Exception e) {
+                        LOG.warn("[TEST CACHE] Failed to load image for PostId={} | imagePath={}",
+                                post.getId(), post.getImagePath());
+                    }
+                    // -----------------
+
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
         return new PagedResults<>(posts, posts.size());
@@ -192,7 +211,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public PostDTO createPost(CreatePostDTO postRequest, int userId) {
 
-        String imagePath = this.saveImage(postRequest.getImage());
+        String imagePath = imageService.saveImage(postRequest.getImage());
 
         User user = userService.findById(userId);
 
@@ -207,31 +226,6 @@ public class PostServiceImpl implements PostService {
 
         printCacheContents();
         return postDTOMapper.fromPostToDTO(newPost);
-    }
-
-    public String saveImage(MultipartFile imageFile) {
-        try{
-            // Definišite folder za čuvanje slika unutar statičkog direktorijuma
-            String uploadDir = "uploads/images";
-            Path uploadPath = Paths.get(uploadDir);
-
-            // Kreirajte folder ako ne postoji
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            // Generišite jedinstveno ime za fajl
-            String fileName = UUID.randomUUID().toString() + "-" + imageFile.getOriginalFilename();
-            Path filePath = uploadPath.resolve(fileName);
-
-            // Sačuvajte fajl u folder
-            Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            // Vratite ime fajla koje će se koristiti za pristup slici
-            return "/images/" + fileName;
-        }catch(IOException e){
-            throw new RuntimeException("An error occurred while saving the image, ", e);
-        }
     }
 
 
@@ -263,8 +257,12 @@ public class PostServiceImpl implements PostService {
             post.setDescription(updatePostRequest.getDescription());
         }
         if(updatePostRequest.getImage() != null){
-            String newImagePath = this.saveImage(updatePostRequest.getImage());
+            String oldImagePath = post.getImagePath(); //cuvaj staru sliku
+            String newImagePath = imageService.saveImage(updatePostRequest.getImage());
             post.setImagePath(newImagePath);
+
+            //izbaci staru sliku iz kesa
+            imageService.evictImage(oldImagePath);
         }
         if(updatePostRequest.getLatitude()!= null && updatePostRequest.getLongitude() != null){
             post.setLocation(new Location(updatePostRequest.getLatitude(), updatePostRequest.getLongitude()));
@@ -305,6 +303,7 @@ public class PostServiceImpl implements PostService {
                     }
                     PostDTO postDTO = new PostDTO(post);
                     postDTO.isLikedByCurrentUser = isLiked;
+
                     return postDTO;
                 })
                 .collect(Collectors.toList());

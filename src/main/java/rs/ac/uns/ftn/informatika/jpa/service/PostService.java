@@ -45,7 +45,7 @@ public interface PostService {
 
     PostDTO createPost(CreatePostDTO postRequest, int userId);
 
-    String saveImage(MultipartFile file);
+    //String saveImage(MultipartFile file);
 
     boolean likePost(int postId, int userId);
 

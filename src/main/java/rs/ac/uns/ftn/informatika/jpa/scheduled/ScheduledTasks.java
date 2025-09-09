@@ -16,7 +16,7 @@ public class ScheduledTasks {
         this.userService = userService;
     }
 
-    @Scheduled(cron= "0 50 21 * * ?") //(cron = "0 59 23 L * ?")
+    @Scheduled(cron= "${cleanup.cron}") //(cron = "0 59 23 L * ?")
     public void cleanUpInactiveUsersAccount(){
         LocalDateTime now = LocalDateTime.now();
         userService.deleteInactiveUsersOlderThan(now.minusDays(7)); // ili odmah "sad", ako hoćeš samo neaktivne
