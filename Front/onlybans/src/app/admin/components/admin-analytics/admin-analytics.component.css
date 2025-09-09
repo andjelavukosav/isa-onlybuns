@@ -1,0 +1,75 @@
+.analytics-container {
+  padding: 20px;
+  background-color: white; /* bela pozadina */
+  border-radius: 12px;     /* kao admin-home */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* blaža senka */
+}
+
+.analytics-container h2 {
+  font-size: 24px;      /* slično kao page-title */
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 2px solid #ccc; /* opciono, kao tab content header */
+  padding-bottom: 8px;
+}
+
+/* Stil dugmadi za period toggle */
+mat-button-toggle-group {
+  margin-bottom: 20px;
+  background-color: #f5f7fa; /* svetlo siva pozadina */
+  border-radius: 12px;       /* zaobljeno kao sidebar kartice */
+  padding: 5px;
+  display: inline-flex;
+}
+
+mat-button-toggle-group mat-button-toggle {
+  border-radius: 8px;          /* blago zaobljeni uglovi */
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+/* Hover efekat: svetlo plava pozadina */
+mat-button-toggle-group mat-button-toggle:hover {
+  background-color: #e3f2fd;  /* svetlo plava */
+}
+
+/* Aktivno dugme */
+mat-button-toggle-group mat-button-toggle.mat-button-toggle-checked {
+  background-color: #007BFF;  /* tvoja plava kao kod sidebar active */
+  color: white;
+  font-weight: 600;
+}
+
+/* Opcionalno: mala animacija klika */
+mat-button-toggle-group mat-button-toggle:active {
+  transform: scale(0.97);
+}
+
+.kpi-cards mat-card {
+  flex: 1;
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px; /* isti radijus kao home */
+  background-color: #fefefe; /* malo svetlije od bele */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.kpi-cards mat-card:hover {
+  transform: translateY(-5px);
+}
+
+.kpi-cards mat-card h1 {
+  font-size: 36px;
+  margin: 0;
+}
+
+.bar-chart {
+  margin-top: 20px;
+  min-width: 300px;
+  padding: 20px;
+  background-color: #fefefe;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+

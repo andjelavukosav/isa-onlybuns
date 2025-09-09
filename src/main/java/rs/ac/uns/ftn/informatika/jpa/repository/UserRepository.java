@@ -12,6 +12,7 @@ import rs.ac.uns.ftn.informatika.jpa.model.User;
 
 import javax.persistence.LockModeType;
 import javax.persistence.QueryHint;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByUsernameContainingIgnoreCase(String username);
 
     List<User> findAllByIdIn(List<Integer> ids);
+
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name <> 'ROLE_ADMIN'")
+    List<User> findAllNonAdminUsers();
+
+    List<User> findByEnabledFalseAndCreatedAtBefore(LocalDateTime dateTime);
 
 }
 

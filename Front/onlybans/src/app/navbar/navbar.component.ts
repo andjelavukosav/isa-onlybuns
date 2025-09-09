@@ -50,6 +50,9 @@ export class NavbarComponent implements OnInit {
     this.authService.logout();
   }
 
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
   
   
 }

@@ -1,47 +1,44 @@
-
 .app-navbar {
-  position: relative;
-  z-index: 10;
+  position: fixed; /* fiksiran na vrh */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px; /* visina navbar-a */
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 16px;
+  background-color: #fff; /* bijela boja navbar-a */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* blaga sjenka */
+  z-index: 1000;
 }
 
 .greeting {
-  font-size: 20px;
-  color: rgb(150, 150, 150);
-  font-weight: bold;
-  display: block;
-  visibility: visible;
-  margin-bottom: 10px; /* Dodajte malo razmaka ispod teksta */
-}
-
-::ng-deep .mat-menu {
-  top: 100% !important; /* Meni ispod dugmeta */
-  right: 0 !important; /* Poravnanje sa desnom ivicom */
-  z-index: 999;
+  font-size: 14px;
+  margin-right: 10px;
+  color: #fff;
 }
 
 button.mat-icon-button {
-  z-index: 1000;
   font-size: 24px;
   padding: 8px;
+}
+
+/* Glavni sadržaj odmah ispod navbar-a */
+.main-content {
+  padding-top: 50px; /* isto koliko i visina navbar-a */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dropdown {
+  position: absolute;
+  top: 50px; /* odmah ispod navbar-a */
+  right: 16px;
+  background: #fff;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 4px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative; 
+  flex-direction: column;
+  z-index: 1100;
 }
-
-.mat-menu-panel {
-  width: 200px;
-  background-color: #fff;
-  border: 1px solid #5e5c5c;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.mat-menu-panel .mat-menu-item {
-  display: block;
-  padding: 10px 15px;
-  font-size: 14px;
-}
-

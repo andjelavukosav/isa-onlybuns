@@ -2,12 +2,15 @@ package rs.ac.uns.ftn.informatika.jpa.exception;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,7 +33,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateResource(DuplicateResourceException ex) {
-        logger.error("Duplicate resource error: " + ex.getMessage());
+        logger.error("Duplicate resource error: {} ", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.CONFLICT.value());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
@@ -43,7 +46,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        logger.error("Database constraint violation: " + ex.getMessage());
+        logger.error("Database constraint violation: {} ", ex.getMessage());
 
         String message = "Database error";
         if (ex.getMessage().contains("username")) {
@@ -79,21 +82,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
         // Logujte detalje greške
-        logger.error("Access denied: " + ex.getMessage());
+        logger.error("Access denied: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse("Access is denied", HttpStatus.FORBIDDEN.value()));
     }
 
     @ExceptionHandler(RequestNotPermitted.class)
     public ResponseEntity<ErrorResponse> handleCallNotPermitted(RequestNotPermitted ex) {
-        logger.warn("Rate limit exceeded: " + ex.getMessage());
+        logger.warn("Rate limit exceeded: {} ",  ex.getMessage());
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .body(new ErrorResponse("Too many requests. Please try again later.", HttpStatus.TOO_MANY_REQUESTS.value()));
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ErrorResponse> handleOptimisticLockException(ObjectOptimisticLockingFailureException ex) {
-        logger.error("Optimistic lock exception: " + ex.getMessage());
+        logger.error("Optimistic lock exception: {} ", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("Optimistic lock exception", HttpStatus.CONFLICT.value()));
     }
@@ -111,7 +114,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException ex) {
-        logger.error("Constraint violation exception: " + ex.getMessage());
+        logger.error("Constraint violation exception: {} ", ex.getMessage());
         Map<String, String> errors = new HashMap<>();
         for(ConstraintViolation<?> violation : ex.getConstraintViolations()) {
             String field = violation.getPropertyPath().toString();
@@ -132,4 +135,22 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ErrorResponse> handleDisabledException(DisabledException ex){
+        logger.warn("Attempt to authenticate disabled user account: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                "User account is disabled.",
+                HttpStatus.FORBIDDEN.value());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
+        logger.warn("Failed login attempt: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Invalid username or password",
+                HttpStatus.UNAUTHORIZED.value()
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
 }

@@ -1,37 +1,19 @@
-<mat-toolbar class="app-navbar" color="primary">
-    <div fxFlex="1 1 auto" fxLayout="row" fxLayoutAlign="flex-end center" style="gap: 10px; align-items: center;">
-      
-      <!-- Ako korisnik NIJE prijavljen -->
-      <ng-container *ngIf="!(user$ | async); else signedInBlock">
-        <button mat-raised-button routerLink="/signup">Sign up</button>
-        <button mat-raised-button routerLink="/login">Login</button>
-      </ng-container>
-  
-      <!-- Ako jeste prijavljen -->
-      <ng-template #signedInBlock>
-        <!-- Prikazuje ime korisnika ako je dostupno -->
-        <ng-container *ngIf="user$ | async as user ; else loading">
-          <span class="greeting">Hello, {{ user.username }}</span>
-        </ng-container>
-  
-        <!-- Prikazuje Loading dok ime nije dostupno -->
-        <ng-template #loading>
-          <span class="greeting">Hello, Loading...</span>
-        </ng-template>
+<mat-toolbar class="app-navbar">
+  <span class="greeting" *ngIf="user$ | async as user; else loading">
+    Hello, {{ user.username }}
+  </span>
 
-  
-        <!-- Dugme koje otvara meni -->
-        <button mat-icon-button [matMenuTriggerFor]="userMenu">
-          <mat-icon>menu</mat-icon>
-        </button>        
-  
-        <!-- Padajući meni -->
-        <mat-menu #userMenu="matMenu" >
-          <button mat-menu-item *ngIf="isAdmin()" routerLink="/registered-users">Registered Users</button>
-          <button mat-menu-item *ngIf="!isAdmin()" routerLink="/user-home">Home Page</button>
-          <button mat-menu-item (click)="logout()">Sign out</button>
-        </mat-menu> 
-      </ng-template>
-    
-    </div>
-  </mat-toolbar>
+  <ng-template #loading>
+    <span class="greeting">Hello, Loading...</span>
+  </ng-template>
+
+  <button mat-icon-button (click)="toggleMenu()">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Dropdown unutar toolbar-a -->
+  <div class="dropdown" *ngIf="menuOpen">
+    <button mat-button *ngIf="!isAdmin()" routerLink="/user-home">Home Page</button>
+    <button mat-button (click)="logout()">Sign out</button>
+  </div>
+</mat-toolbar>

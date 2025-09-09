@@ -2,6 +2,7 @@ package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import rs.ac.uns.ftn.informatika.jpa.dto.CommentDTO;
 import rs.ac.uns.ftn.informatika.jpa.model.Comment;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
@@ -32,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     private PostRepository postRepository;
 
     @Override
+    @Transactional
     public Comment addComment(String text, Integer userId, Integer postId) {
 
         User user = userRepository.findById(userId)
@@ -55,8 +57,10 @@ public class CommentServiceImpl implements CommentService {
 
         Comment comment = new Comment();
         comment.setText(text);
-        comment.setUser(user);
-        comment.setPost(post);
+        user.addComment(comment);
+        //comment.setUser(user);
+        //comment.setPost(post);
+        post.addComment(comment);
         comment.setCreationDateTime(LocalDateTime.now());
 
         return commentRepository.save(comment);

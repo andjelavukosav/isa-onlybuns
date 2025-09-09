@@ -11,7 +11,7 @@ import { ActivityTrendsComponent } from 'src/app/activity-trends/activity-trends
 import { ChatComponent } from 'src/app/chat/chat.component';
 import { FollowedUserPostComponent } from 'src/app/followed-user-post/followed-user-post.component';
 import { NearbyPostsMapComponent } from 'src/app/nearby-posts-map/nearby-posts-map.component';
-import { RegisteredUsersComponent } from 'src/app/registered-users/registered-users.component';
+import { RegisteredUsersComponent } from 'src/app/admin/components/registered-users/registered-users.component';
 import { roleGuard } from 'src/app/guards/role.guard';
 
 const routes: Routes = [
@@ -33,12 +33,11 @@ const routes: Routes = [
   {path: 'activity-trends', component: ActivityTrendsComponent},
   {path: 'chat', component: ChatComponent},
   {path: 'followed-user-post', component: FollowedUserPostComponent},
-  {path: 'registered-users',
-    component: RegisteredUsersComponent,
-    canActivate: [roleGuard],
-    data: { roles: ['ROLE_ADMIN']}
-  },
   {path: 'nearby-posts-map/:userId', component: NearbyPostsMapComponent},
+  {
+    path: 'admin-home',
+    loadChildren: () => import('../../admin/admin.module').then(m => m.AdminModule)
+  },
 ];
 
 @NgModule({

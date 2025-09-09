@@ -8,6 +8,7 @@ import javax.xml.crypto.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -49,6 +50,10 @@ public class Post implements Serializable {
 
     @Column(name = "MarkedForAd", nullable = false)
     private Boolean markedForAd = false;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Set<Comment> comments = new HashSet<>();
 
 
     public Post() {
@@ -148,4 +153,14 @@ public class Post implements Serializable {
     }
 
     public void setMarkedForAd(boolean markedForAd) { this.markedForAd = markedForAd; }
+
+    public void addComment(Comment comment){
+        this.comments.add(comment);
+        comment.setPost(this);
+    }
+
+    public void removeComment(Comment comment){
+        this.comments.remove(comment);
+        comment.setPost(null);
+    }
 }

@@ -1,5 +1,6 @@
 package rs.ac.uns.ftn.informatika.jpa.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.web.multipart.MultipartFile;
 import rs.ac.uns.ftn.informatika.jpa.model.Post;
 
@@ -69,5 +70,16 @@ public class PostDTO {
 
     public LocalDateTime getCreationDateTime() { return creationDateTime; }
 
+    @JsonIgnore
+    private byte[] imageBytes;
+
+    // Getter i setter
+    public byte[] getImageBytes() {
+        return imageBytes;
+    }
+
+    public void setImageBytes(byte[] imageBytes) {
+        this.imageBytes = imageBytes;
+    }
 
 }

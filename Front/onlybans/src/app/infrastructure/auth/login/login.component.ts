@@ -93,9 +93,9 @@ onSubmit() {
         if (userRole === 'ROLE_USER') {
           this.router.navigate(['/user-home']);
         } 
-        /* else if (userRole === 'ROLE_ADMIN') {
+        else if (userRole === 'ROLE_ADMIN') {
           this.router.navigate(['/admin-home']);
-        } */
+        }
         else {
           console.error('Unknown role:', userRole);
           this.router.navigate(['/home']);

@@ -47,6 +47,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("SELECT p FROM Post p WHERE p.id = :id")
     Post findByIdForUpdate(@Param("id") int id);
 
+    long countByCreationDateTimeBetween(LocalDateTime start, LocalDateTime end);
 
 }
 
