@@ -1,14 +1,15 @@
 package rs.ac.uns.ftn.informatika.jpa.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 
 @Configuration
 @EnableWebMvc
 public class WebConfig implements WebMvcConfigurer{
+
+    @Autowired
+    private LoggingInterceptor loggingInterceptor;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -23,5 +24,10 @@ public class WebConfig implements WebMvcConfigurer{
         // Mapiranje URL putanje "/images/**" na fajlove u folderu src/main/resources/images
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:uploads/images/");
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(loggingInterceptor);
     }
 }

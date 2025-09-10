@@ -9,7 +9,7 @@ import { AuthUser, UserDTO } from '../model/registered-user';
 import { AuthService } from '../service';
 import { ChangeDetectorRef } from '@angular/core';
 import { CommentService } from '../service/comment.service';
-import { CommentDTO } from '../model/commentDto';
+import { CommentDTO } from '../model/commentDTO';
 
 @Component({
   selector: 'app-post',

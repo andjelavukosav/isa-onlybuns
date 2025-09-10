@@ -30,13 +30,13 @@ export class PostService {
       formData.append('imageFile', imageFile);
     }
 
-    return this.http.post<Post>('http://localhost:8080/api/posts/create', formData).pipe(
+    return this.http.post<Post>(`${environment.apiHost}/posts/create`, formData).pipe(
       map(post => this.convertPostDate(post))
     );
   }
 
   getPosts(): Observable<PagedResults<Post>> {
-    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/all').pipe(
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/posts/all`).pipe(
       map(response => ({
         ...response,
         results: response.results.map(post => this.convertPostDate(post))
@@ -44,19 +44,19 @@ export class PostService {
   }
 
   getPostsWithoutSort(): Observable<PagedResults<Post>> {
-    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/allPosts');
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/posts/allPosts`);
   }
 
   getPostsLastMonth(): Observable<PagedResults<Post>> {
-    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/allPostsLastMonth');
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/` + 'posts/allPostsLastMonth');
   }
 
   getPostsMostPopular(): Observable<PagedResults<Post>> {
-    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/allPostsMostPopular');
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/` + 'posts/allPostsMostPopular');
   }
 
   getPostsMostPopularEver(): Observable<PagedResults<Post>> {
-    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/top10PostsMostPopular');
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/` + 'posts/top10PostsMostPopular');
   }
   getPostById(id: number): Observable<Post> {
     return this.http.get<Post>(`${environment.apiHost}/posts/${id}`).pipe(
@@ -79,11 +79,11 @@ export class PostService {
   }
 
   getLikeByPostIdAndUserId(postId: number, userId: number): Observable<boolean> {
-    return this.http.get<boolean>(`http://localhost:8080/api/likes/${postId}/${userId}`);
+    return this.http.get<boolean>(`${environment.apiHost}/likes/${postId}/${userId}`);
   }
 
   getLikesByPostId(postId: number): Observable<number> {
-    return this.http.get<number>(`http://localhost:8080/api/likes/countLikes/${postId}`);
+    return this.http.get<number>(`${environment.apiHost}/likes/countLikes/${postId}`);
   }
 
   unlikePost(postId: number): Observable<any> {
@@ -91,7 +91,7 @@ export class PostService {
   }
 
   getLikedPostIds(): Observable<number[]> {
-    return this.http.get<number[]>('http://localhost:8080/api/likes/liked-post-ids');
+    return this.http.get<number[]>(`${environment.apiHost}/likes/liked-post-ids`);
   }
 
   deletePost(postId: number): Observable<any> {
@@ -122,7 +122,7 @@ export class PostService {
 
 
   getNearbyPosts(latitude: number, longitude: number, radius: number = 100000) {
-    return this.http.get<any>(`http://localhost:8080/api/posts/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
+    return this.http.get<any>(`${environment.apiHost}/posts/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
   }
 
   getLikesFromPost(postId: number): Observable<UserDTO[]> {
@@ -147,7 +147,7 @@ export class PostService {
   }
   
   approvePost(postId: number): Observable<void> {
-    return this.http.put<void>(`http://localhost:8080/api/posts/${postId}/mark-for-ad`, {});
+    return this.http.put<void>(`${environment.apiHost}/posts/${postId}/mark-for-ad`, {});
   }
 
 }

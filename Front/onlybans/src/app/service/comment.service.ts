@@ -2,9 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../env/enviroment';
-import { PostComment } from '../model/comment';
 import { AuthService } from './auth.service';
-import { CommentDTO } from '../model/commentDto';
+import { CommentDTO } from '../model/commentDTO';
 
 @Injectable({
   providedIn: 'root'
