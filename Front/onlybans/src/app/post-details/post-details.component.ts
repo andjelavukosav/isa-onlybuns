@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PostService } from '../service/post.service';
 import { UserDTO } from '../model/registered-user';
 import { AuthService, UserService } from '../service';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { icon, latLng, marker, tileLayer, Map } from 'leaflet';
 
@@ -17,6 +17,7 @@ import { Location } from '../model/location.model';
 })
 export class PostDetailsComponent {
   post: Post | undefined;
+  postSubject: BehaviorSubject<Post | null> = new BehaviorSubject<Post | null>(null);
   currentUser: UserDTO | undefined ;
   whoamIResponse = {};
   isEditing: boolean = false; // Dodano za režim uređivanja
@@ -28,7 +29,7 @@ export class PostDetailsComponent {
   // Mapa koordinata
   map: Map | undefined;
   marker: any;  // Marker na mapi
-  location: Location = { latitude: 0, longitude: 0 }; // Početne koordinate
+  location: Location | null = null ; 
 
   // Opcije za mapu (centar i zoom nivo)
   options = {
@@ -49,8 +50,8 @@ export class PostDetailsComponent {
   ) {
     this.postForm = this.fb.group({
       description: [this.post?.description, [Validators.required, Validators.maxLength(255)]],
-      locationLatitude: [this.post?.location.latitude],
-      locationLongitude: [this.post?.location.longitude],
+      locationLatitude: [this.post?.location?.latitude],
+      locationLongitude: [this.post?.location?.longitude],
       image: [this.post?.imagePath] // Ako želite da preuzmete vrednost slike
     });
   }
@@ -64,6 +65,8 @@ export class PostDetailsComponent {
       this.postService.getPostById(+postId).subscribe(
         (post: Post) => {
           this.post = post;
+          console.log('Post je: ', post);
+          this.postSubject.next(post);
           this.fillForm(post);
         },
         (error) =>{
@@ -83,7 +86,9 @@ export class PostDetailsComponent {
 
       // Postavljanje markera sa postojećim koordinatama
       this.location = this.post.location;
-      this.setMarker(this.location.latitude, this.location.longitude);
+      if(this.location){
+        this.setMarker(this.location.latitude, this.location.longitude);
+      }
     }
   }
 
@@ -130,8 +135,8 @@ export class PostDetailsComponent {
     if (this.postForm) {
       this.postForm.patchValue({
         description: post.description,
-        locationLatitude: post.location.latitude,
-        locationLongitude: post.location.longitude
+        locationLatitude: post.location?.latitude ?? null,
+        locationLongitude: post.location?.longitude ?? null
       });
     }
   }
@@ -170,14 +175,16 @@ export class PostDetailsComponent {
       console.log('User is undifined.');
       return;
     }
-    this.postService.deletePost(post.id, post.user.id).subscribe({
+    this.postService.deletePost(post.id).subscribe({
       next: () => {
         alert('Post deleted successfully.');
-        this.router.navigate(['/user-home']);
+        console.log('Navigating to profile of user ID:', this.currentUser?.id);
+
+        this.router.navigate([`/profile/${this.currentUser?.id}`]);
       },
-      error: ()=> {
-        alert('Post deleted successfully.');
-        this.router.navigate(['/user-home']);      }
+      error: (err)=> {
+        alert('Failed to delete the post.');
+      }
     }
       
     );
@@ -202,21 +209,30 @@ export class PostDetailsComponent {
               description: this.postForm.value.description,
               likeCount: this.post.likeCount,
               imagePath: this.post.imagePath,
-              creationDateTime: new Date().toISOString().slice(0, 16), 
-              location: this.post.location,
+              creationDateTime: new Date(), 
+              location: {
+                latitude: this.postForm.value.locationLatitude ?? null,  // Postavljanje na null ako nije postavljeno
+                longitude: this.postForm.value.locationLongitude ?? null  // Postavljanje na null ako nije postavljeno
+              },
               user: user  // Dodajte kompletne podatke o korisniku
             };
   
             this.postService.updatePost(updatedPost, this.selectedImage).subscribe(
               (response) => {
                 this.post = response;
+
                 this.isEditing = false;
                 alert('Post updated successfully!');
+                console.log('Updated post: ', response);
                 // Resetovanje forme i čišćenje slike
                 this.postForm.reset(); // Resetuje formu
                 this.selectedImage = null; // Briše selektovanu sliku
                 this.previewUrl = null; // Uklanja preview slike
                 this.marker = null; // Uklanja marker sa mape
+               
+                this.postSubject.next(response);
+
+               
                 if (this.map) {
                   this.map.eachLayer((layer) => {
                     if ((layer as any).options.icon) {
@@ -243,6 +259,8 @@ export class PostDetailsComponent {
       alert('Post form is not valid or post does not exist.');
     }
   }
+
+  
   
   
 }

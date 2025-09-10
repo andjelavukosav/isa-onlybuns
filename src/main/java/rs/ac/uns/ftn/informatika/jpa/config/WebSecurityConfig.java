@@ -19,7 +19,15 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import rs.ac.uns.ftn.informatika.jpa.security.auth.RestAuthenticationEntryPoint;
 import rs.ac.uns.ftn.informatika.jpa.security.auth.TokenAuthenticationFilter;
+import rs.ac.uns.ftn.informatika.jpa.service.UserActivityTracker;
 import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
+
 
 import rs.ac.uns.ftn.informatika.jpa.service.impl.CustomUserDetailsImpl;
 
@@ -49,7 +57,6 @@ public class WebSecurityConfig {
     }
 
 
-
     @Autowired
     private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
@@ -62,22 +69,51 @@ public class WebSecurityConfig {
     @Autowired
     private TokenUtils tokenUtils;
 
+    @Autowired
+    private UserActivityTracker userActivityTracker;
+
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        List<String> allowedOrigins = Arrays.asList("http://localhost:4200");
+        List<String> allowedMethods = Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS");
+        List<String> allowedHeaders = Arrays.asList("Authorization", "Content-Type");
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedMethods(allowedMethods);
+        configuration.setAllowedHeaders(allowedHeaders);
+        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(true); // 🔥 VRLO VAŽNO
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.cors().configurationSource(corsConfigurationSource());
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
         http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint);
-        http.authorizeRequests().antMatchers("/auth/**").permitAll()		// /auth/**
+        http.csrf().disable()
+                .authorizeRequests().antMatchers("/auth/**").permitAll()		// /auth/**
                 .antMatchers("/h2-console/**").permitAll()	// /h2-console/** ako se koristi H2 baza)
                 .antMatchers("/api/foo").permitAll()		// /api/foo
                 .antMatchers("/api/posts/all").permitAll()
                 .antMatchers("/api/posts/{postId}").permitAll()
                 .antMatchers("/api/users/{userId}").permitAll()
+                .antMatchers("/api/likes/countLikes/{postId}").permitAll()
+                .antMatchers("/api/likes/{postId}/{userId}").permitAll()
                 .antMatchers("/images/**").permitAll()
+                .antMatchers("/ws/**").permitAll()
+                .antMatchers("/api/queue/manual").permitAll()
+                .antMatchers("/api/posts/user/{userId}").permitAll() // Dodato: omogućava pristup /api/posts/user/{userId} bez autentifikacije
+                .antMatchers("/actuator/**").permitAll()
+                .antMatchers("/api/ads/queue").permitAll()
                 .anyRequest().authenticated().and()
                 .cors().and()
 
-                .addFilterBefore(new TokenAuthenticationFilter(tokenUtils,  userDetailsService()), BasicAuthenticationFilter.class);
+                .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, userDetailsService(), userActivityTracker), BasicAuthenticationFilter.class);
 
         http.csrf().disable();
 
@@ -96,6 +132,8 @@ public class WebSecurityConfig {
                         "/**/*.html", "/**/*.css", "/**/*.js", "/images/**");
 
     }
+
+
 
     /*
     @Bean

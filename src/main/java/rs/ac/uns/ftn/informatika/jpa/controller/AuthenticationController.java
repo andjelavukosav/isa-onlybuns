@@ -1,5 +1,8 @@
 package rs.ac.uns.ftn.informatika.jpa.controller;
 
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RateLimiter;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -9,18 +12,28 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 import rs.ac.uns.ftn.informatika.jpa.dto.JwtAuthenticationRequestDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
 import rs.ac.uns.ftn.informatika.jpa.dto.UserTokenStateDTO;
-import rs.ac.uns.ftn.informatika.jpa.exception.ResourceConflictException;
+import rs.ac.uns.ftn.informatika.jpa.exception.DuplicateResourceException;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
+import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
 import rs.ac.uns.ftn.informatika.jpa.service.EmailSenderService;
+import rs.ac.uns.ftn.informatika.jpa.service.RateLimiterService;
 import rs.ac.uns.ftn.informatika.jpa.service.UserService;
+import rs.ac.uns.ftn.informatika.jpa.util.LoggedUserTracker;
 import rs.ac.uns.ftn.informatika.jpa.util.TokenUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 
 @RestController
 @RequestMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -38,61 +51,97 @@ public class AuthenticationController {
     @Autowired
     private EmailSenderService emailService;
 
+    @Autowired
+    private UserDTOMapper userDTOMapper;
+    
+    @Autowired
+    private RateLimiterService rateLimiterService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private LoggedUserTracker loggedUserTracker;
+
+    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationController.class);
+
 
     @PostMapping("/login")
     public ResponseEntity<UserTokenStateDTO> createAuthenticationToken(
-            @RequestBody JwtAuthenticationRequestDTO authenticationRequest, HttpServletResponse response) {
+            @RequestBody JwtAuthenticationRequestDTO authenticationRequest,
+            HttpServletRequest request) throws Throwable {
 
-        // Authenticate using email and password
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(), authenticationRequest.getPassword())
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Obtain the user object from the authentication
-        User user = (User) authentication.getPrincipal();
-
-        // Check if the user is enabled (i.e., account is verified)
-        if (!user.isEnabled()) {
-            // If user is not enabled, return a forbidden response
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new UserTokenStateDTO("Account not verified. Please check your email for activation link.", 0));
-        }
-
-        // Generate the JWT using the user's email
-        String jwt = tokenUtils.generateToken(user.getEmail());
-        int expiresIn = tokenUtils.getExpiredIn();
-
-        return ResponseEntity.ok(new UserTokenStateDTO(jwt, expiresIn));
-    }
-
-
-
-
-    @PostMapping("/signup")
-    public ResponseEntity<String> addUser(@RequestBody UserDTO userRequest) {
-        User existUser = this.userService.findByEmail(userRequest.getEmail());
-
-        if (existUser != null) {
-            // Return a response with a conflict message if the email already exists
-            return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
-        }
-
-        // Continue with saving the new user if email doesn't exist
-        userRequest.setEnabled(false);
-        User user = this.userService.save(userRequest);
-
-        String activationLink = "http://localhost:8080/auth/verify?email=" + user.getEmail();
+        String ipAddress = request.getRemoteAddr();
+        RateLimiter rateLimiter = rateLimiterService.getRateLimiter(ipAddress);
 
         try {
-            emailService.sendVerificationEmail(userRequest,activationLink);
-        }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+            return RateLimiter.decorateCheckedSupplier(rateLimiter, () -> {
+                // Logika autentifikacije
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                authenticationRequest.getEmail(),
+                                authenticationRequest.getPassword()
+                        )
+                );
 
-        return new ResponseEntity<>("User created successfully", HttpStatus.CREATED);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                User user = (User) authentication.getPrincipal();
+
+
+                Date now = new Date();
+                long timeWithoutMillis = (now.getTime() / 1000) * 1000;
+                user.setLastLoginDate(new Date(timeWithoutMillis));
+                userRepository.save(user);
+
+                String jwt = tokenUtils.generateToken(user.getId(), user.getEmail(), user.getUsername(), user.getRoles());
+                int expiresIn = tokenUtils.getExpiredIn();
+
+                loggedUserTracker.userLoggedIn(user.getEmail());
+
+                return ResponseEntity.ok(new UserTokenStateDTO(jwt, expiresIn));
+            }).apply(); // Koristimo apply() za rukovanje CheckedSupplier
+        }
+        catch(RequestNotPermitted e){
+            LOG.warn("Too many login attempts from IP: {}", ipAddress);
+            System.out.println("Too many login attempts from IP: " + ipAddress); // Ispis u konzolu
+
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(new UserTokenStateDTO("Too many login attempts. Please try again later.", 0));
+
+        }
+        /*catch (Throwable throwable) {
+            // Rukovanje izuzetkom
+            if (throwable instanceof RequestNotPermitted) {
+                // Logovanje kada je premašeno ograničenje
+                LOG.warn("Too many login attempts from IP: {}", ipAddress);
+                System.out.println("Too many login attempts from IP: " + ipAddress); // Ispis u konzolu
+
+                return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                        .body(new UserTokenStateDTO("Too many login attempts. Please try again later.", 0));
+            }
+            throw new RuntimeException(throwable); // Ili prilagodite rukovanje
+        }*/
     }
+
+    @PostMapping("/signup")
+    public ResponseEntity<Map<String, String>> addUser(@RequestBody UserDTO userRequest) throws MessagingException, InterruptedException {
+
+            // Nastavi sa čuvanjem korisnika ako email ne postoji
+            userRequest.setEnabled(false);
+            Date now = new Date();
+            long timeWithoutMillis = (now.getTime() / 1000) * 1000;
+            userRequest.setLastPasswordResetDate(new Date(timeWithoutMillis));
+            User user = this.userService.save(userRequest);
+
+            String activationLink = "http://localhost:8080/auth/verify?email=" + user.getEmail();
+            emailService.sendVerificationEmail(userRequest, activationLink);
+            Map<String, String> successResponse = new HashMap<>();
+            successResponse.put("message", "User created successfully");
+            return new ResponseEntity<>(successResponse, HttpStatus.CREATED);
+
+    }
+
 
     @GetMapping(value = "/verify")
     public ResponseEntity<String> verifyUser(@RequestParam("email") String email) {
@@ -102,7 +151,7 @@ public class AuthenticationController {
         // Check if the user exists
         if (user != null) {
             // Map the User entity to UserDTO
-            UserDTO userDTO = UserDTOMapper.fromUsertoDTO(user);
+            UserDTO userDTO = userDTOMapper.fromUsertoDTO(user);
 
             // Update the verification status in the UserDTO
             userDTO.setEnabled(true);
@@ -116,6 +165,23 @@ public class AuthenticationController {
 
         // Return a failure response if the user is not found
         return new ResponseEntity<>("Unsuccessful Activation", HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            String email = tokenUtils.getUsernameFromToken(token); // Preuzmi email iz tokena
+
+            loggedUserTracker.userLoggedOut(email);
+            System.out.println(">> KORISNIK SE ODJAVIO: " + email);
+
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.badRequest().body("Missing or invalid Authorization header");
     }
 
 }

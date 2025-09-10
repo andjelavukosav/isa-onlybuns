@@ -1,29 +1,52 @@
 package rs.ac.uns.ftn.informatika.jpa.service.impl;
 
-
+import com.google.common.hash.BloomFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import rs.ac.uns.ftn.informatika.jpa.dto.AddressDTO;
-import rs.ac.uns.ftn.informatika.jpa.dto.UserDTO;
+import org.springframework.transaction.annotation.Transactional;
+import rs.ac.uns.ftn.informatika.jpa.dto.*;
+import rs.ac.uns.ftn.informatika.jpa.exception.DuplicateResourceException;
+import rs.ac.uns.ftn.informatika.jpa.mapper.PostDTOMapper;
 import rs.ac.uns.ftn.informatika.jpa.mapper.UserDTOMapper;
-import rs.ac.uns.ftn.informatika.jpa.model.Address;
-import rs.ac.uns.ftn.informatika.jpa.model.Post;
-import rs.ac.uns.ftn.informatika.jpa.model.Role;
-import rs.ac.uns.ftn.informatika.jpa.model.User;
+import rs.ac.uns.ftn.informatika.jpa.model.*;
+import rs.ac.uns.ftn.informatika.jpa.model.*;
+import rs.ac.uns.ftn.informatika.jpa.pagedResults.PagedResults;
 import rs.ac.uns.ftn.informatika.jpa.repository.AddressRepository;
+import rs.ac.uns.ftn.informatika.jpa.repository.PostRepository;
 import rs.ac.uns.ftn.informatika.jpa.repository.UserRepository;
-import rs.ac.uns.ftn.informatika.jpa.service.RoleService;
-import rs.ac.uns.ftn.informatika.jpa.service.UserService;
+import rs.ac.uns.ftn.informatika.jpa.service.*;
+import rs.ac.uns.ftn.informatika.jpa.specification.UserSpecification;
+import rs.ac.uns.ftn.informatika.jpa.util.LoggedUserTracker;
 
-import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import java.io.IOException;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.PersistenceContext;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
+    @Autowired
+    private BloomFilter<String> usernameBloomFilter;
 
     @Autowired
     private UserRepository userRepository;
@@ -33,10 +56,33 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleService roleService;
+
     @Autowired
     private AddressRepository addressRepository;
     @Autowired
     private UserDTOMapper userDTOMapper;
+
+    @Autowired
+    private PostDTOMapper postDTOMapper;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private GeocodingService geocodingService;
+
+    @Autowired
+    private LikeService likeService;
+
+    @PersistenceContext
+    private EntityManager entityManagerr;
+
+    @Autowired
+    private EmailSenderService emailSenderService;
+
+    @Autowired
+    private LoggedUserTracker loggedUserTracker;
+
 
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
@@ -56,63 +102,116 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
+    @Transactional
     @Override
     public User save(UserDTO userRequest) {
-        // Create a new User entity
-        User u = new User();
-        u.setUsername(userRequest.getUsername());
+        try {
 
-        // Encrypt password
-        u.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-
-        // Set user details
-        u.setFirstName(userRequest.getFirstname());
-        u.setLastName(userRequest.getLastname());
-        u.setEnabled(userRequest.isEnabled());
-        u.setEmail(userRequest.getEmail());
-
-        // Get the roles and assign to user
-        List<Role> roles = roleService.findByName("ROLE_USER");
-        u.setRoles(roles);
-
-        // Handle address
-        Address address = new Address();
-
-        // If address data exists in the UserDTO, set it
-        if (userRequest.getAddress() != null) {
-            AddressDTO addressDTO = userRequest.getAddress();
-
-            // Check if the address already exists in the database (based on some unique criteria like country, city, etc.)
-            address = addressRepository.findByCountryAndCityAndStreetAndStreetNumber(
-                    addressDTO.getCountry(),
-                    addressDTO.getCity(),
-                    addressDTO.getStreet(),
-                    addressDTO.getStreetNumber()
-            );
-
-            // If address doesn't exist, create a new one
-            if (address == null) {
-                address = new Address();
-                address.setCountry(addressDTO.getCountry());
-                address.setCity(addressDTO.getCity());
-                address.setStreet(addressDTO.getStreet());
-                address.setStreetNumber(addressDTO.getStreetNumber());
-                addressRepository.save(address); // Save new address
+            Optional<User> existingUserByEmail = userRepository.findUserByEmailOptional(userRequest.getEmail());
+            if (existingUserByEmail.isPresent()) {
+                throw new DuplicateResourceException("Email address already exists.");
             }
 
-            // Set the address for the user
-            u.setAddress(address);
+            if (usernameBloomFilter.mightContain(userRequest.getUsername())) {
+                Optional<User> existingUserByUsername = userRepository.findByUsernameOptional(userRequest.getUsername());
+                if (existingUserByUsername.isPresent()) {
+                    throw new DuplicateResourceException("Username already exists.");
+                }
+            }
+
+            // Create new user entity
+            User u = new User();
+            u.setUsername(userRequest.getUsername());
+            u.setPassword(passwordEncoder.encode(userRequest.getPassword())); // Encrypt password
+            u.setFirstName(userRequest.getFirstname());
+            u.setLastName(userRequest.getLastname());
+            u.setEnabled(userRequest.isEnabled());
+            u.setEmail(userRequest.getEmail());
+            u.setLastPasswordResetDate(userRequest.getLastPasswordResetDate());
+
+            // Assign default role
+            List<Role> roles = roleService.findByName("ROLE_USER");
+            u.setRoles(roles);
+
+            // Handle address if present
+            if (userRequest.getAddress() != null) {
+                AddressDTO addressDTO = userRequest.getAddress();
+                Address address;
+
+                if (addressDTO.getId() > 0) {
+                    // Try to find address in database
+                    address = addressRepository.findById(addressDTO.getId()).orElse(null);
+
+                    if (address != null) {
+                        // Update existing address
+                        address.setCountry(addressDTO.getCountry());
+                        address.setCity(addressDTO.getCity());
+                        address.setStreet(addressDTO.getStreet());
+                        address.setStreetNumber(addressDTO.getStreetNumber());
+                    } else {
+                        // Create new address
+                        address = new Address();
+                        address.setCountry(addressDTO.getCountry());
+                        address.setCity(addressDTO.getCity());
+                        address.setStreet(addressDTO.getStreet());
+                        address.setStreetNumber(addressDTO.getStreetNumber());
+                    }
+                } else {
+                    // ID not set, create new address
+                    address = new Address();
+                    address.setCountry(addressDTO.getCountry());
+                    address.setCity(addressDTO.getCity());
+                    address.setStreet(addressDTO.getStreet());
+                    address.setStreetNumber(addressDTO.getStreetNumber());
+                }
+
+                String fullAddress = address.getStreet() + " " + address.getStreetNumber() + ", "
+                        + address.getCity() + ", "
+                        + address.getCountry();
+
+                try {
+                    Location location = geocodingService.getCoordinates(fullAddress);
+                    address.setLocation(location);
+                } catch (IOException e) {
+                    System.err.println("Error during address geocoding: " + fullAddress + ". Details: " + e.getMessage());
+                }
+
+                // Save address in database
+                address = addressRepository.save(address);
+
+                // Assign address to user
+                u.setAddress(address);
+            }
+
+            // Attempt to save the user — if uniqueness constraint fails, it will throw an exception
+            User savedUser = this.userRepository.save(u);
+
+            // Add the username to the Bloom filter
+            usernameBloomFilter.put(savedUser.getUsername());
+
+            return savedUser;
+
+        } catch (DataIntegrityViolationException e) {
+            String errorMessage = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+
+            if (errorMessage.contains("uk_user_email") || errorMessage.contains("email")) {
+                throw new DuplicateResourceException("Email address already exists.", e);
+            } else if (errorMessage.contains("uk_user_username") || errorMessage.contains("username")) {
+                throw new DuplicateResourceException("Username already exists.", e);
+            }
+
+            throw e; // Re-throw other unhandled integrity issues
         }
 
-        // Save the user and return the saved entity
-        return this.userRepository.save(u);
     }
+
 
     public User updateUser(int id, UserDTO userRequest) throws AccessDeniedException {
         // Find the user by ID
-        User existingUser = userRepository.findById(id).orElseThrow(() -> new AccessDeniedException("User not found"));
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new AccessDeniedException("User not found"));
 
-        // Update the user fields
+        // Update user fields
         existingUser.setUsername(userRequest.getUsername());
 
 
@@ -124,32 +223,48 @@ public class UserServiceImpl implements UserService {
         existingUser.setEnabled(userRequest.isEnabled());
         existingUser.setEmail(userRequest.getEmail());
 
-        // Update roles if necessary
-        // If roles need to be updated, we can add logic to handle that. For simplicity, we retain the same role.
-        // List<Role> roles = roleService.findByName("ROLE_USER");
-        // existingUser.setRoles(roles);
-
-        // Handle address
+        // Update address if provided in the request
         if (userRequest.getAddress() != null) {
             AddressDTO addressDTO = userRequest.getAddress();
-            Address address = addressRepository.findByCountryAndCityAndStreetAndStreetNumber(
-                    addressDTO.getCountry(),
-                    addressDTO.getCity(),
-                    addressDTO.getStreet(),
-                    addressDTO.getStreetNumber()
-            );
+            Address address = null;
 
-            // If address doesn't exist, create a new one
-            if (address == null) {
-                address = new Address();
-                address.setCountry(addressDTO.getCountry());
-                address.setCity(addressDTO.getCity());
-                address.setStreet(addressDTO.getStreet());
-                address.setStreetNumber(addressDTO.getStreetNumber());
-                addressRepository.save(address); // Save new address
+            if (addressDTO.getId() > 0) {
+                // Ako ID postoji u request-u, pokušaj pronaći adresu u bazi
+                address = addressRepository.findById(addressDTO.getId()).orElse(null);
             }
 
-            // Update the user's address
+            if (address == null) {
+                // Ako adresa nije pronađena (ili ID nije dat), koristi postojeću adresu korisnika
+                address = existingUser.getAddress();
+            }
+
+            if (address == null) {
+                // Ako korisnik nema adresu i nije pronađena u bazi, kreiraj novu
+                address = new Address();
+            }
+
+            // Ažuriranje podataka o adresi
+            address.setCountry(addressDTO.getCountry());
+            address.setCity(addressDTO.getCity());
+            address.setStreet(addressDTO.getStreet());
+            address.setStreetNumber(addressDTO.getStreetNumber());
+
+            String fullAddress = address.getStreet() + " " + address.getStreetNumber() + ", "
+                    + address.getCity() + ", "
+                    + address.getCountry();
+
+            try {
+                Location location = geocodingService.getCoordinates(fullAddress);
+                address.setLocation(location);
+            } catch (IOException e) {
+                e.printStackTrace(); // Bolja obrada greške može uključivati logovanje
+            }
+
+
+            // Sačuvaj adresu u bazi
+            address = addressRepository.save(address);
+
+            // Postavi ažuriranu ili novu adresu korisniku
             existingUser.setAddress(address);
         }
 
@@ -158,20 +273,213 @@ public class UserServiceImpl implements UserService {
     }
 
 
+
     public List<Post> getAllPostsByUser(int userId) {
         return userRepository.findPostsByUserId(userId);
     }
 
     @Override
-    public List<UserDTO> findUsersByRoleExcludingAdmin(int adminId) {
-        List<User> users =  userRepository.findAllByRoleNameExcludingId("ROLE_USER", adminId);
+    @Transactional(readOnly = true)
+    public Page<UserDTO> getUsersExcludingAdmin(int adminId, Pageable pageable) {
 
-        return users.stream().map(user -> new UserDTO(user)).collect(Collectors.toList());
+        Page<User> userPage =  userRepository.getUsersByRoleNameExcludingId("ROLE_USER", adminId, pageable);
+
+        List<UserDTO> usersOnCurrentPage = userDTOMapper.toUserDTOList(userPage.getContent());
+
+        return new PageImpl<>(usersOnCurrentPage, pageable, userPage.getTotalElements());
     }
 
     @Override
-    public List<UserDTO> searchUsers(String firstName, String lastName, String email, Long minPosts, Long maxPosts, int adminId, Sort sort) {
-        return UserDTOMapper.toUserDTOList(userRepository.searchUserBy(firstName, lastName, email, minPosts, maxPosts, adminId, sort));
+    @Transactional(readOnly = true)
+    public Page<UserDTO> searchUsers(UserSearchCriteria criteria, Pageable pageable, int adminId) {
+
+        if(criteria.isEmpty()){
+            System.out.println("CRITERIA IS EMPTY ");
+            return getUsersExcludingAdmin(adminId, pageable);
+        }
+
+        Specification<User> userSpecification = new UserSpecification(criteria);
+
+        Specification<User> adminExclusion = (root, query, builder) -> builder.notEqual(root.get("id"), adminId);
+
+        Specification<User> concludedSpecification = Specification.where(userSpecification).and(adminExclusion);
+
+        Page<User> usersPage = userRepository.findAll(concludedSpecification, pageable);
+
+        List<UserDTO> usersOnPage = userDTOMapper.toUserDTOList(usersPage.getContent());
+
+        return new PageImpl<>(usersOnPage, pageable, usersPage.getTotalElements());
     }
+
+    @Override
+    public List<UserDTO> findAllContainingUsername(String username){
+        return userDTOMapper.toUserDTOList(userRepository.findByUsernameContainingIgnoreCase(username));
+    }
+
+    @Override
+    @Transactional
+    public PagedResults<PostDTO> getFollowingPosts(int userId) {
+        List<User> followings = getFollowing(userId);
+
+        if(followings.isEmpty()){
+            return new PagedResults<>(Collections.emptyList(), 0);
+        }
+
+        List<PostDTO> posts = followings.stream()
+                .flatMap(followed -> followed.getPosts().stream())
+                .sorted(Comparator.comparing(Post::getCreationDateTime).reversed())
+                .map(post -> {
+                    boolean isLiked = likeService.findLikeByPostIdAndUserId(post.getId(), userId) != null ;
+
+                    PostDTO postDTO = new PostDTO(post);
+                    postDTO.isLikedByCurrentUser = isLiked;
+                    return postDTO;
+                })
+                .collect(Collectors.toList());
+
+        return new PagedResults<>(posts, posts.size());
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResults<UserDTO> getUserFollowing(int userId) {
+        List<User> followingUsers = getFollowing(userId);
+
+        if(followingUsers.isEmpty()){
+            return new PagedResults<>(Collections.emptyList(), 0);
+        }
+
+        List<UserDTO> followingUsersDto = userDTOMapper.toUserDTOList(followingUsers);
+
+        return new PagedResults<>(followingUsersDto, followingUsersDto.size());
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResults<UserDTO> getUserFollowers(int userId) {
+        List<User> followers = getFollowers(userId);
+
+        if(followers.isEmpty()){
+            return new PagedResults<>(Collections.emptyList(), 0);
+        }
+
+        List<UserDTO> followersDto = userDTOMapper.toUserDTOList(followers);
+
+        return new PagedResults<>(followersDto, followersDto.size());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PagedResults<PostDTO> getPostsByUser(int userId) {
+        User user = this.findById(userId);
+
+        List<PostDTO> posts = user.getPosts()
+                .stream()
+                .sorted(Comparator.comparing(Post::getCreationDateTime).reversed())
+                .map(PostDTO :: new)
+                .collect(Collectors.toList());
+
+        return new PagedResults<>(posts, posts.size());
+    }
+
+
+    private List<User> getFollowing(int userId){
+        User user = this.findById(userId);
+
+        return user.getFollowing()
+                .stream()
+                .map(Follow::getFollowed)
+                .collect(Collectors.toList());
+    }
+
+    private List<User> getFollowers(int userId){
+        User user = this.findById(userId);
+
+        return user.getFollowers() //mappedBy = "followed"
+                .stream()
+                .map(Follow :: getFollower)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public User updateUserPassword(int userId, String newPassword) throws Exception {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        Date now = new Date();
+        long timeWithoutMillis = (now.getTime() / 1000) * 1000;
+        user.setLastPasswordResetDate(new Date(timeWithoutMillis));
+        userRepository.save(user);
+        entityManagerr.flush(); // ⬅️ Forsira upis u bazu odmah
+
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found after update"));
+    }
+
+    @Override
+    public boolean verifyPassword(int userId, String currentPassword) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional == null) {
+            throw new RuntimeException("User not found.");
+        }
+
+        User user = userOptional.get();
+        return passwordEncoder.matches(currentPassword, user.getPassword());
+    }
+
+    @Override
+    //@Scheduled(fixedRate = 60000) // svakog minuta
+    @Scheduled(cron = "0 0 10 * * *") // svaki dan u 10h
+    public void sendInactivityNotificationsToUsers() {
+        try {
+            System.out.println("Running scheduled task...");
+            // 7 dana u milisekundama = 7 * 24 * 60 * 60 * 1000 = 604800000
+            long sevenDaysInMillis = 7 * 24 * 60 * 60 * 1000L;
+            Set<String> inactiveEmails = loggedUserTracker.getUsersLoggedOutLongerThan(sevenDaysInMillis);
+            // Pronađi sve korisnike koji su izlogovani duže od 1 minut
+            //Set<String> inactiveEmails = loggedUserTracker.getUsersLoggedOutLongerThan(60000);
+
+            for (String email : inactiveEmails) {
+                User user = userRepository.findByEmail(email);
+                System.out.println("Usao...");
+
+                if (user != null) {
+                    String content = generateSummary(user);
+                    emailSenderService.sendSummaryEmail(user.getEmail(), content); // asinhrono slanje
+                    System.out.println("Sent inactivity notification to: " + user.getEmail());
+                }
+            }
+
+        } catch (Exception e) {
+            System.err.println("Exception in scheduled task: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private String generateSummary(User user) {
+        return "Hello " + user.getUsername() + ",\n\n"
+                + "Here's your weekly activity summary on Onlybuns:\n"
+                + "📣 New followers: " + user.getFollowersCount() + "\n"
+                + "📝 Posts: " + user.getPostsCount() + "\n"
+                //+ "❤️ Likes: " + user.getLikesCount() + "\n\n"
+                + "Come back to Onlybuns and see what you've missed!";
+    }
+    @Override
+    public List<User> findAllByIds(List<Integer> ids){
+        return this.userRepository.findAllByIdIn(ids);
+    }
+
+    @Override
+    @Transactional
+    public void deleteInactiveUsersOlderThan(LocalDateTime dateTime) {
+        List<User> inactiveUsers = userRepository.findByEnabledFalseAndCreatedAtBefore(dateTime);
+        userRepository.deleteAll(inactiveUsers);
+        log.debug("Deleted {} inactive users older than 7 day.", inactiveUsers.size());
+    }
+
 
 }

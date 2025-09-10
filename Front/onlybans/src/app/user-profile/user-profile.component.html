@@ -1,11 +1,90 @@
-<div *ngIf="user">
-    <h1>{{ user.username }}'s Profile</h1>
-    <p><strong>Username:</strong> {{ user.username }}</p>
-    <p><strong>Email:</strong> {{ user.email }}</p>
-    <!-- Add any other user information you want to display -->
+<div *ngIf="user" class="profile-container">
+  <!-- Profilna sekcija -->
+  <div class="profile-header">
+    <h1>{{ user.username }}</h1>
+    <app-user-profile-details
+          [loggedInUser]="currentUser"
+          [user]="user"
+          [userId]="userId"
+        ></app-user-profile-details>
   </div>
-  
-  <div *ngIf="!user">
-    <p>Loading user data...</p>
+
+ 
+  <!-- Main Layout -->
+  <div class="profile-content">
+    <!-- Left Column: About User -->
+    <div class="profile-left">
+     <h2 class="profile-section-title">About user</h2>
+
+      <div class="user-info">
+        <div class="info-item">
+          <label>First Name:</label>
+          <span *ngIf="!editing">{{ user.firstname }}</span>
+          <input *ngIf="editing" [(ngModel)]="editableUser.firstname" />
+        </div>
+        <div class="info-item">
+          <label>Last Name:</label>
+          <span *ngIf="!editing">{{ user.lastname }}</span>
+          <input *ngIf="editing" [(ngModel)]="editableUser.lastname" />
+        </div>
+        <div class="info-item">
+          <label>Username:</label>
+          <span>{{ user.username }}</span>
+        </div>
+        <div class="info-item">
+          <label>Email:</label>
+          <span>{{ user.email }}</span>
+        </div>
+        <div class="info-item">
+          <label>Address:</label>
+          <span *ngIf="!editing">
+            {{ user.address.street }} {{ user.address.streetNumber }},
+            {{ user.address.city }}, {{ user.address.country }}
+          </span>
+          <div *ngIf="editing">
+            <input placeholder="Street" [(ngModel)]="editableUser.address.street" />
+            <input placeholder="Street Number" [(ngModel)]="editableUser.address.streetNumber" />
+            <input placeholder="City" [(ngModel)]="editableUser.address.city" />
+            <input placeholder="Country" [(ngModel)]="editableUser.address.country" />
+          </div>
+        </div>
+        
+        <!-- Ovde ubaciš deo za promenu lozinke -->
+        <div *ngIf="editing" class="change-password-section">
+          <h3>Change Password</h3>
+
+          <!-- Polje za unos stare lozinke, prikazuje se samo ako još nije potvrđena -->
+          <div class="password-field-group" *ngIf="!oldPasswordVerified">
+            <input type="password" placeholder="Enter new password" [(ngModel)]="currentPasswordInput" />
+            <button (click)="verifyOldPassword()">Verify</button>
+            <div class="error" *ngIf="passwordErrorMessage">{{ passwordErrorMessage }}</div>
+          </div>
+
+          <!-- Ako je stara lozinka potvrđena, prikaži dva polja za novu lozinku -->
+          <div *ngIf="oldPasswordVerified">
+            <label>New Password:</label>
+            <input type="password" [(ngModel)]="newPassword" />
+            <label>Confirm New Password:</label>
+            <input type="password" [(ngModel)]="confirmPassword" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Dugme Edit samo ako je isti korisnik -->
+      <div *ngIf="currentUserId === userId">
+        <button *ngIf="!editing" (click)="startEditing()">Edit</button>
+        <button *ngIf="editing" (click)="saveChanges()">Save</button>
+        <button *ngIf="editing" (click)="cancelEditing()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="profile-right">
+     <h2 class="profile-section-title">Posts</h2>
+      <div class="posts-grid">
+        <app-post [inputPosts]="posts"></app-post>
+      </div>
+    </div>
   </div>
-  
+</div>
+    
+ 

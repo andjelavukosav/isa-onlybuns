@@ -1,0 +1,42 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh; /* Koristimo vh za punu visinu viewport-a */
+  width: 100vw;  /* Koristimo vw za punu širinu viewport-a */
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden; /* Sprečava skrolovanje na nivou body-ja */
+}
+
+.map-container {
+  height: calc(100vh - 40px); /* Visina viewport-a umanjena za padding */
+  width: calc(100vw - 40px);  /* Širina viewport-a umanjena za padding */
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f5f7fa;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Sprečava skrolovanje unutar map-container-a */
+}
+
+.map-title-box {
+  background-color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+#map {
+  flex-grow: 1;
+  height: 0; /* Početna visina 0 */
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #ddd;
+  overflow: hidden;
+}

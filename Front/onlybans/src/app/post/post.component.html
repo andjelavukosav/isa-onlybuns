@@ -1,45 +1,90 @@
-<div id="post-management" style="display: flex; flex-wrap: wrap; gap: 20px;">
-  <div *ngFor="let p of post"
-        class="post-card"
-        [routerLink]="['/post', p.id]"
-        style="border: 1px solid #ccc;
-        border-radius: 8px; padding: 16px; width: 300px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-    <div class="post-header">
-      <strong>
-        <a [routerLink]="['/profile',p.user?.id]"
-            (click)="$event.stopPropagation()"
-        style="text-decoration: none; color: #007bff;">
-        
-          {{ p.usernameDisplay }}
-        </a>
-      </strong>
-      <span style="float: right; color: #888;">{{ p.creationDateTime | date:'short' }}</span>
-    </div>
-    <div class="post-image" style="text-align: center; margin: 16px 0;">
-      <img *ngIf="p.imagePath" [src]="p.imagePath" alt="Post Image" style="max-width: 100%; border-radius: 8px;">
-    </div>
-    
-    <div class="post-content">
-      <p>{{ p.description }}</p>
-    </div>
-    <div class="post-footer" style="color: #888; font-size: 0.9em;">
-      <div style="margin-top: 10px;">
-        <!-- Like button with click event -->
-        <button (click)="likePost(p)" (click)="$event.stopPropagation()" style="background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-          Like
-        </button>
-        <span style="margin-left: 8px;">{{ p.likeCount || 0 }} Likes</span>
+<ng-container *ngIf="displayedPosts && displayedPosts.length > 0">
+  <div id="post-management">
+    <div *ngFor="let p of displayedPosts; trackBy: trackByPostId" class="post-card">
+      
+      <div class="post-header">
+        <strong>
+          <a [routerLink]="['/profile', p.user?.id]" (click)="$event.stopPropagation()" class="username-link">
+            {{ p.usernameDisplay }}
+          </a>
+        </strong>
+        <span class="post-date">{{ p.creationDateTime | date:'short' }}</span>
       </div>
 
-    <div class="comment-section" style="margin-top: 15px;">
-      <textarea [(ngModel)]="commentText[p.id]" (click)="$event.stopPropagation()" placeholder="Add a comment..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-      <button (click)="addComment(p)" (click)="$event.stopPropagation()" style="background-color: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 8px;">
-        Add Comment
-      </button>
-    </div>
+      <div class="post-image">
+        <img *ngIf="p.imagePath" [src]="p.imagePath" alt="Post Image" [routerLink]="['/post', p.id]">
+      </div>
 
-    
+      <div class="post-content">
+        <p>{{ p.description }}</p>
+      </div>
 
+      <div class="post-footer">
+        <div class="like-section">
+          <button *ngIf="!currentUser?.roles?.includes('ROLE_ADMIN')"
+            (click)="likePost(p);  $event.stopPropagation()" 
+            [ngClass]="{'liked': p.isLikedByCurrentUser}"
+            class="like-button">
+            {{ p.isLikedByCurrentUser ? 'Liked' : 'Like' }}
+          </button>
+
+          <span class="likes-link" (click)="toggleLikesList(p.id)"> {{ p.likeCount || 0 }} Likes</span>
+        </div>
+
+        <!-- Modal sa korisnicima koji su lajkovali -->
+        <div *ngIf="isLikesListOpened" class="overlay" (click)="closeLikesList()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <h3>Likes</h3>
+            <ul>
+              <li *ngFor="let user of likes$ | async">
+                <a [routerLink]="['/profile', user.id]">{{ user.username }}</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- SEKCIJA ZA KOMENTARE -->
+        <div class="comment-section" *ngIf="!currentUser?.roles?.includes('ROLE_ADMIN')">
+          <textarea [(ngModel)]="commentText[p.id]" placeholder="Add a comment..." rows="1"></textarea>
+          <button mat-button color="primary" (click)="submitComment(p.id)">Post</button>
+        </div>
+
+        <div class="comments" *ngIf="commentsMap[p.id]?.length">
+          <div class="comment" *ngFor="let comment of commentsMap[p.id]">
+            <div class="comment-content">
+              <div class="comment-line">
+                <strong class="username">{{ comment.username || 'Korisnik ' + comment.userId }}</strong>
+                <span class="comment-text">{{ comment.text }}</span>
+              </div>
+              <div class="comment-footer">
+                <span class="timestamp">{{ toDate(comment.creationDateTime) | date:'d. MMMM y.' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+
+        <!-- DUGME ZA ODOBRAVANJE, samo za admina -->
+        <div *ngIf="currentUser?.roles?.includes('ROLE_ADMIN') && !p.markedForAd" class="admin-approve-section">
+          <button mat-raised-button color="accent" (click)="approvePost(p.id)">
+            ✅ Odobri za reklamu
+          </button>
+        </div>
+
+        <div *ngIf="currentUser?.roles?.includes('ROLE_ADMIN') && p.markedForAd" class="admin-approve-section">
+          <span class="approved-label">✔ Ova objava je odobrena za reklamu</span>
+        </div>
+
+
+
+        <hr>
+      </div>   
     </div>
   </div>
-</div>
+
+  <ng-template #noPosts>
+    <div class="no-posts-message">
+      No posts yet.
+    </div>
+  </ng-template>
+</ng-container>

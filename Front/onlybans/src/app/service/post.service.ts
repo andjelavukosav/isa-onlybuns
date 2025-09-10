@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Post } from '../model/post.model';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { TokenInterceptor } from '../interceptor/TokenInterceptor';
 import { PagedResults } from '../model/paged-result.model';
 import { environment } from '../env/enviroment';
+import { UserDTO } from '../model/registered-user';
 
 @Injectable({
   providedIn: 'root'
@@ -20,61 +21,133 @@ export class PostService {
     formData.append('description', createPost.description);
 
     if (createPost.location) {
-      formData.append('location.latitude', createPost.location.latitude.toString());
-      formData.append('location.longitude', createPost.location.longitude.toString());
+      formData.append('latitude', createPost.location.latitude.toString());
+      formData.append('longitude', createPost.location.longitude.toString());
     }
 
     if (imageFile) {
+      console.log('Image file: ', imageFile);
       formData.append('imageFile', imageFile);
     }
 
-    return this.http.post<Post>('http://localhost:8080/api/posts/create', formData);
+    return this.http.post<Post>(`${environment.apiHost}/posts/create`, formData).pipe(
+      map(post => this.convertPostDate(post))
+    );
   }
 
   getPosts(): Observable<PagedResults<Post>> {
-    return this.http.get<PagedResults<Post>>('http://localhost:8080/api/' + 'posts/all');
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/posts/all`).pipe(
+      map(response => ({
+        ...response,
+        results: response.results.map(post => this.convertPostDate(post))
+      })));
   }
 
+  getPostsWithoutSort(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/posts/allPosts`);
+  }
+
+  getPostsLastMonth(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/` + 'posts/allPostsLastMonth');
+  }
+
+  getPostsMostPopular(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/` + 'posts/allPostsMostPopular');
+  }
+
+  getPostsMostPopularEver(): Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/` + 'posts/top10PostsMostPopular');
+  }
   getPostById(id: number): Observable<Post> {
-    return this.http.get<Post>(`${environment.apiHost}/posts/${id}`);
+    return this.http.get<Post>(`${environment.apiHost}/posts/${id}`).pipe(
+      map(post => this.convertPostDate(post))
+    );
+  }
+
+  getPostsByUser(userId: number):Observable<PagedResults<Post>> {
+    return this.http.get<PagedResults<Post>>(`${environment.apiHost}/posts/user/${userId}`).pipe(
+      map(response =>({
+        ...response,
+        results: response.results.map(post => this.convertPostDate(post))
+      }))
+    );
   }
 
 
   likePost(postId: number): Observable<any> {
-    return this.http.post<any>('http://localhost:8080/api/' + 'posts/' + postId + '/like', {});
+    return this.http.post<any>(`${environment.apiHost}/likes/like-post/${postId}`, {});
   }
 
-  deletePost(postId: number, userId: number){
-    const url = `${environment.apiHost}/posts/${postId}?userId=${userId}`;
-    return this.http.delete(url);  
+  getLikeByPostIdAndUserId(postId: number, userId: number): Observable<boolean> {
+    return this.http.get<boolean>(`${environment.apiHost}/likes/${postId}/${userId}`);
   }
+
+  getLikesByPostId(postId: number): Observable<number> {
+    return this.http.get<number>(`${environment.apiHost}/likes/countLikes/${postId}`);
+  }
+
+  unlikePost(postId: number): Observable<any> {
+    return this.http.delete<any>(`${environment.apiHost}/likes/unlike-post/${postId}`);
+  }
+
+  getLikedPostIds(): Observable<number[]> {
+    return this.http.get<number[]>(`${environment.apiHost}/likes/liked-post-ids`);
+  }
+
+  deletePost(postId: number): Observable<any> {
+    return this.http.delete(`${environment.apiHost}/posts/${postId}`, {
+      responseType: 'text'  
+    });
+  }
+  
 
   updatePost(updatedPost: Post, imageFile: File | null): Observable<Post> {
     const formData = new FormData();
-    formData.append('id', updatedPost.id.toString());
+
     formData.append('description', updatedPost.description);
-    
-    // Dodavanje `likeCount` sa podrazumevanom vrednošću `0` ako je `undefined`
-    formData.append('likeCount', (updatedPost.likeCount ?? 0).toString());
-    
+
     if (updatedPost.location) {
       formData.append('location.latitude', updatedPost.location.latitude.toString());
       formData.append('location.longitude', updatedPost.location.longitude.toString());
     }
-    
-    // Provera `imageFile` i dodavanje u `FormData` ako postoji
+
     if (imageFile) {
       formData.append('imageFile', imageFile);
     }
-    
-    formData.append('imagePath', updatedPost.imagePath || '');
-    formData.append('creationDateTime', updatedPost.creationDateTime);
-    
-    // Osiguravanje da `user` i `user.id` postoje pre dodavanja u `FormData`
-    formData.append('userId', updatedPost.user?.id?.toString() ?? '0'); // Dodajemo '0' kao podrazumevanu vrednost
-    
-    const url = `${environment.apiHost}/posts/`;  // URL za backend
-    return this.http.put<Post>(url, formData);  // Poziv PUT metode sa PostDTO objektom
+
+    return this.http.put<Post>(`${environment.apiHost}/posts/update/${updatedPost.id}`, formData).pipe(
+      map(post => this.convertPostDate(post))
+    );
+  }
+
+
+  getNearbyPosts(latitude: number, longitude: number, radius: number = 100000) {
+    return this.http.get<any>(`${environment.apiHost}/posts/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`);
+  }
+
+  getLikesFromPost(postId: number): Observable<UserDTO[]> {
+    return this.http.get<UserDTO[]>(`${environment.apiHost}/likes/post/${postId}`);
+  }
+
+  
+   convertPostDate(post: any): Post {
+    if (Array.isArray(post.creationDateTime)) {
+      const arr = post.creationDateTime;
+      post.creationDateTime = new Date(
+        arr[0],
+        arr[1] - 1,
+        arr[2],
+        arr[3],
+        arr[4],
+        arr[5],
+        Math.floor(arr[6] / 1000000)
+      );
+    }
+    return post;
+  }
+  
+  approvePost(postId: number): Observable<void> {
+    return this.http.put<void>(`${environment.apiHost}/posts/${postId}/mark-for-ad`, {});
   }
 
 }

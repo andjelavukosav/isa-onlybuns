@@ -1,0 +1,51 @@
+
+.group-chat-list {
+  flex: 0 0 40%;
+  overflow-y: auto;
+  padding: 10px;
+  margin: 0;
+  border-top: 1px solid #ddd;
+  background-color: transparent; /* ili #f9f9f9 ako želiš sivo */
+}
+
+
+
+.group-chat-list h3 {
+ font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.group-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.group-list li {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.group-list li:hover {
+  background-color: #e6e6e6;
+}
+
+.group-icon {
+  margin-right: 10px;
+  color: #555;
+}
+
+.group-name {
+  font-weight: bold;
+  flex: 1;
+}
+
+.group-date {
+  font-size: 10px;
+  color: #999;
+}

@@ -1,35 +1,44 @@
-:host {
-  position: relative;
-  z-index: 10;
-  color: rgb(93, 117, 196);
-}
-
 .app-navbar {
+  position: fixed; /* fiksiran na vrh */
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 50px; /* visina navbar-a */
   display: flex;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 16px;
+  background-color: #fff; /* bijela boja navbar-a */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* blaga sjenka */
+  z-index: 1000;
 }
 
-.app-navbar span {
-  text-transform: uppercase !important;
+.greeting {
+  font-size: 14px;
+  margin-right: 10px;
+  color: #fff;
 }
 
-.right {
-  margin-left: auto;
-  float: right;
+button.mat-icon-button {
+  font-size: 24px;
+  padding: 8px;
 }
 
-.app-angular-logo {
-  margin: 0 4px 3px 0;
-  height: 26px;
+/* Glavni sadržaj odmah ispod navbar-a */
+.main-content {
+  padding-top: 50px; /* isto koliko i visina navbar-a */
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.greeting-hamburger {
-  display: none;
+.dropdown {
+  position: absolute;
+  top: 50px; /* odmah ispod navbar-a */
+  right: 16px;
+  background: #fff;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1100;
 }
-button[mat-icon-button] {
-  color: gray; /* Boja ikone za kontrast sa pozadinom */
-}
-
-
-

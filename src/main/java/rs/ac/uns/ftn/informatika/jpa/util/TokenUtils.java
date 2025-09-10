@@ -7,10 +7,15 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import rs.ac.uns.ftn.informatika.jpa.model.Role;
 import rs.ac.uns.ftn.informatika.jpa.model.User;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+
+import java.util.stream.Collectors;
 
 @Component
 public class TokenUtils {
@@ -49,14 +54,18 @@ public class TokenUtils {
      * @param username Korisničko ime korisnika kojem se token izdaje
      * @return JWT token
      */
-    public String generateToken(String email) {
+    public String generateToken(int userId, String email, String username, List<Role> roles) {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
                 .setSubject(email)
                 .setAudience(generateAudience())
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDate())
-                .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
+                .claim("id", userId)
+                .claim("username", username)
+                .claim("roles", roles.stream().map(Role :: getName).collect(Collectors.toList()))
+                .signWith(SIGNATURE_ALGORITHM, SECRET)
+                .compact();
 
 
         // moguce je postavljanje proizvoljnih podataka u telo JWT tokena pozivom funkcije .claim("key", value), npr. .claim("role", user.getRole())
@@ -232,11 +241,19 @@ public class TokenUtils {
         final String email = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
 
-        // Token je validan kada:
-        return (email != null // korisnicko ime nije null
-                && email.equals(((User) userDetails).getEmail()) // korisnicko ime iz tokena se podudara sa korisnickom imenom koje pise u bazi
-                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())); // nakon kreiranja tokena korisnik nije menjao svoju lozinku
+        System.out.println("Token email: " + email);
+        System.out.println("User email: " + user.getEmail());
+        System.out.println("Token created at: " + created);
+        System.out.println("User last password reset: " + user.getLastPasswordResetDate());
+
+        boolean valid = (email != null
+                && email.equals(user.getEmail())
+                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate()));
+
+        System.out.println("Token valid: " + valid);
+        return valid;
     }
+
 
     /**
      * Funkcija proverava da li je lozinka korisnika izmenjena nakon izdavanja tokena.
@@ -246,8 +263,12 @@ public class TokenUtils {
      * @return Informacija da li je token kreiran pre poslednje izmene lozinke ili ne.
      */
     private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
-        return (lastPasswordReset != null && created.before(lastPasswordReset));
+        // Token je star SAMO ako je STROGO pre vremena resetovanja lozinke
+        return lastPasswordReset != null && created.before(lastPasswordReset);
     }
+
+
+
 
     // =================================================================
 

@@ -1,4 +1,4 @@
-<div *ngIf="post" class="post-details">
+<div *ngIf="postSubject | async as post" class="post-details">
     <h2>Post Details</h2>
     <div class="post-header">
       <strong>{{ post.usernameDisplay }}</strong>
@@ -46,12 +46,12 @@
           <!-- Unos za koordinate -->
           <div class="form-group">
               <label for="locationLatitude">Širina (Latitude):</label>
-              <input id="locationLatitude" type="text" formControlName="locationLatitude" placeholder="Unesite širinu" [value]="post.location.latitude" readonly />
+              <input id="locationLatitude" type="text" formControlName="locationLatitude" placeholder="Unesite širinu" [value]="post.location?.latitude" readonly />
           </div>
 
           <div class="form-group">
               <label for="locationLongitude">Dužina (Longitude):</label>
-              <input id="locationLongitude" type="text" formControlName="locationLongitude" placeholder="Unesite dužinu" [value]="post.location.longitude" readonly />
+              <input id="locationLongitude" type="text" formControlName="locationLongitude" placeholder="Unesite dužinu" [value]="post.location?.longitude" readonly />
           </div>
 
           <!-- Slika -->
@@ -67,6 +67,8 @@
           <!-- Dugme za submit -->
           <button type="submit" [disabled]="postForm.invalid" class="btn-submit">Update</button>
       </form>
+
+      
     </div>
 
 

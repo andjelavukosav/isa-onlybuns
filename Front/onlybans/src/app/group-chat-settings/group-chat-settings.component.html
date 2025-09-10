@@ -1,0 +1,70 @@
+<!-- POZADINA (zatamnjena) -->
+<div class="modal-overlay" (click)="closeModal.emit()"></div>
+
+<!-- MODAL -->
+<div class="modal-content">
+  <h2>Group Settings - "{{ groupChat?.name }}"</h2>
+
+  <!-- Ako NIJE owner, samo vidi listu članova -->
+  <div *ngIf="!isOwner; else ownerView">
+    <h3>Group Members</h3>
+    <ul class="member-list">
+      <li *ngFor="let member of groupChat?.members" (click)="goToUserProfile(member.id)">
+        {{ member.username }}
+      </li>
+    </ul>
+    <div class="non-owner-actions">
+        <button class="cancel-btn" (click)="closeModal.emit()">Close</button>
+    </div>
+  </div>
+
+  <!-- OWNER vidi kartice za dodavanje/uklanjanje -->
+  <ng-template #ownerView>
+    <!-- Prikaz kartica ako nijedna još nije otvorena -->
+    <div *ngIf="!selectedTab" class="card-selection">
+      <div class="card-option" (click)="selectedTab = 'add'">
+        <i class="fas fa-user-plus icon"></i>
+        <span>Add Members</span>
+      </div>
+
+      <div class="card-option" (click)="selectedTab = 'remove'">
+        <i class="fas fa-user-minus icon"></i>
+        <span>Remove Members</span>
+      </div>
+
+      <button class="cancel-btn" (click)="closeModal.emit()">Close</button>
+    </div>
+
+    <!-- Dodavanje članova -->
+    <div *ngIf="selectedTab === 'add'" class="tab-content">
+      <h3>Add Members</h3>
+      <div class="checkbox-list">
+        <label *ngFor="let user of usersToAdd" class="checkbox-item">
+          <input type="checkbox" (change)="toggleAdd(user.id, $event)">
+          {{ user.username }}
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button (click)="saveAdd()" [disabled]="selectedToAdd.size === 0">Confirm</button>
+        <button (click)="cancel()">Back</button>
+      </div>
+    </div>
+
+    <!-- Uklanjanje članova -->
+    <div *ngIf="selectedTab === 'remove'" class="tab-content">
+      <h3>Remove Members</h3>
+      <div class="checkbox-list">
+        <label *ngFor="let member of usersToRemove" class="checkbox-item">
+          <input type="checkbox" (change)="toggleRemove(member.id, $event)">
+          {{ member.username }}
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button (click)="saveRemove()" [disabled]="selectedToRemove.size === 0">Confirm</button>
+        <button (click)="cancel()">Back</button>
+      </div>
+    </div>
+  </ng-template>
+</div>

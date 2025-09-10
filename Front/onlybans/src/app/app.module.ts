@@ -22,12 +22,10 @@ import { UserService } from './service';
 import { ConfigService } from './service';
 import { PostService } from './service/post.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { TokenInterceptor } from './interceptor/TokenInterceptor';
 import { PostComponent } from './post/post.component';
 import { CreatePostComponent } from './create-post/create-post.component';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
-
-import { UsersComponent } from './users/users.component';
+import { TokenInterceptor } from './interceptor/TokenInterceptor';
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { PostDetailsComponent } from './post-details/post-details.component';
 import { UserHomeComponent } from './user-home/user-home.component';
@@ -35,6 +33,18 @@ import { FollowedUserPostComponent } from './followed-user-post/followed-user-po
 import { ActivityTrendsComponent } from './activity-trends/activity-trends.component';
 import { NearbyPostsMapComponent } from './nearby-posts-map/nearby-posts-map.component';
 import { ChatComponent } from './chat/chat.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { AuthModule } from './infrastructure/auth/auth.module';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { UserProfileDetailsComponent } from './user-profile-details/user-profile-details.component';
+import { ChatListComponent } from './chat-list/chat-list.component';
+import { CreateGroupChatComponent } from './create-group-chat/create-group-chat.component';
+import { GroupChatListComponent } from './group-chat-list/group-chat-list.component';
+import { GroupChatSettingsComponent } from './group-chat-settings/group-chat-settings.component';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -43,20 +53,25 @@ import { ChatComponent } from './chat/chat.component';
     NavbarComponent,
     HomeComponent,
     CardComponent,
-    RegistrationComponent,
-    PostComponent,
+    //PostComponent,
     CreatePostComponent,
-    RegistrationComponent,
-    UsersComponent,
+    //RegistrationComponent,
     UserProfileComponent,
     PostDetailsComponent,
     UserHomeComponent,
     FollowedUserPostComponent,
     ActivityTrendsComponent,
     NearbyPostsMapComponent,
-    ChatComponent
+    ChatComponent,
+    UserProfileDetailsComponent,
+    ChatComponent,
+    ChatListComponent,
+    CreateGroupChatComponent,
+    GroupChatListComponent,
+    GroupChatSettingsComponent,
   ],
   imports: [
+    SharedModule,
     BrowserModule,
     AppRoutingModule,
     MaterialModule,
@@ -65,7 +80,12 @@ import { ChatComponent } from './chat/chat.component';
     ReactiveFormsModule,
     HttpClientModule,
     NoopAnimationsModule,
-    LeafletModule
+    LeafletModule,
+    MatSnackBarModule,
+    AuthModule,
+    MatMenuModule,
+    MatIconModule,
+    MatButtonModule
   ],
   providers: [
     {
@@ -78,7 +98,9 @@ import { ChatComponent } from './chat/chat.component';
     ApiService,
     UserService,
     ConfigService,
-    PostService
+    PostService,
+    
+    
   ],
   bootstrap: [AppComponent],
   schemas: [NO_ERRORS_SCHEMA]

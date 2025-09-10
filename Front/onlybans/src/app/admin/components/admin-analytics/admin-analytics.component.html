@@ -1,0 +1,43 @@
+<div class="analytics-container">
+
+  <h2>Posts & Comments Analytics</h2>
+
+  <!-- Toggle period -->
+  <mat-button-toggle-group [value]="selectedPeriod" (change)="changePeriod($event.value)">
+    <mat-button-toggle value="week">Weekly</mat-button-toggle>
+    <mat-button-toggle value="month">Monthly</mat-button-toggle>
+    <mat-button-toggle value="year">Yearly</mat-button-toggle>
+  </mat-button-toggle-group>
+
+  <!-- KPI kartice -->
+  <div class="kpi-cards">
+    <mat-card>
+      <h3>Posts</h3>
+      <h1>{{ currentStats.posts }}</h1>
+    </mat-card>
+    <mat-card>
+      <h3>Comments</h3>
+      <h1>{{ currentStats.comments }}</h1>
+    </mat-card>
+  </div>
+
+  <!-- Bar chart -->
+  <div class="bar-chart">
+    <h3>Posts vs Comments ({{ selectedPeriod }})</h3>
+    <canvas baseChart
+      [data]="barChartData"
+      [type]="barChartType"
+      [options]="{ responsive: true, plugins: { legend: { display: true } } }">
+    </canvas>
+  </div>
+
+  <div class="radar-chart" style="width: 400px; margin: auto; margin-top: 20px;">
+    <h3>User Activity Distribution</h3>
+    <canvas baseChart
+      [data]="radarChartData"
+      [type]="radarChartType"
+      [options]="radarChartOptions">
+    </canvas>
+  </div>
+
+</div>

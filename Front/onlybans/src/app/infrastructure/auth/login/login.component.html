@@ -21,6 +21,13 @@
         </form>
         <br>
 
+        <!-- LINK ZA SIGNUP -->
+      <p *ngIf="!submitted">
+        Don't have an account? 
+        <a routerLink="/signup">Sign up here</a>
+      </p>
+
+
         <mat-spinner *ngIf="submitted" mode="indeterminate"></mat-spinner>
         <br>
         <hr>

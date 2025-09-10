@@ -39,9 +39,10 @@
     color: #8BC34A;
   }
   
-  a {
-    text-decoration: none;
-    cursor: auto;
-    color: #FFFFFF;
-  }
+a {
+  text-decoration: underline; /* ili none, po želji */
+  cursor: pointer;
+  color: #1976d2; /* tamnoplava ili neka vidljiva boja */
+}
+
   

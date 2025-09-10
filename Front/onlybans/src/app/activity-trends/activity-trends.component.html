@@ -1,1 +1,74 @@
-<p>activity-trends works!</p>
+<div class="trends-section">
+  <h2 class="page-title">Trends Overview: All, Popular and Recent Posts</h2>
+
+  <div class="tab-container">
+  <div class="tab-sidebar">
+    <button (click)="setActiveTab('all')" [class.active]="activeTab === 'all'">Feed</button>
+    <button (click)="setActiveTab('month')" [class.active]="activeTab === 'month'">Recent</button>
+    <button (click)="setActiveTab('popular7')" [class.active]="activeTab === 'popular7'">Trending</button>
+    <button (click)="setActiveTab('popularEver')" [class.active]="activeTab === 'popularEver'">Top Posts</button>
+    <button (click)="setActiveTab('topUsers')" [class.active]="activeTab === 'topUsers'">Top Users</button>
+  </div>
+
+
+    <div class="tab-content">
+      <div *ngIf="activeTab === 'all'">
+        <p>Ukupan broj objava: {{ allPosts?.length }}</p>
+        <app-post [inputPosts]="allPosts" (refreshLists)="reloadDataAllPosts()"></app-post>
+      </div>
+
+      <div *ngIf="activeTab === 'month'">
+        <p>Ukupan broj objava: {{ postsLastMonth?.length }}</p>
+        <app-post
+          *ngIf="postsLastMonth.length > 0"
+          [inputPosts]="postsLastMonth"
+          (refreshLists)="reloadDataLastMonthPosts()"
+        ></app-post>
+      </div>
+
+      <div *ngIf="activeTab === 'popular7'">
+        <p>Ukupan broj objava: {{ postsMostPopularLast7Days?.length }}</p>
+        <app-post [inputPosts]="postsMostPopularLast7Days" (refreshLists)="reloadData()"></app-post>
+      </div>
+
+      <div *ngIf="activeTab === 'popularEver'">
+        <p>Ukupan broj objava: {{ postsMostPopularEver?.length }}</p>
+        <app-post
+          *ngIf="postsMostPopularEver.length > 0"
+          [inputPosts]="postsMostPopularEver"
+          (refreshLists)="reloadData()"
+        ></app-post>
+    </div> 
+    <div *ngIf="activeTab === 'topUsers'">
+    <p>Top 10 korisnika koji su najviše delili lajkove u zadnjih 7 dana:</p>
+
+    <div class="top-users-table-wrapper">
+      <table class="top-users-table">
+        <thead>
+          <tr>
+            <th>Mesto</th>
+            <th>Korisničko ime</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of usersMostPopular; index as i">
+            <td>
+              <ng-container [ngSwitch]="i">
+                <span *ngSwitchCase="0">🥇 1.</span>
+                <span *ngSwitchCase="1">🥈 2.</span>
+                <span *ngSwitchCase="2">🥉 3.</span>
+                <span *ngSwitchDefault>{{ i + 1 }}.</span>
+              </ng-container>
+            </td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+   </div>
+</div>

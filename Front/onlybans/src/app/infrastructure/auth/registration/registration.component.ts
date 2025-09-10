@@ -99,31 +99,34 @@ export class RegistrationComponent implements OnInit {
         }
     };
 
-    this.authService.signup(formData).subscribe(
-        data => {
-            alert('Signup successful: You have been successfully registered! Please verify your account via email.');
-            this.router.navigate(['/login']);
-        },
-        error => {
-            let errorMessage = 'An error occurred';
+   this.authService.signup(formData).subscribe(
+    data => {
+      alert('Signup successful: Please verify your account via email.');
+      this.router.navigate(['/login']);
+    },
+   error => {
+  let errorMessage = 'An error occurred';
 
-            if (error.status === 409) {
-                errorMessage = 'This email or username is already taken. Please use a different one.';
-            } else if (error.status === 400) {
-                errorMessage = 'Invalid password format. Please ensure your password meets the requirements.';
-            } else if (error.status === 500) {
-                errorMessage = 'Server error. Please try again later.';
-            } else {
-              errorMessage = 'Signup successful: You have been successfully registered! Please verify your account via email.';
-              this.router.navigate(['/login']);
-            }
-            
+  const backendError = typeof error.error === 'string' ? null : error.error;
 
-            alert(errorMessage);
-            this.submitted = false;
-        }
-    );
+  if (error.status === 409 && backendError?.message) {
+    if (backendError.message === 'Username already exists.') {
+      errorMessage = 'This username is already taken.';
+    } else if (backendError.message === 'Email address already exists.') {
+      errorMessage = 'An account with this email already exists.';
+    }
+  } else if (error.status === 400) {
+    errorMessage = 'Invalid password format.';
+  } else if (error.status === 500) {
+    errorMessage = backendError?.message || 'Server error. Please try again later.';
+  }
+
+  alert(errorMessage);
+  this.submitted = false;
 }
+   );
+  }
+
 
   
 }

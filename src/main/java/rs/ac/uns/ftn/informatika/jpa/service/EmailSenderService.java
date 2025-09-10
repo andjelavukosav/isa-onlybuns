@@ -47,4 +47,15 @@ public class EmailSenderService {
 
         mailSender.send(mail);
     }
+
+    @Async
+    public void sendSummaryEmail(String toEmail, String content) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setFrom("isa.projekti@gmail.com");
+        message.setSubject("Your weekly activity on Onlybuns");
+        message.setText(content);
+        mailSender.send(message);
+    }
+
 }

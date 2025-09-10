@@ -8,5 +8,8 @@
       </list>
     </option>
   </component>
+  <component name="ProjectResources">
+    <resource url="http://www.ehcache.org/v3" location="$PROJECT_DIR$/src/main/resources/schemas/ehcache-core-3.7.xsd" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_23" default="true" project-jdk-name="openjdk-23" project-jdk-type="JavaSDK" />
 </project>
