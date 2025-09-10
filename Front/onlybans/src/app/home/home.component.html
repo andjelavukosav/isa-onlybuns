@@ -2,19 +2,4 @@
   
   <app-post [inputPosts]="posts" fxFlex="100%"></app-post>
 
-  <app-card (apiClick)="makeRequest($event)" [responseObj]="fooResponse"
-            apiText="/api/foo" content="This is an demo public endpoint..."
-            fxFlex="30%" subTitle="Public" title='"Foo"'>
-  </app-card>
-
-  <app-card (apiClick)="makeRequest($event)" [responseObj]="whoamIResponse"
-            apiText="/api/whoami" content="Regular endpoint for current user info"
-            fxFlex="30%" subTitle="Authorized role: USER" title='"Who am I"'>
-  </app-card>
-
-  <app-card (apiClick)="makeRequest($event)" [responseObj]="allUserResponse"
-            apiText="/api/user/all" content="Endpoint gives all users..."
-            fxFlex="30%" subTitle="Authorized role: ADMIN" title='"All users"'>
-  </app-card>
-
 </div>

@@ -13,7 +13,14 @@
 
   <!-- Dropdown unutar toolbar-a -->
   <div class="dropdown" *ngIf="menuOpen">
-    <button mat-button *ngIf="!isAdmin()" routerLink="/user-home">Home Page</button>
-    <button mat-button (click)="logout()">Sign out</button>
+    <ng-container *ngIf="user$ | async as user">
+      <!-- Sign Out ako je ulogovan -->
+      <button mat-button (click)="logout()">Sign Out</button>
+    </ng-container>
+
+    <!-- Sign In ako nije ulogovan -->
+    <ng-container *ngIf="!(user$ | async)">
+      <button mat-button routerLink="/login">Sign In</button>
+    </ng-container>
   </div>
 </mat-toolbar>

@@ -34,9 +34,10 @@ export class NavbarComponent implements OnInit {
     console.log('menuTrigger initialized:', this.menuTrigger);
   }
 
-  isAdmin(): boolean{
-    return this.user$.value?.roles.includes('ROLE_ADMIN') ?? false;
+  isAdmin(user: AuthUser | null): boolean {
+    return user?.roles.includes('ROLE_ADMIN') ?? false;
   }
+
 
   hasSignedIn() {
     return !!this.userService.currentUser;
